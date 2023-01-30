@@ -1,4 +1,5 @@
-﻿using HaroohiePals.Nitro.Card;
+﻿using HaroohiePals.IO.Archive;
+using HaroohiePals.Nitro.Card;
 using HaroohiePals.Nitro.Fs;
 using System.Collections.Generic;
 using System.IO;
@@ -8,7 +9,6 @@ using System.Threading.Tasks;
 
 namespace HaroohieClub.NitroPacker.Core
 {
-
     public class NdsProjectFile : ProjectFile
     {
         public NdsRomInfo RomInfo;
@@ -36,6 +36,25 @@ namespace HaroohieClub.NitroPacker.Core
             public Rom.RomBanner Banner;
             public byte[] RSASignature;
             public string ExternalARM9Path;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="outputRomPath"></param>
+        /// <param name="projectFilePath"></param>
+        public static void Pack(string outputRomPath, string projectFilePath)
+        {
+            using (var file = new FileStream(outputRomPath, FileMode.Create))
+            {
+                var project = FromByteArray<NdsProjectFile>(File.ReadAllBytes(projectFilePath));
+
+                var basePath = new FileInfo(projectFilePath).DirectoryName;
+
+                var fsRoot = new DiskArchive($"{basePath}\\data");
+
+                project.Build(basePath, fsRoot, file);
+            }
         }
 
         /// <summary>
@@ -89,44 +108,7 @@ namespace HaroohieClub.NitroPacker.Core
             File.WriteAllBytes(Path.Combine(outPath, $"{name}.xml"), projectFile.Write());
         }
 
-        public byte[] Build(string projectDir, NitroFsArchive fsRoot)
-        {
-            Rom n = new Rom
-            {
-                Header = RomInfo.Header,
-                StaticFooter = RomInfo.NitroFooter,
-                MainOvt = RomInfo.ARM9Ovt,
-                SubOvt = RomInfo.ARM7Ovt,
-                Banner = RomInfo.Banner,
-                RSASignature = RomInfo.RSASignature,
-                Fnt = new Rom.RomFNT()
-            };
-
-            n.Fat = new FatEntry[n.MainOvt.Length + n.SubOvt.Length];
-            n.FileData = new byte[n.MainOvt.Length + n.SubOvt.Length][];
-            uint fid = 0;
-            foreach (var vv in n.MainOvt)
-            {
-                vv.FileId = fid;
-                n.Fat[fid] = new FatEntry(0, 0);
-                n.FileData[fid] = File.ReadAllBytes(projectDir + "\\overlay\\main_" + vv.Id.ToString("X4") + ".bin");
-                fid++;
-            }
-            foreach (var vv in n.SubOvt)
-            {
-                vv.FileId = fid;
-                n.Fat[fid] = new FatEntry(0, 0);
-                n.FileData[fid] = File.ReadAllBytes(projectDir + "\\overlay\\sub_" + vv.Id.ToString("X4") + ".bin");
-                fid++;
-            }
-            n.MainRom = File.ReadAllBytes(projectDir + "\\arm9.bin");
-            n.SubRom = File.ReadAllBytes(projectDir + "\\arm7.bin");
-            n.FromArchive(fsRoot);
-
-            return n.Write();
-        }
-
-        public void Build(string projectDir, NitroFsArchive fsRoot, Stream outputStream)
+        public void Build(string projectDir, Archive fsRoot, Stream outputStream)
         {
             var n = new Rom
             {
