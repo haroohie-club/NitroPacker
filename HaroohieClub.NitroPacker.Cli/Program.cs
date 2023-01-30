@@ -12,6 +12,8 @@ namespace HaroohieClub.NitroPacker.Cli
             {
                 new UnpackCommand(),
                 new PackCommand(),
+                new PatchArm9Command(),
+                new PatchOverlaysCommand(),
             };
             commands.Run(args);
         }
