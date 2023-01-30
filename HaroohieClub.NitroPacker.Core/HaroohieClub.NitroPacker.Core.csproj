@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HaroohieClub.NitroPacker.IO\HaroohieClub.NitroPacker.IO.csproj" />
+    <ProjectReference Include="..\HaroohieClub.NitroPacker.Nitro\HaroohieClub.NitroPacker.Nitro.csproj" />
   </ItemGroup>
 
 </Project>

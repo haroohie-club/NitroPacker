@@ -7,4 +7,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\HaroohieClub.NitroPacker.Core\HaroohieClub.NitroPacker.Core.csproj" />
+  </ItemGroup>
+
 </Project>
