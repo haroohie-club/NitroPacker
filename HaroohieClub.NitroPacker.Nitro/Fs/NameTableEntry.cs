@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using HaroohieClub.NitroPacker.IO;
+using System;
 using System.Text;
-using System.Threading.Tasks;
-using HaroohiePals.IO;
 
-namespace HaroohiePals.Nitro.Fs
+namespace HaroohieClub.NitroPacker.Nitro.Fs
 {
     public enum NameTableEntryType
     {
@@ -43,8 +40,8 @@ namespace HaroohiePals.Nitro.Fs
                 Type = NameTableEntryType.EndOfDirectory;
             else if ((length & 0x80) != 0)
             {
-                Type        = NameTableEntryType.Directory;
-                Name        = er.ReadString(Encoding.ASCII, length & ~0x80);
+                Type = NameTableEntryType.Directory;
+                Name = er.ReadString(Encoding.ASCII, length & ~0x80);
                 DirectoryId = er.Read<ushort>();
             }
             else
@@ -80,8 +77,8 @@ namespace HaroohiePals.Nitro.Fs
         }
 
         public NameTableEntryType Type;
-        public string             Name;
-        public ushort             DirectoryId;
+        public string Name;
+        public ushort DirectoryId;
 
         public static NameTableEntry EndOfDirectory() => new(NameTableEntryType.EndOfDirectory);
         public static NameTableEntry File(string name) => new(NameTableEntryType.File, name);

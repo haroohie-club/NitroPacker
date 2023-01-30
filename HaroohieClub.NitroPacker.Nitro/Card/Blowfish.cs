@@ -1,17 +1,17 @@
-﻿using System;
-using HaroohiePals.IO;
+﻿using HaroohieClub.NitroPacker.IO;
+using System;
 
-namespace HaroohiePals.Nitro.Card
+namespace HaroohieClub.NitroPacker.Nitro.Card
 {
     public class Blowfish
     {
         public const int KeyTableLength = 0x1048;
 
         public const int PTableEntryCount = 18;
-        public const int SBoxCount        = 4;
-        public const int SBoxEntryCount   = 256;
+        public const int SBoxCount = 4;
+        public const int SBoxEntryCount = 256;
 
-        private readonly uint[]   _pTable;
+        private readonly uint[] _pTable;
         private readonly uint[][] _sBoxes;
 
         public Blowfish(uint[] pTable, uint[][] sBoxes)
@@ -34,8 +34,8 @@ namespace HaroohiePals.Nitro.Card
                 throw new ArgumentNullException(nameof(keyTable));
             if (keyTable.Length < KeyTableLength)
                 throw new ArgumentException(nameof(keyTable));
-            _pTable    = IOUtil.ReadU32Le(keyTable, PTableEntryCount);
-            _sBoxes    = new uint[SBoxCount][];
+            _pTable = IOUtil.ReadU32Le(keyTable, PTableEntryCount);
+            _sBoxes = new uint[SBoxCount][];
             _sBoxes[0] = IOUtil.ReadU32Le(keyTable[0x48..], SBoxEntryCount);
             _sBoxes[1] = IOUtil.ReadU32Le(keyTable[0x448..], SBoxEntryCount);
             _sBoxes[2] = IOUtil.ReadU32Le(keyTable[0x848..], SBoxEntryCount);
@@ -63,15 +63,15 @@ namespace HaroohiePals.Nitro.Card
             for (int i = 0; i < 16; i++)
             {
                 uint z = _pTable[i] ^ x;
-                uint a = _sBoxes[0][(z >> 24) & 0xFF];
-                uint b = _sBoxes[1][(z >> 16) & 0xFF];
-                uint c = _sBoxes[2][(z >> 8) & 0xFF];
+                uint a = _sBoxes[0][z >> 24 & 0xFF];
+                uint b = _sBoxes[1][z >> 16 & 0xFF];
+                uint c = _sBoxes[2][z >> 8 & 0xFF];
                 uint d = _sBoxes[3][z & 0xFF];
-                x = (d + (c ^ (b + a))) ^ y;
+                x = d + (c ^ b + a) ^ y;
                 y = z;
             }
 
-            return (x ^ _pTable[16]) | (ulong)(y ^ _pTable[17]) << 32;
+            return x ^ _pTable[16] | (ulong)(y ^ _pTable[17]) << 32;
         }
 
         public void Decrypt(byte[] src, int srcOffset, int length, byte[] dst, int dstOffset)
@@ -100,15 +100,15 @@ namespace HaroohiePals.Nitro.Card
             for (int i = 17; i >= 2; i--)
             {
                 uint z = _pTable[i] ^ x;
-                uint a = _sBoxes[0][(z >> 24) & 0xFF];
-                uint b = _sBoxes[1][(z >> 16) & 0xFF];
-                uint c = _sBoxes[2][(z >> 8) & 0xFF];
+                uint a = _sBoxes[0][z >> 24 & 0xFF];
+                uint b = _sBoxes[1][z >> 16 & 0xFF];
+                uint c = _sBoxes[2][z >> 8 & 0xFF];
                 uint d = _sBoxes[3][z & 0xFF];
-                x = (d + (c ^ (b + a))) ^ y;
+                x = d + (c ^ b + a) ^ y;
                 y = z;
             }
 
-            return (x ^ _pTable[1]) | (ulong)(y ^ _pTable[0]) << 32;
+            return x ^ _pTable[1] | (ulong)(y ^ _pTable[0]) << 32;
         }
     }
 }

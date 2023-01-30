@@ -1,17 +1,16 @@
-﻿using System;
+﻿using HaroohieClub.NitroPacker.IO;
+using HaroohieClub.NitroPacker.IO.Archive;
+using HaroohieClub.NitroPacker.IO.Serialization;
+using HaroohieClub.NitroPacker.Nitro.Fs;
+using HaroohieClub.NitroPacker.Nitro.Gx;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Serialization;
-using HaroohiePals.Graphics;
-using HaroohiePals.IO;
-using HaroohiePals.IO.Archive;
-using HaroohiePals.IO.Serialization;
-using HaroohiePals.Nitro.Fs;
-using HaroohiePals.Nitro.Gx;
 
-namespace HaroohiePals.Nitro.Card
+namespace HaroohieClub.NitroPacker.Nitro.Card
 {
     public class Rom
     {
@@ -31,7 +30,7 @@ namespace HaroohiePals.Nitro.Card
                     er.BaseStream.Position = 0x1000;
 
                     KeyPadding0 = er.Read<byte>(0x600);
-                    PTable      = er.Read<uint>(Blowfish.PTableEntryCount);
+                    PTable = er.Read<uint>(Blowfish.PTableEntryCount);
                     KeyPadding1 = er.Read<byte>(0x5B8);
 
                     SBoxes = new uint[Blowfish.SBoxCount][];
@@ -42,43 +41,43 @@ namespace HaroohiePals.Nitro.Card
                 }
 
                 er.BaseStream.Position = Header.MainRomOffset;
-                MainRom                = er.Read<byte>((int)Header.MainSize);
+                MainRom = er.Read<byte>((int)Header.MainSize);
                 if (er.Read<uint>() == 0xDEC00621) //Nitro Footer
                 {
                     er.BaseStream.Position -= 4;
-                    StaticFooter           =  new NitroFooter(er);
+                    StaticFooter = new NitroFooter(er);
                 }
 
                 er.BaseStream.Position = Header.SubRomOffset;
-                SubRom                 = er.Read<byte>((int)Header.SubSize);
+                SubRom = er.Read<byte>((int)Header.SubSize);
 
                 er.BaseStream.Position = Header.FntOffset;
-                Fnt                    = new RomFNT(er);
+                Fnt = new RomFNT(er);
 
                 er.BaseStream.Position = Header.MainOvtOffset;
-                MainOvt                = new RomOVT[Header.MainOvtSize / 32];
+                MainOvt = new RomOVT[Header.MainOvtSize / 32];
                 for (int i = 0; i < Header.MainOvtSize / 32; i++) MainOvt[i] = new RomOVT(er);
 
                 er.BaseStream.Position = Header.SubOvtOffset;
-                SubOvt                 = new RomOVT[Header.SubOvtSize / 32];
+                SubOvt = new RomOVT[Header.SubOvtSize / 32];
                 for (int i = 0; i < Header.SubOvtSize / 32; i++) SubOvt[i] = new RomOVT(er);
 
                 er.BaseStream.Position = Header.FatOffset;
-                Fat                    = new FatEntry[Header.FatSize / 8];
+                Fat = new FatEntry[Header.FatSize / 8];
                 for (int i = 0; i < Header.FatSize / 8; i++)
                     Fat[i] = new FatEntry(er);
 
                 if (Header.BannerOffset != 0)
                 {
                     er.BaseStream.Position = Header.BannerOffset;
-                    Banner                 = new RomBanner(er);
+                    Banner = new RomBanner(er);
                 }
 
                 FileData = new byte[Header.FatSize / 8][];
                 for (int i = 0; i < Header.FatSize / 8; i++)
                 {
                     er.BaseStream.Position = Fat[i].FileTop;
-                    FileData[i]            = er.Read<byte>((int)Fat[i].FileSize);
+                    FileData[i] = er.Read<byte>((int)Fat[i].FileSize);
                 }
 
                 //RSA Signature
@@ -183,10 +182,10 @@ namespace HaroohiePals.Nitro.Card
                 }
 
                 er.BaseStream.Position = 0x4000;
-                Header.HeaderSize      = (uint)er.BaseStream.Position;
+                Header.HeaderSize = (uint)er.BaseStream.Position;
                 //MainRom
                 Header.MainRomOffset = (uint)er.BaseStream.Position;
-                Header.MainSize      = (uint)MainRom.Length;
+                Header.MainSize = (uint)MainRom.Length;
                 er.Write(MainRom, 0, MainRom.Length);
                 //Static Footer
                 StaticFooter?.Write(er);
@@ -195,13 +194,13 @@ namespace HaroohiePals.Nitro.Card
                     er.WritePadding(0x200);
                     //Main Ovt
                     Header.MainOvtOffset = (uint)er.BaseStream.Position;
-                    Header.MainOvtSize   = (uint)MainOvt.Length * 0x20;
+                    Header.MainOvtSize = (uint)MainOvt.Length * 0x20;
                     foreach (var v in MainOvt)
                         v.Write(er);
                     foreach (var v in MainOvt)
                     {
                         er.WritePadding(0x200);
-                        Fat[v.FileId].FileTop    = (uint)er.BaseStream.Position;
+                        Fat[v.FileId].FileTop = (uint)er.BaseStream.Position;
                         Fat[v.FileId].FileBottom = (uint)er.BaseStream.Position + (uint)FileData[v.FileId].Length;
                         er.Write(FileData[v.FileId], 0, FileData[v.FileId].Length);
                     }
@@ -209,13 +208,13 @@ namespace HaroohiePals.Nitro.Card
                 else
                 {
                     Header.MainOvtOffset = 0;
-                    Header.MainOvtSize   = 0;
+                    Header.MainOvtSize = 0;
                 }
 
                 er.WritePadding(0x200, 0xFF);
                 //SubRom
                 Header.SubRomOffset = (uint)er.BaseStream.Position;
-                Header.SubSize      = (uint)SubRom.Length;
+                Header.SubSize = (uint)SubRom.Length;
                 er.Write(SubRom, 0, SubRom.Length);
                 //I assume this works the same as the main ovt?
                 if (SubOvt.Length != 0)
@@ -223,13 +222,13 @@ namespace HaroohiePals.Nitro.Card
                     er.WritePadding(0x200);
                     //Sub Ovt
                     Header.SubOvtOffset = (uint)er.BaseStream.Position;
-                    Header.SubOvtSize   = (uint)SubOvt.Length * 0x20;
+                    Header.SubOvtSize = (uint)SubOvt.Length * 0x20;
                     foreach (var v in SubOvt)
                         v.Write(er);
                     foreach (var v in SubOvt)
                     {
                         er.WritePadding(0x200);
-                        Fat[v.FileId].FileTop    = (uint)er.BaseStream.Position;
+                        Fat[v.FileId].FileTop = (uint)er.BaseStream.Position;
                         Fat[v.FileId].FileBottom = (uint)er.BaseStream.Position + (uint)FileData[v.FileId].Length;
                         er.Write(FileData[v.FileId], 0, FileData[v.FileId].Length);
                     }
@@ -237,7 +236,7 @@ namespace HaroohiePals.Nitro.Card
                 else
                 {
                     Header.SubOvtOffset = 0;
-                    Header.SubOvtSize   = 0;
+                    Header.SubOvtSize = 0;
                 }
 
                 er.WritePadding(0x200, 0xFF);
@@ -248,7 +247,7 @@ namespace HaroohiePals.Nitro.Card
                 er.WritePadding(0x200, 0xFF);
                 //FAT
                 Header.FatOffset = (uint)er.BaseStream.Position;
-                Header.FatSize   = (uint)Fat.Length * 8;
+                Header.FatSize = (uint)Fat.Length * 8;
                 //Skip the fat, and write it after writing the data itself
                 er.BaseStream.Position += Header.FatSize;
                 //Banner
@@ -265,7 +264,7 @@ namespace HaroohiePals.Nitro.Card
                 for (int i = (int)(Header.MainOvtSize / 32 + Header.SubOvtSize / 32); i < FileData.Length; i++)
                 {
                     er.WritePadding(0x200, 0xFF);
-                    Fat[i].FileTop    = (uint)er.BaseStream.Position;
+                    Fat[i].FileTop = (uint)er.BaseStream.Position;
                     Fat[i].FileBottom = (uint)er.BaseStream.Position + (uint)FileData[i].Length;
                     er.Write(FileData[i], 0, FileData[i].Length);
                 }
@@ -282,14 +281,14 @@ namespace HaroohiePals.Nitro.Card
                 if (capacitySize < 0x20000)
                     capacitySize = 0x20000;
                 uint capacitySize2 = capacitySize;
-                int  capacity      = -18;
+                int capacity = -18;
                 while (capacitySize2 != 0)
                 {
                     capacitySize2 >>= 1;
                     capacity++;
                 }
 
-                Header.DeviceSize = (byte)((capacity < 0) ? 0 : capacity);
+                Header.DeviceSize = (byte)(capacity < 0 ? 0 : capacity);
                 //RSA
                 if (RSASignature != null)
                     er.Write(RSASignature, 0, 0x88);
@@ -317,58 +316,58 @@ namespace HaroohiePals.Nitro.Card
 
             public RomHeader(EndianBinaryReader er)
             {
-                GameName    = er.ReadString(Encoding.ASCII, 12).TrimEnd('\0');
-                GameCode    = er.ReadString(Encoding.ASCII, 4).TrimEnd('\0');
-                MakerCode   = er.ReadString(Encoding.ASCII, 2).TrimEnd('\0');
-                ProductId   = er.Read<byte>();
-                DeviceType  = er.Read<byte>();
-                DeviceSize  = er.Read<byte>();
-                ReservedA   = er.Read<byte>(9);
+                GameName = er.ReadString(Encoding.ASCII, 12).TrimEnd('\0');
+                GameCode = er.ReadString(Encoding.ASCII, 4).TrimEnd('\0');
+                MakerCode = er.ReadString(Encoding.ASCII, 2).TrimEnd('\0');
+                ProductId = er.Read<byte>();
+                DeviceType = er.Read<byte>();
+                DeviceSize = er.Read<byte>();
+                ReservedA = er.Read<byte>(9);
                 GameVersion = er.Read<byte>();
-                Property    = er.Read<byte>();
+                Property = er.Read<byte>();
 
-                MainRomOffset    = er.Read<uint>();
+                MainRomOffset = er.Read<uint>();
                 MainEntryAddress = er.Read<uint>();
-                MainRamAddress   = er.Read<uint>();
-                MainSize         = er.Read<uint>();
-                SubRomOffset     = er.Read<uint>();
-                SubEntryAddress  = er.Read<uint>();
-                SubRamAddress    = er.Read<uint>();
-                SubSize          = er.Read<uint>();
+                MainRamAddress = er.Read<uint>();
+                MainSize = er.Read<uint>();
+                SubRomOffset = er.Read<uint>();
+                SubEntryAddress = er.Read<uint>();
+                SubRamAddress = er.Read<uint>();
+                SubSize = er.Read<uint>();
 
                 FntOffset = er.Read<uint>();
-                FntSize   = er.Read<uint>();
+                FntSize = er.Read<uint>();
 
                 FatOffset = er.Read<uint>();
-                FatSize   = er.Read<uint>();
+                FatSize = er.Read<uint>();
 
                 MainOvtOffset = er.Read<uint>();
-                MainOvtSize   = er.Read<uint>();
+                MainOvtSize = er.Read<uint>();
 
                 SubOvtOffset = er.Read<uint>();
-                SubOvtSize   = er.Read<uint>();
+                SubOvtSize = er.Read<uint>();
 
-                RomParamA    = er.Read<byte>(8);
+                RomParamA = er.Read<byte>(8);
                 BannerOffset = er.Read<uint>();
-                SecureCRC    = er.Read<ushort>();
-                RomParamB    = er.Read<byte>(2);
+                SecureCRC = er.Read<ushort>();
+                RomParamB = er.Read<byte>(2);
 
                 MainAutoloadDone = er.Read<uint>();
-                SubAutoloadDone  = er.Read<uint>();
+                SubAutoloadDone = er.Read<uint>();
 
-                RomParamC  = er.Read<byte>(8);
-                RomSize    = er.Read<uint>();
+                RomParamC = er.Read<byte>(8);
+                RomSize = er.Read<uint>();
                 HeaderSize = er.Read<uint>();
-                ReservedB  = er.Read<byte>(0x38);
+                ReservedB = er.Read<byte>(0x38);
 
-                LogoData  = er.Read<byte>(0x9C);
-                LogoCRC   = er.Read<ushort>();
+                LogoData = er.Read<byte>(0x9C);
+                LogoCRC = er.Read<ushort>();
                 HeaderCRC = er.Read<ushort>();
             }
 
             public void Write(EndianBinaryWriter er)
             {
-                var    m = new MemoryStream();
+                var m = new MemoryStream();
                 byte[] header;
                 using (var ew = new EndianBinaryWriter(m, Endianness.LittleEndian))
                 {
@@ -432,9 +431,9 @@ namespace HaroohiePals.Nitro.Card
             public string GameName;  //12
             public string GameCode;  //4
             public string MakerCode; //2
-            public byte   ProductId;
-            public byte   DeviceType;
-            public byte   DeviceSize;
+            public byte ProductId;
+            public byte DeviceType;
+            public byte DeviceSize;
 
             [ArraySize(9)]
             public byte[] ReservedA;
@@ -520,13 +519,13 @@ namespace HaroohiePals.Nitro.Card
             public ushort HeaderCRC;
         }
 
-        public byte[]   KeyPadding0;
-        public uint[]   PTable;
-        public byte[]   KeyPadding1;
+        public byte[] KeyPadding0;
+        public uint[] PTable;
+        public byte[] KeyPadding1;
         public uint[][] SBoxes;
-        public byte[]   KeyPadding2;
+        public byte[] KeyPadding2;
 
-        public byte[]      MainRom;
+        public byte[] MainRom;
         public NitroFooter StaticFooter;
 
         [Serializable]
@@ -551,7 +550,7 @@ namespace HaroohiePals.Nitro.Card
             public RomFNT()
             {
                 DirectoryTable = new[] { new DirectoryTableEntry { ParentId = 1 } };
-                NameTable      = new[] { new[] { NameTableEntry.EndOfDirectory() } };
+                NameTable = new[] { new[] { NameTableEntry.EndOfDirectory() } };
             }
 
             public RomFNT(EndianBinaryReaderEx er)
@@ -559,7 +558,7 @@ namespace HaroohiePals.Nitro.Card
                 er.BeginChunk();
                 {
                     var root = new DirectoryTableEntry(er);
-                    DirectoryTable    = new DirectoryTableEntry[root.ParentId];
+                    DirectoryTable = new DirectoryTableEntry[root.ParentId];
                     DirectoryTable[0] = root;
                     for (int i = 1; i < root.ParentId; i++)
                         DirectoryTable[i] = new DirectoryTableEntry(er);
@@ -607,7 +606,7 @@ namespace HaroohiePals.Nitro.Card
             }
 
             public DirectoryTableEntry[] DirectoryTable;
-            public NameTableEntry[][]    NameTable;
+            public NameTableEntry[][] NameTable;
         }
 
         public RomOVT[] MainOvt;
@@ -619,7 +618,7 @@ namespace HaroohiePals.Nitro.Card
             [Flags]
             public enum OVTFlag : byte
             {
-                Compressed         = 1,
+                Compressed = 1,
                 AuthenticationCode = 2
             }
 
@@ -630,13 +629,13 @@ namespace HaroohiePals.Nitro.Card
                 er.ReadObject(this);
                 uint tmp = er.Read<uint>();
                 Compressed = tmp & 0xFFFFFF;
-                Flag       = (OVTFlag)(tmp >> 24);
+                Flag = (OVTFlag)(tmp >> 24);
             }
 
             public void Write(EndianBinaryWriterEx er)
             {
                 er.WriteObject(this);
-                er.Write(((uint)Flag & 0xFF) << 24 | (Compressed & 0xFFFFFF));
+                er.Write(((uint)Flag & 0xFF) << 24 | Compressed & 0xFFFFFF);
             }
 
             [XmlAttribute]
@@ -660,7 +659,7 @@ namespace HaroohiePals.Nitro.Card
         }
 
         public FatEntry[] Fat;
-        public RomBanner  Banner;
+        public RomBanner Banner;
 
         [Serializable]
         public class RomBanner
@@ -716,9 +715,9 @@ namespace HaroohiePals.Nitro.Card
 
                 public BannerV1(EndianBinaryReader er)
                 {
-                    Image       = er.Read<byte>(32 * 32 / 2);
-                    Pltt        = er.Read<byte>(16 * 2);
-                    GameName    = new string[6];
+                    Image = er.Read<byte>(32 * 32 / 2);
+                    Pltt = er.Read<byte>(16 * 2);
+                    GameName = new string[6];
                     GameName[0] = er.ReadString(Encoding.Unicode, 128).Replace("\0", "");
                     GameName[1] = er.ReadString(Encoding.Unicode, 128).Replace("\0", "");
                     GameName[2] = er.ReadString(Encoding.Unicode, 128).Replace("\0", "");
@@ -806,7 +805,7 @@ namespace HaroohiePals.Nitro.Card
 
             var nitroArc = new NitroFsArchive(archive, (ushort)nrOverlays);
             Fnt.DirectoryTable = nitroArc.DirTable;
-            Fnt.NameTable      = nitroArc.NameTable;
+            Fnt.NameTable = nitroArc.NameTable;
 
             int nrFiles = nitroArc.FileData.Length;
 
@@ -820,7 +819,7 @@ namespace HaroohiePals.Nitro.Card
 
             for (int i = nrOverlays; i < nrFiles + nrOverlays; i++)
             {
-                Fat[i]      = new FatEntry(0, 0);
+                Fat[i] = new FatEntry(0, 0);
                 FileData[i] = nitroArc.FileData[i - nitroArc.FileIdOffset];
             }
         }

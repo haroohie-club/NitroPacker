@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace HaroohiePals.Nitro.Gx
+namespace HaroohieClub.NitroPacker.Nitro.Gx
 {
     public enum ImageFormat : uint
     {

@@ -1,43 +1,43 @@
-﻿using System;
+﻿using HaroohieClub.NitroPacker.IO.Archive;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using HaroohiePals.IO.Archive;
 
-namespace HaroohiePals.Nitro.Fs
+namespace HaroohieClub.NitroPacker.Nitro.Fs
 {
     public class NitroFsArchive : Archive
     {
-        public DirectoryTableEntry[] DirTable     { get; }
-        public NameTableEntry[][]    NameTable    { get; }
-        public byte[][]              FileData     { get; }
-        public ushort                FileIdOffset { get; }
+        public DirectoryTableEntry[] DirTable { get; }
+        public NameTableEntry[][] NameTable { get; }
+        public byte[][] FileData { get; }
+        public ushort FileIdOffset { get; }
 
         public NitroFsArchive(DirectoryTableEntry[] dirTable, NameTableEntry[][] nameTable,
             byte[][] fileData, ushort fileIdOffset = 0)
         {
-            DirTable     = dirTable;
-            NameTable    = nameTable;
-            FileData     = fileData;
+            DirTable = dirTable;
+            NameTable = nameTable;
+            FileData = fileData;
             FileIdOffset = fileIdOffset;
         }
 
         public NitroFsArchive(Archive archive, ushort fileIdOffset = 0)
         {
-            if(archive is NitroFsArchive nitroFsArc)
+            if (archive is NitroFsArchive nitroFsArc)
             {
-                DirTable     = nitroFsArc.DirTable;
-                NameTable    = nitroFsArc.NameTable;
-                FileData     = nitroFsArc.FileData;
+                DirTable = nitroFsArc.DirTable;
+                NameTable = nitroFsArc.NameTable;
+                FileData = nitroFsArc.FileData;
                 FileIdOffset = nitroFsArc.FileIdOffset;
                 return;
             }
 
-            var    dirTabEntries  = new List<DirectoryTableEntry>();
-            var    nameTabEntries = new List<NameTableEntry[]>();
-            var    fileDatas      = new List<byte[]>();
-            ushort dirId          = 0xF000;
-            ushort fileId         = fileIdOffset;
-            var    stack          = new Queue<(ushort id, string path, ushort parentId)>();
+            var dirTabEntries = new List<DirectoryTableEntry>();
+            var nameTabEntries = new List<NameTableEntry[]>();
+            var fileDatas = new List<byte[]>();
+            ushort dirId = 0xF000;
+            ushort fileId = fileIdOffset;
+            var stack = new Queue<(ushort id, string path, ushort parentId)>();
             stack.Enqueue((dirId, RootPath, 0));
             dirId++;
             while (stack.Count > 0)
@@ -46,7 +46,7 @@ namespace HaroohiePals.Nitro.Fs
                 var dir = new DirectoryTableEntry
                 {
                     EntryFileId = fileId,
-                    ParentId    = parentId
+                    ParentId = parentId
                 };
                 dirTabEntries.Add(dir);
                 var entries = new List<NameTableEntry>();
@@ -75,9 +75,9 @@ namespace HaroohiePals.Nitro.Fs
 
             dirTabEntries[0].ParentId = (ushort)dirTabEntries.Count;
 
-            DirTable     = dirTabEntries.ToArray();
-            NameTable    = nameTabEntries.ToArray();
-            FileData     = fileDatas.ToArray();
+            DirTable = dirTabEntries.ToArray();
+            NameTable = nameTabEntries.ToArray();
+            FileData = fileDatas.ToArray();
             FileIdOffset = fileIdOffset;
         }
 
@@ -90,7 +90,7 @@ namespace HaroohiePals.Nitro.Fs
                 return 0;
 
             int partIdx = 0;
-            int dir     = 0;
+            int dir = 0;
             while (partIdx < parts.Length)
             {
                 foreach (var entry in NameTable[dir])
@@ -119,7 +119,7 @@ namespace HaroohiePals.Nitro.Fs
         public override IEnumerable<string> EnumerateFiles(string path, bool fullPath)
         {
             string normPath = NormalizePath(path);
-            int    dir      = FindDirectory(normPath);
+            int dir = FindDirectory(normPath);
 
             for (int i = 0; i < NameTable[dir].Length; i++)
             {
@@ -141,7 +141,7 @@ namespace HaroohiePals.Nitro.Fs
         public override IEnumerable<string> EnumerateDirectories(string path, bool fullPath)
         {
             string normPath = NormalizePath(path);
-            int    dir      = FindDirectory(normPath);
+            int dir = FindDirectory(normPath);
 
             for (int i = 0; i < NameTable[dir].Length; i++)
             {
@@ -167,9 +167,9 @@ namespace HaroohiePals.Nitro.Fs
 
             string normPath = NormalizePath(path).Trim(PathSeparator);
 
-            int    val     = normPath.LastIndexOf(PathSeparator);
+            int val = normPath.LastIndexOf(PathSeparator);
             string dirPath = val < 0 ? RootPath : normPath.Substring(0, val);
-            int    dir     = FindDirectory(dirPath);
+            int dir = FindDirectory(dirPath);
 
             string fileName = normPath.Substring(val + 1);
 
@@ -207,9 +207,9 @@ namespace HaroohiePals.Nitro.Fs
 
             string normPath = NormalizePath(path).Trim(PathSeparator);
 
-            int    val     = normPath.LastIndexOf(PathSeparator);
+            int val = normPath.LastIndexOf(PathSeparator);
             string dirPath = val < 0 ? RootPath : normPath.Substring(0, val);
-            int    dir     = FindDirectory(dirPath);
+            int dir = FindDirectory(dirPath);
 
             string fileName = normPath.Substring(val + 1);
 

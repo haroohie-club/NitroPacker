@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace HaroohiePals.IO.Archive
+namespace HaroohieClub.NitroPacker.IO.Archive
 {
     public class ArcDirectory : ArcEntry
     {
@@ -13,10 +13,10 @@ namespace HaroohiePals.IO.Archive
             : base(name, parent) { }
 
         private readonly Dictionary<string, ArcDirectory> _directories = new();
-        private readonly Dictionary<string, ArcFile>      _files       = new();
+        private readonly Dictionary<string, ArcFile> _files = new();
 
         public IReadOnlyCollection<ArcDirectory> Directories => _directories.Values;
-        public IReadOnlyCollection<ArcFile>      Files       => _files.Values;
+        public IReadOnlyCollection<ArcFile> Files => _files.Values;
 
         public bool ContainsDirectory(string name) => _directories.ContainsKey(name);
         public bool ContainsFile(string name) => _files.ContainsKey(name);

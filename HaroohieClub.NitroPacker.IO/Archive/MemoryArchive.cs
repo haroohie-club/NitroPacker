@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace HaroohiePals.IO.Archive
+namespace HaroohieClub.NitroPacker.IO.Archive
 {
     public class MemoryArchive : Archive
     {
@@ -163,8 +163,8 @@ namespace HaroohiePals.IO.Archive
 
         public override void SetFileData(string path, byte[] data)
         {
-            int    val  = path.Trim(PathSeparator).LastIndexOf(PathSeparator);
-            var    dir  = val >= 0 ? GetDirectoryByPath(path.Substring(0, val)) : Root;
+            int val = path.Trim(PathSeparator).LastIndexOf(PathSeparator);
+            var dir = val >= 0 ? GetDirectoryByPath(path.Substring(0, val)) : Root;
             string name = val >= 0 ? path.Substring(val + 1) : path;
             if (dir.ContainsFile(name))
                 dir.GetFile(name).Data = data;

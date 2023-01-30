@@ -1,7 +1,7 @@
-﻿using System;
-using HaroohiePals.IO;
+﻿using HaroohieClub.NitroPacker.IO;
+using System;
 
-namespace HaroohiePals.Nitro.Card
+namespace HaroohieClub.NitroPacker.Nitro.Card
 {
     public static class KeyTransform
     {
@@ -13,7 +13,7 @@ namespace HaroohiePals.Nitro.Card
             for (int i = 0; i < Blowfish.PTableEntryCount; i++)
             {
                 IOUtil.WriteU32Le(keyTable, i * 4,
-                    IOUtil.ReadU32Le(keyTable, i * 4) ^ IOUtil.ReadU32Be(keyCode, (i * 4) % modulo));
+                    IOUtil.ReadU32Le(keyTable, i * 4) ^ IOUtil.ReadU32Be(keyCode, i * 4 % modulo));
             }
 
             var scratch = new byte[8];

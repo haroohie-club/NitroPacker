@@ -1,18 +1,16 @@
 ﻿using System;
-using System.Buffers.Binary;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace HaroohiePals.IO
+namespace HaroohieClub.NitroPacker.IO
 {
     public class EndianBinaryReader : IDisposable
     {
-        private bool   _disposed;
+        private bool _disposed;
         private byte[] _buffer;
 
-        public Stream     BaseStream { get; }
+        public Stream BaseStream { get; }
         public Endianness Endianness { get; }
 
         public static Endianness SystemEndianness =>
@@ -106,8 +104,8 @@ namespace HaroohiePals.IO
 
         public unsafe T[] Read<T>(int count) where T : unmanaged
         {
-            int size       = sizeof(T);
-            var result     = new T[count];
+            int size = sizeof(T);
+            var result = new T[count];
             var byteResult = MemoryMarshal.Cast<T, byte>(result);
             BaseStream.Read(byteResult);
 
@@ -167,7 +165,7 @@ namespace HaroohiePals.IO
             if (disposing)
                 BaseStream?.Close();
 
-            _buffer   = null;
+            _buffer = null;
             _disposed = true;
         }
     }

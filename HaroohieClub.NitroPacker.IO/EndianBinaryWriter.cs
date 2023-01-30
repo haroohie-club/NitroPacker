@@ -3,14 +3,14 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace HaroohiePals.IO
+namespace HaroohieClub.NitroPacker.IO
 {
     public class EndianBinaryWriter : IDisposable
     {
-        protected bool   _disposed;
-        private   byte[] _buffer;
+        protected bool _disposed;
+        private byte[] _buffer;
 
-        public Stream     BaseStream { get; private set; }
+        public Stream BaseStream { get; private set; }
         public Endianness Endianness { get; set; }
 
         public static Endianness SystemEndianness =>
@@ -126,7 +126,7 @@ namespace HaroohiePals.IO
 
         public void WriteFx16(double value)
         {
-            Write((short)System.Math.Round(value * 4096d));
+            Write((short)Math.Round(value * 4096d));
         }
 
         public void WriteFx16s(ReadOnlySpan<double> values)
@@ -137,7 +137,7 @@ namespace HaroohiePals.IO
 
         public void WriteFx32(double value)
         {
-            Write((int)System.Math.Round(value * 4096d));
+            Write((int)Math.Round(value * 4096d));
         }
 
         public void WriteFx32s(ReadOnlySpan<double> values)
@@ -165,7 +165,7 @@ namespace HaroohiePals.IO
             if (disposing)
                 BaseStream?.Close();
 
-            _buffer   = null;
+            _buffer = null;
             _disposed = true;
         }
     }

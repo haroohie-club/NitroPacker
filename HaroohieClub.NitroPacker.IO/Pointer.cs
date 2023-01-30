@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 
-namespace HaroohiePals.IO
+namespace HaroohieClub.NitroPacker.IO
 {
     public readonly struct Pointer<T> : IEquatable<Pointer<T>>
     {

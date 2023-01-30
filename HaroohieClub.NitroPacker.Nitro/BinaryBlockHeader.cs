@@ -1,6 +1,6 @@
-﻿using HaroohiePals.IO;
+﻿using HaroohieClub.NitroPacker.IO;
 
-namespace HaroohiePals.Nitro
+namespace HaroohieClub.NitroPacker.Nitro
 {
     public class BinaryBlockHeader
     {

@@ -1,12 +1,11 @@
-﻿using System;
+﻿using HaroohieClub.NitroPacker.IO.Serialization;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
-using HaroohiePals.IO.Serialization;
 
-namespace HaroohiePals.IO
+namespace HaroohieClub.NitroPacker.IO
 {
     public class EndianBinaryWriterEx : EndianBinaryWriter
     {
@@ -26,11 +25,11 @@ namespace HaroohiePals.IO
 
         private class Chunk
         {
-            public long          StartAddress;
-            public bool          HasSize;
-            public int           SizeOffset;
+            public long StartAddress;
+            public bool HasSize;
+            public int SizeOffset;
             public ChunkSizeType SizeType;
-            public int           SizeDelta;
+            public int SizeDelta;
         }
 
         private readonly Stack<Chunk> _chunks = new();
@@ -54,10 +53,10 @@ namespace HaroohiePals.IO
             _chunks.Push(new Chunk
             {
                 StartAddress = BaseStream.Position,
-                HasSize      = true,
-                SizeOffset   = sizeOffset,
-                SizeType     = sizeType,
-                SizeDelta    = 0
+                HasSize = true,
+                SizeOffset = sizeOffset,
+                SizeType = sizeType,
+                SizeDelta = 0
             });
         }
 
@@ -67,7 +66,7 @@ namespace HaroohiePals.IO
             if (s.HasSize)
             {
                 ulong length = (ulong)(BaseStream.Position - s.StartAddress + s.SizeDelta);
-                long  curpos = BaseStream.Position;
+                long curpos = BaseStream.Position;
                 BaseStream.Position = s.StartAddress + s.SizeOffset;
                 switch (s.SizeType)
                 {
@@ -81,7 +80,7 @@ namespace HaroohiePals.IO
                         Write((uint)length);
                         break;
                     case ChunkSizeType.U64:
-                        Write((ulong)length);
+                        Write(length);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -152,9 +151,9 @@ namespace HaroohiePals.IO
             if (_chunks.Count == 0)
                 return;
             var curChunk = _chunks.Peek();
-            curChunk.HasSize    = true;
+            curChunk.HasSize = true;
             curChunk.SizeOffset = (int)(curPos - curChunk.StartAddress);
-            curChunk.SizeType   = sizeType;
+            curChunk.SizeType = sizeType;
         }
 
         public void WriteChunkSize16()
@@ -185,7 +184,7 @@ namespace HaroohiePals.IO
 
         public void WritePadding(int alignment, byte value = 0)
         {
-            while ((BaseStream.Position % alignment) != 0)
+            while (BaseStream.Position % alignment != 0)
                 Write(value);
         }
 
@@ -304,12 +303,12 @@ namespace HaroohiePals.IO
         private void WritePrimitive<T>(T obj, FieldInfo field, FieldAlignment alignment)
         {
             var fieldType = SerializationUtil.GetFieldPrimitiveType(field);
-            var trueType  = SerializationUtil.FieldTypeToType(fieldType);
+            var trueType = SerializationUtil.FieldTypeToType(fieldType);
 
             AlignForField(field, alignment, fieldType);
 
-            var    constAttrib = field.GetCustomAttribute<ConstantAttribute>();
-            object fieldValue  = constAttrib != null ? constAttrib.Value : field.GetValue(obj);
+            var constAttrib = field.GetCustomAttribute<ConstantAttribute>();
+            object fieldValue = constAttrib != null ? constAttrib.Value : field.GetValue(obj);
 
             object finalValue;
             if (field.FieldType == typeof(bool))
@@ -322,19 +321,19 @@ namespace HaroohiePals.IO
             {
                 var chunkSizeType = fieldType switch
                 {
-                    FieldType.U8  => ChunkSizeType.U8,
+                    FieldType.U8 => ChunkSizeType.U8,
                     FieldType.U16 => ChunkSizeType.U16,
                     FieldType.U32 => ChunkSizeType.U32,
                     FieldType.U64 => ChunkSizeType.U64,
-                    _             => throw new ArgumentOutOfRangeException("Invalid type for chunk size")
+                    _ => throw new ArgumentOutOfRangeException("Invalid type for chunk size")
                 };
 
                 var chunk = _chunks.Peek();
-                chunk.HasSize    = true;
+                chunk.HasSize = true;
                 chunk.SizeOffset = (int)GetCurposRelative();
-                chunk.SizeType   = chunkSizeType;
-                chunk.SizeDelta  = chunkSizeAttr.Difference;
-                finalValue       = SerializationUtil.Cast(0, trueType);
+                chunk.SizeType = chunkSizeType;
+                chunk.SizeDelta = chunkSizeAttr.Difference;
+                finalValue = SerializationUtil.Cast(0, trueType);
             }
 
             WriteFieldTypeDirect(fieldType, finalValue);
@@ -531,10 +530,10 @@ namespace HaroohiePals.IO
                 {
                     long ptr = pointer.refInfo.Type switch
                     {
-                        ReferenceType.Absolute      => address,
+                        ReferenceType.Absolute => address,
                         ReferenceType.ChunkRelative => address - (pointer.chunk?.StartAddress ?? 0),
                         ReferenceType.FieldRelative => address - pointer.address,
-                        _                           => throw new ArgumentOutOfRangeException()
+                        _ => throw new ArgumentOutOfRangeException()
                     };
 
                     var fieldType = SerializationUtil.FieldTypeToType(pointer.refInfo.PointerFieldType);

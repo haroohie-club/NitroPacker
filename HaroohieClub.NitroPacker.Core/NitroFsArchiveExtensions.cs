@@ -1,9 +1,5 @@
-﻿using HaroohiePals.Nitro.Fs;
-using System;
-using System.Collections.Generic;
+﻿using HaroohieClub.NitroPacker.Nitro.Fs;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace HaroohieClub.NitroPacker.Core

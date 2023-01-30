@@ -3,7 +3,7 @@ using System.Buffers.Binary;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace HaroohiePals.IO
+namespace HaroohieClub.NitroPacker.IO
 {
     public static class IOUtil
     {
@@ -127,11 +127,11 @@ namespace HaroohiePals.IO
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static uint ReadU24Le(byte[] data, int offset)
-            => (uint)(data[offset] | (data[offset + 1] << 8) | (data[offset + 2] << 16));
+            => (uint)(data[offset] | data[offset + 1] << 8 | data[offset + 2] << 16);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static uint ReadU24Le(ReadOnlySpan<byte> span)
-            => (uint)(span[0] | (span[1] << 8) | (span[2] << 16));
+            => (uint)(span[0] | span[1] << 8 | span[2] << 16);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static uint ReadU32Le(byte[] data, int offset)

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HaroohiePals.Nitro.Card
+namespace HaroohieClub.NitroPacker.Nitro.Card
 {
     public static class Crc16
     {
@@ -35,7 +35,7 @@ namespace HaroohiePals.Nitro.Card
         {
             ushort result = 0xFFFF;
             for (int i = 0; i < data.Length; i++)
-                result = (ushort)((result >> 8) ^ Crc16Table[(result ^ data[i]) & 0xFF]);
+                result = (ushort)(result >> 8 ^ Crc16Table[(result ^ data[i]) & 0xFF]);
 
             return result;
         }

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HaroohiePals.Nitro.Card
+namespace HaroohieClub.NitroPacker.Nitro.Card
 {
     public static class Keys
     {

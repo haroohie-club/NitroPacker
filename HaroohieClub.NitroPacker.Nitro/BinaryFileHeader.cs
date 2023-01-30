@@ -1,24 +1,24 @@
-﻿using HaroohiePals.IO;
+﻿using HaroohieClub.NitroPacker.IO;
 
-namespace HaroohiePals.Nitro
+namespace HaroohieClub.NitroPacker.Nitro
 {
     public class BinaryFileHeader
     {
         public BinaryFileHeader(uint signature, int nrBlocks)
         {
-            Signature  = signature;
-            ByteOrder  = 0xFEFF;
-            Version    = 0x100;
+            Signature = signature;
+            ByteOrder = 0xFEFF;
+            Version = 0x100;
             HeaderSize = 0x10;
             DataBlocks = (ushort)nrBlocks;
         }
 
         public BinaryFileHeader(EndianBinaryReader er)
         {
-            Signature  = er.Read<uint>();
-            ByteOrder  = er.Read<ushort>();
-            Version    = er.Read<ushort>();
-            FileSize   = er.Read<uint>();
+            Signature = er.Read<uint>();
+            ByteOrder = er.Read<ushort>();
+            Version = er.Read<ushort>();
+            FileSize = er.Read<uint>();
             HeaderSize = er.Read<ushort>();
             DataBlocks = er.Read<ushort>();
         }
@@ -33,10 +33,10 @@ namespace HaroohiePals.Nitro
             er.Write(DataBlocks);
         }
 
-        public uint   Signature;
+        public uint Signature;
         public ushort ByteOrder;
         public ushort Version;
-        public uint   FileSize;
+        public uint FileSize;
         public ushort HeaderSize;
         public ushort DataBlocks;
     }

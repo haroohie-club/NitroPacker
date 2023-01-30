@@ -1,4 +1,4 @@
-﻿namespace HaroohiePals.IO
+﻿namespace HaroohieClub.NitroPacker.IO
 {
     public enum Endianness
     {

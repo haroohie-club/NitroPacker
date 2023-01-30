@@ -1,16 +1,16 @@
 ﻿using System;
 
-namespace HaroohiePals.Graphics
+namespace HaroohieClub.NitroPacker.Nitro.Gx
 {
     public class Rgba8Bitmap
     {
-        public int    Width  { get; }
-        public int    Height { get; }
+        public int Width { get; }
+        public int Height { get; }
         public uint[] Pixels { get; }
 
         public Rgba8Bitmap(int width, int height)
         {
-            Width  = width;
+            Width = width;
             Height = height;
 
             Pixels = new uint[width * height];
@@ -18,7 +18,7 @@ namespace HaroohiePals.Graphics
 
         public Rgba8Bitmap(int width, int height, uint[] data)
         {
-            Width  = width;
+            Width = width;
             Height = height;
 
             Pixels = new uint[width * height];

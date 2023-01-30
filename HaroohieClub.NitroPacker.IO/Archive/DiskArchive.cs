@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace HaroohiePals.IO.Archive
+namespace HaroohieClub.NitroPacker.IO.Archive
 {
     public class DiskArchive : Archive
     {

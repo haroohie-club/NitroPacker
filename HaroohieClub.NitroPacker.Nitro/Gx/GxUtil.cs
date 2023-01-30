@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using HaroohieClub.NitroPacker.IO;
+using System;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using HaroohiePals.Graphics;
-using HaroohiePals.IO;
 
-namespace HaroohiePals.Nitro.Gx
+namespace HaroohieClub.NitroPacker.Nitro.Gx
 {
     public static class GxUtil
     {
@@ -65,10 +60,10 @@ namespace HaroohiePals.Nitro.Gx
             if ((height & 7) != 0)
                 throw new ArgumentException(nameof(height));
 
-            int    tileSize    = imageFormat == ImageFormat.Pltt16 ? 32 : 64;
-            int    paletteSize = imageFormat == ImageFormat.Pltt16 ? 16 : 256;
-            uint[] bmpdata     = new uint[width * height];
-            int    tileIdx     = 0;
+            int tileSize = imageFormat == ImageFormat.Pltt16 ? 32 : 64;
+            int paletteSize = imageFormat == ImageFormat.Pltt16 ? 16 : 256;
+            uint[] bmpdata = new uint[width * height];
+            int tileIdx = 0;
             for (int y = 0; y < height / 8; y++)
             {
                 for (int x = 0; x < width / 8; x++)
@@ -76,12 +71,12 @@ namespace HaroohiePals.Nitro.Gx
                     if (mapFormat == MapFormat.Text)
                     {
                         ushort tileData = IOUtil.ReadU16Le(map[(tileIdx * 2)..]);
-                        int    charName = (int)(tileData & 0x3FF) - mapTileOffset;
+                        int charName = (tileData & 0x3FF) - mapTileOffset;
                         if (charName < 0)
                             continue;
-                        bool hf     = ((tileData >> 10) & 0x1) == 1;
-                        bool vf     = ((tileData >> 11) & 0x1) == 1;
-                        int  palidx = tileData >> 12;
+                        bool hf = (tileData >> 10 & 0x1) == 1;
+                        bool vf = (tileData >> 11 & 0x1) == 1;
+                        int palidx = tileData >> 12;
                         uint[] pixels = DecodeRaw(data.Slice(charName * tileSize, tileSize),
                             palette.Slice(paletteSize * palidx), imageFormat, firstTransparent);
                         if (!hf && !vf)
@@ -240,69 +235,69 @@ namespace HaroohiePals.Nitro.Gx
                     throw new Exception("Invalid pixel format");
 
                 case ImageFormat.A3I5:
-                {
-                    var result = new uint[pixelData.Length];
-                    for (int i = 0; i < pixelData.Length; i++)
                     {
-                        int a = pixelData[i] >> 5;
-                        a = (a << 2) + (a >> 1);
-
-                        result[i] = (palette[pixelData[i] & 0x1F] & ~0xFF000000) | (uint)((a * 255 / 31) << 24);
-                    }
-
-                    return result;
-                }
-                case ImageFormat.Pltt4:
-                {
-                    var result = new uint[pixelData.Length * 4];
-                    for (int i = 0; i < pixelData.Length; i++)
-                    {
-                        for (int j = 0; j < 4; j++)
+                        var result = new uint[pixelData.Length];
+                        for (int i = 0; i < pixelData.Length; i++)
                         {
-                            int idx = (pixelData[i] >> (j * 2)) & 0x3;
-                            result[i * 4 + j] = idx != 0 || !firstTransparent ? palette[idx] : 0;
+                            int a = pixelData[i] >> 5;
+                            a = (a << 2) + (a >> 1);
+
+                            result[i] = palette[pixelData[i] & 0x1F] & ~0xFF000000 | (uint)(a * 255 / 31 << 24);
                         }
-                    }
 
-                    return result;
-                }
+                        return result;
+                    }
+                case ImageFormat.Pltt4:
+                    {
+                        var result = new uint[pixelData.Length * 4];
+                        for (int i = 0; i < pixelData.Length; i++)
+                        {
+                            for (int j = 0; j < 4; j++)
+                            {
+                                int idx = pixelData[i] >> j * 2 & 0x3;
+                                result[i * 4 + j] = idx != 0 || !firstTransparent ? palette[idx] : 0;
+                            }
+                        }
+
+                        return result;
+                    }
                 case ImageFormat.Pltt16:
-                {
-                    var result = new uint[pixelData.Length * 2];
-                    for (int i = 0; i < pixelData.Length; i++)
                     {
-                        int idx = pixelData[i] & 0xF;
-                        result[i * 2]     = idx != 0 || !firstTransparent ? palette[idx] : 0;
-                        idx               = pixelData[i] >> 4;
-                        result[i * 2 + 1] = idx != 0 || !firstTransparent ? palette[idx] : 0;
-                    }
+                        var result = new uint[pixelData.Length * 2];
+                        for (int i = 0; i < pixelData.Length; i++)
+                        {
+                            int idx = pixelData[i] & 0xF;
+                            result[i * 2] = idx != 0 || !firstTransparent ? palette[idx] : 0;
+                            idx = pixelData[i] >> 4;
+                            result[i * 2 + 1] = idx != 0 || !firstTransparent ? palette[idx] : 0;
+                        }
 
-                    return result;
-                }
+                        return result;
+                    }
                 case ImageFormat.Pltt256:
-                {
-                    var result = new uint[pixelData.Length];
-                    for (int i = 0; i < pixelData.Length; i++)
                     {
-                        int idx = pixelData[i];
-                        result[i] = idx != 0 || !firstTransparent ? palette[idx] : 0;
-                    }
+                        var result = new uint[pixelData.Length];
+                        for (int i = 0; i < pixelData.Length; i++)
+                        {
+                            int idx = pixelData[i];
+                            result[i] = idx != 0 || !firstTransparent ? palette[idx] : 0;
+                        }
 
-                    return result;
-                }
+                        return result;
+                    }
                 case ImageFormat.Comp4x4:
                     return DecodeRawComp4x4(pixelData, tex4x4Data, palette);
                 case ImageFormat.A5I3:
-                {
-                    var result = new uint[pixelData.Length];
-                    for (int i = 0; i < pixelData.Length; i++)
                     {
-                        result[i] = (palette[pixelData[i] & 7] & ~0xFF000000) |
-                                    (uint)(((pixelData[i] >> 3) * 255 / 31) << 24);
-                    }
+                        var result = new uint[pixelData.Length];
+                        for (int i = 0; i < pixelData.Length; i++)
+                        {
+                            result[i] = palette[pixelData[i] & 7] & ~0xFF000000 |
+                                        (uint)((pixelData[i] >> 3) * 255 / 31 << 24);
+                        }
 
-                    return result;
-                }
+                        return result;
+                    }
                 case ImageFormat.Direct:
                     return GfxUtil.ConvertColorFormatFromU16(
                         IOUtil.ReadU16Le(pixelData, pixelData.Length / 2),
@@ -315,17 +310,17 @@ namespace HaroohiePals.Nitro.Gx
         private static uint[] DecodeRawComp4x4(ReadOnlySpan<byte> pixelData, ReadOnlySpan<byte> tex4x4Data,
             ReadOnlySpan<uint> palette)
         {
-            var result    = new uint[pixelData.Length * 4];
-            int offset    = 0;
+            var result = new uint[pixelData.Length * 4];
+            int offset = 0;
             int offset4x4 = 0;
             for (int i = 0; i < pixelData.Length * 4; i += 4 * 4)
             {
                 ushort tex4x4 = IOUtil.ReadU16Le(tex4x4Data[offset4x4..]);
                 offset4x4 += 2;
-                int  pal = tex4x4 & 0x3FFF;
-                bool a   = (tex4x4 & 0x8000) != 0;
+                int pal = tex4x4 & 0x3FFF;
+                bool a = (tex4x4 & 0x8000) != 0;
                 bool pty = (tex4x4 & 0x4000) != 0;
-                byte d   = 0;
+                byte d = 0;
                 for (int j = 0; j < 4 * 4; j++)
                 {
                     if ((j & 3) == 0)

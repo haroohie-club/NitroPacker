@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using HaroohiePals.IO;
+﻿using HaroohieClub.NitroPacker.IO;
 
-namespace HaroohiePals.Nitro.Fs
+namespace HaroohieClub.NitroPacker.Nitro.Fs
 {
     public class DirectoryTableEntry
     {
@@ -17,7 +12,7 @@ namespace HaroohiePals.Nitro.Fs
         public void Write(EndianBinaryWriterEx er)
             => er.WriteObject(this);
 
-        public uint   EntryStart;
+        public uint EntryStart;
         public ushort EntryFileId;
         public ushort ParentId;
     }

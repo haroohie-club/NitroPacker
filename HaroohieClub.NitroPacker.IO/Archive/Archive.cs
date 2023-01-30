@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 
-namespace HaroohiePals.IO.Archive
+namespace HaroohieClub.NitroPacker.IO.Archive
 {
     public abstract class Archive : IReadOnlyArchive
     {
-        public const char   PathSeparator = '/';
-        public const string RootPath      = "/";
+        public const char PathSeparator = '/';
+        public const string RootPath = "/";
 
         public virtual bool IsReadOnly => true;
 

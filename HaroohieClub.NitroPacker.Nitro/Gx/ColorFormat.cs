@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HaroohiePals.Graphics
+namespace HaroohieClub.NitroPacker.Nitro.Gx
 {
     public class ColorFormat
     {
@@ -18,7 +18,7 @@ namespace HaroohiePals.Graphics
             BSize = bSize;
         }
 
-        public int NrBytes => (int)System.Math.Ceiling((ASize + RSize + GSize + BSize) / 8f);
+        public int NrBytes => (int)Math.Ceiling((ASize + RSize + GSize + BSize) / 8f);
 
         //The naming is based on the bit order when read out in the correct endianness
         public static readonly ColorFormat ARGB8888 = new(24, 8, 16, 8, 8, 8, 0, 8);

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HaroohiePals.IO.Serialization
+namespace HaroohieClub.NitroPacker.IO.Serialization
 {
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Class | AttributeTargets.Struct, Inherited = true, AllowMultiple = false)]
     public sealed class AlignAttribute : Attribute

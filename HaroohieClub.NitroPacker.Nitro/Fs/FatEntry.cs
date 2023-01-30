@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using HaroohiePals.IO;
+﻿using HaroohieClub.NitroPacker.IO;
 
-namespace HaroohiePals.Nitro.Fs
+namespace HaroohieClub.NitroPacker.Nitro.Fs
 {
     public class FatEntry
     {
         public FatEntry(uint offset, uint size)
         {
-            FileTop    = offset;
+            FileTop = offset;
             FileBottom = offset + size;
         }
 

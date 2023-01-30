@@ -1,4 +1,4 @@
-﻿namespace HaroohiePals.IO.Archive
+﻿namespace HaroohieClub.NitroPacker.IO.Archive
 {
     public class ArcFile : ArcEntry
     {

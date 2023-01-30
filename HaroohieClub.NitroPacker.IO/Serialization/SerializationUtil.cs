@@ -4,9 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using Microsoft.CSharp.RuntimeBinder;
 
-namespace HaroohiePals.IO.Serialization
+namespace HaroohieClub.NitroPacker.IO.Serialization
 {
     public static class SerializationUtil
     {
@@ -34,36 +33,36 @@ namespace HaroohiePals.IO.Serialization
 
         public static Type FieldTypeToType(FieldType type) => type switch
         {
-            FieldType.U8     => typeof(byte),
-            FieldType.S8     => typeof(sbyte),
-            FieldType.U16    => typeof(ushort),
-            FieldType.S16    => typeof(short),
-            FieldType.U32    => typeof(uint),
-            FieldType.S32    => typeof(int),
-            FieldType.U64    => typeof(ulong),
-            FieldType.S64    => typeof(long),
-            FieldType.Fx16   => typeof(double),
-            FieldType.Fx32   => typeof(double),
-            FieldType.Float  => typeof(float),
+            FieldType.U8 => typeof(byte),
+            FieldType.S8 => typeof(sbyte),
+            FieldType.U16 => typeof(ushort),
+            FieldType.S16 => typeof(short),
+            FieldType.U32 => typeof(uint),
+            FieldType.S32 => typeof(int),
+            FieldType.U64 => typeof(ulong),
+            FieldType.S64 => typeof(long),
+            FieldType.Fx16 => typeof(double),
+            FieldType.Fx32 => typeof(double),
+            FieldType.Float => typeof(float),
             FieldType.Double => typeof(double),
-            _                => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
 
         public static int GetTypeSize(FieldType type) => type switch
         {
-            FieldType.U8     => 1,
-            FieldType.S8     => 1,
-            FieldType.U16    => 2,
-            FieldType.S16    => 2,
-            FieldType.U32    => 4,
-            FieldType.S32    => 4,
-            FieldType.U64    => 8,
-            FieldType.S64    => 8,
-            FieldType.Fx16   => 2,
-            FieldType.Fx32   => 4,
-            FieldType.Float  => 4,
+            FieldType.U8 => 1,
+            FieldType.S8 => 1,
+            FieldType.U16 => 2,
+            FieldType.S16 => 2,
+            FieldType.U32 => 4,
+            FieldType.S32 => 4,
+            FieldType.U64 => 8,
+            FieldType.S64 => 8,
+            FieldType.Fx16 => 2,
+            FieldType.Fx32 => 4,
+            FieldType.Float => 4,
             FieldType.Double => 8,
-            _                => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
 
         public static bool HasPrimitiveType(FieldInfo field)
@@ -90,10 +89,10 @@ namespace HaroohiePals.IO.Serialization
 
         public static FieldType GetFieldPrimitiveType(FieldInfo field)
         {
-            bool isFx32       = field.GetCustomAttribute<Fx32Attribute>() != null;
-            bool isFx16       = field.GetCustomAttribute<Fx16Attribute>() != null;
+            bool isFx32 = field.GetCustomAttribute<Fx32Attribute>() != null;
+            bool isFx16 = field.GetCustomAttribute<Fx16Attribute>() != null;
             bool hasFieldType = field.GetCustomAttribute<TypeAttribute>() != null;
-            int  count        = (isFx32 ? 1 : 0) + (isFx16 ? 1 : 0) + (hasFieldType ? 1 : 0);
+            int count = (isFx32 ? 1 : 0) + (isFx16 ? 1 : 0) + (hasFieldType ? 1 : 0);
             if (count > 1)
                 throw new Exception("More than one field type specified for field " + field.Name + " in type " +
                                     field.DeclaringType?.Name);
@@ -120,10 +119,10 @@ namespace HaroohiePals.IO.Serialization
 
         public static FieldType GetVectorPrimitiveType(FieldInfo field)
         {
-            bool isFx32       = field.GetCustomAttribute<Fx32Attribute>() != null;
-            bool isFx16       = field.GetCustomAttribute<Fx16Attribute>() != null;
+            bool isFx32 = field.GetCustomAttribute<Fx32Attribute>() != null;
+            bool isFx16 = field.GetCustomAttribute<Fx16Attribute>() != null;
             bool hasFieldType = field.GetCustomAttribute<TypeAttribute>() != null;
-            int  count        = (isFx32 ? 1 : 0) + (isFx16 ? 1 : 0) + (hasFieldType ? 1 : 0);
+            int count = (isFx32 ? 1 : 0) + (isFx16 ? 1 : 0) + (hasFieldType ? 1 : 0);
             if (count > 1)
                 throw new Exception("More than one field type specified for field " + field.Name + " in type " +
                                     field.DeclaringType?.Name);
@@ -170,7 +169,7 @@ namespace HaroohiePals.IO.Serialization
                 return func.DynamicInvoke(data);
 
             var dataParam = Expression.Parameter(data.GetType());
-            var run       = Expression.Lambda(Expression.Convert(dataParam, type), dataParam).Compile();
+            var run = Expression.Lambda(Expression.Convert(dataParam, type), dataParam).Compile();
 
             CastCache.TryAdd((inType, type), run);
 

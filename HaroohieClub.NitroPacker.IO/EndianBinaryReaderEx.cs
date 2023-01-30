@@ -1,12 +1,11 @@
-﻿using System;
+﻿using HaroohieClub.NitroPacker.IO.Serialization;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
-using HaroohiePals.IO.Serialization;
 
-namespace HaroohiePals.IO
+namespace HaroohieClub.NitroPacker.IO
 {
     public class EndianBinaryReaderEx : EndianBinaryReader
     {
@@ -18,9 +17,9 @@ namespace HaroohiePals.IO
 
         public void ReadPadding(int alignment)
         {
-            if ((BaseStream.Position % alignment) == 0)
+            if (BaseStream.Position % alignment == 0)
                 return;
-            BaseStream.Position += alignment - (BaseStream.Position % alignment);
+            BaseStream.Position += alignment - BaseStream.Position % alignment;
         }
 
         private Stack<long> Chunks = new Stack<long>();
@@ -81,36 +80,36 @@ namespace HaroohiePals.IO
         private object ReadFieldTypeDirect(FieldType type) => type switch
         {
             //The object cast is needed once to ensure the switch doesn't cast to double
-            FieldType.U8     => (object)Read<byte>(),
-            FieldType.S8     => Read<sbyte>(),
-            FieldType.U16    => Read<ushort>(),
-            FieldType.S16    => Read<short>(),
-            FieldType.U32    => Read<uint>(),
-            FieldType.S32    => Read<int>(),
-            FieldType.U64    => Read<ulong>(),
-            FieldType.S64    => Read<long>(),
-            FieldType.Fx16   => ReadFx16(),
-            FieldType.Fx32   => ReadFx32(),
-            FieldType.Float  => Read<float>(),
+            FieldType.U8 => Read<byte>(),
+            FieldType.S8 => Read<sbyte>(),
+            FieldType.U16 => Read<ushort>(),
+            FieldType.S16 => Read<short>(),
+            FieldType.U32 => Read<uint>(),
+            FieldType.S32 => Read<int>(),
+            FieldType.U64 => Read<ulong>(),
+            FieldType.S64 => Read<long>(),
+            FieldType.Fx16 => ReadFx16(),
+            FieldType.Fx32 => ReadFx32(),
+            FieldType.Float => Read<float>(),
             FieldType.Double => Read<double>(),
-            _                => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
 
         private Array ReadFieldTypeArrayDirect(FieldType type, int count) => type switch
         {
-            FieldType.U8     => Read<byte>(count),
-            FieldType.S8     => Read<sbyte>(count),
-            FieldType.U16    => Read<ushort>(count),
-            FieldType.S16    => Read<short>(count),
-            FieldType.U32    => Read<uint>(count),
-            FieldType.S32    => Read<int>(count),
-            FieldType.U64    => Read<ulong>(count),
-            FieldType.S64    => Read<long>(count),
-            FieldType.Fx16   => ReadFx16s(count),
-            FieldType.Fx32   => ReadFx32s(count),
-            FieldType.Float  => Read<float>(count),
+            FieldType.U8 => Read<byte>(count),
+            FieldType.S8 => Read<sbyte>(count),
+            FieldType.U16 => Read<ushort>(count),
+            FieldType.S16 => Read<short>(count),
+            FieldType.U32 => Read<uint>(count),
+            FieldType.S32 => Read<int>(count),
+            FieldType.U64 => Read<ulong>(count),
+            FieldType.S64 => Read<long>(count),
+            FieldType.Fx16 => ReadFx16s(count),
+            FieldType.Fx32 => ReadFx32s(count),
+            FieldType.Float => Read<float>(count),
             FieldType.Double => Read<double>(count),
-            _                => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
 
         private void AlignForField(FieldInfo field, FieldAlignment alignment, FieldType type)
@@ -279,16 +278,16 @@ namespace HaroohiePals.IO
             var alignment = SerializationUtil.GetFieldAlignment<T>();
             foreach (var field in fields)
             {
-                long curPos    = BaseStream.Position;
-                var  refAttrib = field.GetCustomAttribute<ReferenceAttribute>();
+                long curPos = BaseStream.Position;
+                var refAttrib = field.GetCustomAttribute<ReferenceAttribute>();
                 if (refAttrib != null)
                 {
                     if (SerializationUtil.HasPrimitiveType(field))
                         throw new Exception("Reference field cannot be a primitive type");
 
                     AlignForField(field, alignment, refAttrib.PointerFieldType);
-                    long   address = BaseStream.Position;
-                    object val     = ReadFieldTypeDirect(refAttrib.PointerFieldType);
+                    long address = BaseStream.Position;
+                    object val = ReadFieldTypeDirect(refAttrib.PointerFieldType);
                     curPos = BaseStream.Position;
                     long ptr = (long)Convert.ChangeType(val, typeof(long));
                     switch (refAttrib.Type)
