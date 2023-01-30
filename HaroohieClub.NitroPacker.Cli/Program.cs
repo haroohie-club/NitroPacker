@@ -1,10 +1,19 @@
 ﻿using HaroohieClub.NitroPacker.Core;
+using Mono.Options;
+using System.IO;
 
-string romPath = @"D:\dev\projects\nitro\mkds-decomp\masterrom\WUP-N-DACP\WUP-N-DACP.nds";
-string unpackPath = @"C:\Users\ermel\Desktop\Tests";
-string packPath = @"C:\Users\ermel\Desktop\Tests\Rom.nds";
-string unpackedProjectName = "TestUnpack";
-string unpackedProjectFilePath = Path.Combine(unpackPath, unpackedProjectName + ".xml");
-
-NdsProjectFile.Create("TestUnpack", romPath, unpackPath);
-NdsProjectFile.Pack(packPath, unpackedProjectFilePath);
+namespace HaroohieClub.NitroPacker.Cli
+{   
+    public class Program
+    {
+        public static void Main(string[] args)
+        {
+            CommandSet commands = new("NitroPacker")
+            {
+                new UnpackCommand(),
+                new PackCommand(),
+            };
+            commands.Run(args);
+        }
+    }
+}
