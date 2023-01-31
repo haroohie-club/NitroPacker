@@ -47,7 +47,7 @@ namespace HaroohieClub.NitroPacker.Core
 
                 var basePath = new FileInfo(projectFilePath).DirectoryName;
 
-                var fsRoot = new DiskArchive($"{basePath}\\data");
+                var fsRoot = new DiskArchive(Path.Combine(basePath, "data"));
 
                 project.Build(basePath, fsRoot, file);
             }
@@ -85,19 +85,15 @@ namespace HaroohieClub.NitroPacker.Core
             dir.CreateSubdirectory("overlay");
             foreach (var vv in ndsFile.MainOvt)
             {
-                File.Create(outPath + $"\\overlay\\main_{vv.Id:X4}.bin").Close();
-                File.WriteAllBytes(outPath + $"\\overlay\\main_{vv.Id:X4}.bin", ndsFile.FileData[vv.FileId]);
+                File.WriteAllBytes(Path.Combine(outPath, "overlay", $"main_{vv.Id:X4}.bin"), ndsFile.FileData[vv.FileId]);
             }
             foreach (var vv in ndsFile.SubOvt)
             {
-                File.Create(outPath + $"\\overlay\\sub_{vv.Id:X4}.bin").Close();
-                File.WriteAllBytes(outPath + $"\\overlay\\sub_{vv.Id:X4}.bin", ndsFile.FileData[vv.FileId]);
+                File.WriteAllBytes(Path.Combine(outPath, "overlay", $"sub_{vv.Id:X4}.bin"), ndsFile.FileData[vv.FileId]);
             }
 
-            File.Create(outPath + "\\arm9.bin").Close();
-            File.WriteAllBytes(outPath + "\\arm9.bin", ndsFile.MainRom);
-            File.Create(outPath + "\\arm7.bin").Close();
-            File.WriteAllBytes(outPath + "\\arm7.bin", ndsFile.SubRom);
+            File.WriteAllBytes(Path.Combine(outPath, "arm9.bin"), ndsFile.MainRom);
+            File.WriteAllBytes(Path.Combine(outPath, "arm7.bin"), ndsFile.SubRom);
 
             projectFile.RomInfo = new NdsRomInfo(ndsFile);
 
@@ -124,18 +120,18 @@ namespace HaroohieClub.NitroPacker.Core
             {
                 vv.FileId = fid;
                 n.Fat[fid] = new FatEntry(0, 0);
-                n.FileData[fid] = File.ReadAllBytes(projectDir + "\\overlay\\main_" + vv.Id.ToString("X4") + ".bin");
+                n.FileData[fid] = File.ReadAllBytes(Path.Combine(projectDir, "overlay", $"main_{vv.Id:X4}.bin"));
                 fid++;
             }
             foreach (var vv in n.SubOvt)
             {
                 vv.FileId = fid;
                 n.Fat[fid] = new FatEntry(0, 0);
-                n.FileData[fid] = File.ReadAllBytes(projectDir + "\\overlay\\sub_" + vv.Id.ToString("X4") + ".bin");
+                n.FileData[fid] = File.ReadAllBytes(Path.Combine(projectDir, "overlay", $"sub_{vv.Id:X4}.bin"));
                 fid++;
             }
-            n.MainRom = File.ReadAllBytes(projectDir + "\\arm9.bin");
-            n.SubRom = File.ReadAllBytes(projectDir + "\\arm7.bin");
+            n.MainRom = File.ReadAllBytes(Path.Combine(projectDir, "arm9.bin"));
+            n.SubRom = File.ReadAllBytes(Path.Combine(projectDir, "arm7.bin"));
             n.FromArchive(fsRoot);
 
             n.Write(outputStream);
