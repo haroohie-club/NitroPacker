@@ -57,7 +57,7 @@ stages:
         mkdir publish
         Expand-Archive -Path $(Build.SourcesDirectory)/HaroohieClub.NitroPacker.Cli/bin/Release/net6.0/$(rid)/publish.zip -DestinationPath ./publish
         Push-Location publish
-        tar -czvf $(artifactPath) --transform 's,^\.\/,,' .
+        tar -czvf $(artifactPath) --transform 's,^\.\/,,' ./NitroPacker
         Pop-Location
       condition: ne(variables['imageName'], 'windows-latest')
       displayName: Create tar
@@ -66,7 +66,7 @@ stages:
         mkdir publish
         Expand-Archive -Path $(Build.SourcesDirectory)/HaroohieClub.NitroPacker.Cli/bin/Release/net6.0/$(rid)/publish.zip .\publish
         Push-Location publish
-        Compress-Archive -Path . -DestinationPath $(artifactPath)
+        Compress-Archive -Path .\NitroPacker.exe -DestinationPath $(artifactPath)
         Pop-Location
       condition: eq(variables['imageName'], 'windows-latest')
       displayName: Create zip
