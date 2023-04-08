@@ -35,24 +35,26 @@ namespace HaroohieClub.NitroPacker.Nitro.Fs
 
         public NameTableEntry(EndianBinaryReader er)
         {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             byte length = er.Read<byte>();
             if (length == 0)
                 Type = NameTableEntryType.EndOfDirectory;
             else if ((length & 0x80) != 0)
             {
                 Type = NameTableEntryType.Directory;
-                Name = er.ReadString(Encoding.ASCII, length & ~0x80);
+                Name = er.ReadString(Encoding.GetEncoding("Shift-JIS"), length & ~0x80);
                 DirectoryId = er.Read<ushort>();
             }
             else
             {
                 Type = NameTableEntryType.File;
-                Name = er.ReadString(Encoding.ASCII, length);
+                Name = er.ReadString(Encoding.GetEncoding("Shift-JIS"), length);
             }
         }
 
         public void Write(EndianBinaryWriter er)
         {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             switch (Type)
             {
                 case NameTableEntryType.EndOfDirectory:
@@ -62,13 +64,13 @@ namespace HaroohieClub.NitroPacker.Nitro.Fs
                     if (Name.Length > 0x7F)
                         throw new Exception("File name too long");
                     er.Write((byte)Name.Length);
-                    er.Write(Name, Encoding.ASCII, false);
+                    er.Write(Name, Encoding.GetEncoding("Shift-JIS"), false);
                     break;
                 case NameTableEntryType.Directory:
                     if (Name.Length > 0x7F)
                         throw new Exception("Directory name too long");
                     er.Write((byte)(Name.Length | 0x80));
-                    er.Write(Name, Encoding.ASCII, false);
+                    er.Write(Name, Encoding.GetEncoding("Shift-JIS"), false);
                     er.Write(DirectoryId);
                     break;
                 default:

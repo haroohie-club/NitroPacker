@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "HaroohieClub.NitroPacker.Cli": {
+      "commandName": "Project",
+      "commandLineArgs": "unpack -r unpacked\\data\\data.srl -o unpacked\\data\\matroskya -p MATROSKYA",
+      "workingDirectory": "D:\\ROMHacking\\DSHacking\\test"
+    }
+  }
+}
