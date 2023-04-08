@@ -1,0 +1,100 @@
+trigger:
+- none
+pr:
+- none
+
+parameters:
+- name: version
+  displayName: Release Version
+  type: string
+  default: ''
+- name: releaseNotes
+  displayName: Release Notes
+  type: string
+  default: ''
+
+variables:
+- name: Version
+  value: ${{ parameters.version }}
+
+stages:
+- stage: Build
+  jobs:
+  - job:
+    strategy:
+      matrix:
+        Linux:
+          imageName: 'ubuntu-latest'
+          artifactName: 'NitroPacker-Linux-$(Version)'
+          rid: 'linux-x64'
+          artifactPath: '$(Build.SourcesDirectory)/HaroohieClub.NitroPacker.Cli/bin/Release/net6.0/linux-x64/publish/NitroPacker'
+        macOS:
+          imageName: 'macOS-latest'
+          artifactName: 'NitroPacker-macOS-$(Version)'
+          rid: 'osx-x64'
+          artifactPath: '$(Build.SourcesDirectory)/HaroohieClub.NitroPacker.Cli/bin/Release/net6.0/osx-x64/publish/NitroPacker'
+        Windows:
+          imageName: 'windows-latest'
+          artifactName: 'NitroPacker-Windows-$(Version)'
+          rid: 'win-x64'
+          artifactPath: '$(Build.SourcesDirectory)/HaroohieClub.NitroPacker.Cli/bin/Release/net6.0/win-x64/publish/NitroPacker.exe'
+    displayName: Build & Publish
+    pool:
+      vmImage: $(imageName)
+    steps:
+    - checkout: self
+      clean: true
+      
+    - task: DotNetCoreCLI@2
+      inputs:
+        command: 'publish'
+        projects: $(Build.SourcesDirectory)/src/HaroohieClub.NitroPacker.Cli/HaroohieClub.NitroPacker.Cli.csproj
+        arguments: '-c Release -f net6.0 -r $(rid) --self-contained /p:PublishSingleFile=true'
+        publishWebProjects: false
+      displayName: Build & Publish Serial Loops
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(artifactPath)'
+        ArtifactName: '$(artifactName)'
+        publishLocation: 'Container'
+      displayName: Publish build artifact
+- stage: Release
+  dependsOn: Build
+  jobs:
+  - job:
+    pool:
+      vmImage: ubuntu-latest
+    displayName: Create release
+    steps:
+    - task: DownloadBuildArtifacts@0
+      displayName: Download Linux artifacts
+      inputs:
+        buildType: 'current'
+        downloadType: 'single'
+        artifactName: 'NitroPacker-Linux-$(Version)'
+        downloadPath: '$(Build.ArtifactStagingDirectory)'
+    - task: DownloadBuildArtifacts@0
+      displayName: Download macOS artifacts
+      inputs:
+        buildType: 'current'
+        downloadType: 'single'
+        artifactName: 'NitroPacker-macOS-$(Version)'
+        downloadPath: '$(Build.ArtifactStagingDirectory)'
+    - task: DownloadBuildArtifacts@0
+      displayName: Download Windows artifacts
+      inputs:
+        buildType: 'current'
+        downloadType: 'single'
+        artifactName: 'NitroPacker-Windows-$(Version)'
+        downloadPath: '$(Build.ArtifactStagingDirectory)'
+    - task: GitHubRelease@1
+      displayName: 'Create GitHub Release'
+      inputs:
+        gitHubConnection: 'GitHub Connection (Jonko)'
+        tagSource: userSpecifiedTag
+        tag: '$(Version)'
+        title: 'NitroPacker v$(Version)'
+        releaseNotesSource: inline
+        releaseNotesInline: |
+          ${{ parameters.releaseNotes }}
