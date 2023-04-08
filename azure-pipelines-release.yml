@@ -27,17 +27,17 @@ stages:
           imageName: 'ubuntu-latest'
           artifactName: 'NitroPacker-Linux-$(Version)'
           rid: 'linux-x64'
-          artifactPath: '$(Build.SourcesDirectory)/HaroohieClub.NitroPacker.Cli/bin/Release/net6.0/linux-x64/publish/NitroPacker'
+          artifactPath: '$(Build.SourcesDirectory)/NitroPacker-Linux-$(Version).tar.gz'
         macOS:
           imageName: 'macOS-latest'
           artifactName: 'NitroPacker-macOS-$(Version)'
           rid: 'osx-x64'
-          artifactPath: '$(Build.SourcesDirectory)/HaroohieClub.NitroPacker.Cli/bin/Release/net6.0/osx-x64/publish/NitroPacker'
+          artifactPath: '$(Build.SourcesDirectory)/NitroPacker-macOS-$(Version).tar.gz'
         Windows:
           imageName: 'windows-latest'
           artifactName: 'NitroPacker-Windows-$(Version)'
           rid: 'win-x64'
-          artifactPath: '$(Build.SourcesDirectory)/HaroohieClub.NitroPacker.Cli/bin/Release/net6.0/win-x64/publish/NitroPacker.exe'
+          artifactPath: '$(Build.SourcesDirectory)/NitroPacker-Windows-$(Version).zip'
     displayName: Build & Publish
     pool:
       vmImage: $(imageName)
@@ -52,6 +52,24 @@ stages:
         arguments: '-c Release -f net6.0 -r $(rid) --self-contained /p:PublishSingleFile=true'
         publishWebProjects: false
       displayName: Build & Publish NitroPacker
+        
+    - pwsh: |
+        mkdir publish
+        Expand-Archive -Path $(Build.SourcesDirectory)/HaroohieClub.NitroPacker.Cli/bin/Release/net6.0/$(rid)/publish.zip -DestinationPath ./publish
+        Push-Location publish
+        tar -czvf $(artifactPath) --transform 's,^\.\/,,' .
+        Pop-Location
+      condition: ne(variables['imageName'], 'windows-latest')
+      displayName: Create tar
+
+    - pwsh: |
+        mkdir publish
+        Expand-Archive -Path $(Build.SourcesDirectory)/HaroohieClub.NitroPacker.Cli/bin/Release/net6.0/$(rid)/publish.zip .\publish
+        Push-Location publish
+        Compress-Archive -Path . -DestinationPath $(artifactPath)
+        Pop-Location
+      condition: eq(variables['imageName'], 'windows-latest')
+      displayName: Create zip
 
     - task: PublishBuildArtifacts@1
       inputs:
