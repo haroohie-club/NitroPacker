@@ -48,10 +48,10 @@ stages:
     - task: DotNetCoreCLI@2
       inputs:
         command: 'publish'
-        projects: $(Build.SourcesDirectory)/src/HaroohieClub.NitroPacker.Cli/HaroohieClub.NitroPacker.Cli.csproj
+        projects: $(Build.SourcesDirectory)/HaroohieClub.NitroPacker.Cli/HaroohieClub.NitroPacker.Cli.csproj
         arguments: '-c Release -f net6.0 -r $(rid) --self-contained /p:PublishSingleFile=true'
         publishWebProjects: false
-      displayName: Build & Publish Serial Loops
+      displayName: Build & Publish NitroPacker
 
     - task: PublishBuildArtifacts@1
       inputs:
