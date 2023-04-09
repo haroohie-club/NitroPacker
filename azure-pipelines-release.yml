@@ -109,8 +109,8 @@ stages:
         downloadPath: '$(Build.ArtifactStagingDirectory)'
     - pwsh: |
         Move-Item -Path $(Build.ArtifactStagingDirectory)/NitroPacker-Linux-$(Version)/NitroPacker-Linux-$(Version).tar.gz -Destination $(Build.ArtifactStagingDirectory)/NitroPacker-Linux-$(Version).tar.gz
-        Move-Item -Path $(Build.ArtifactStagingDirectory)/NitroPacker-macOS-$(Version)/NitroPacker-Linux-$(Version).tar.gz -Destination $(Build.ArtifactStagingDirectory)/NitroPacker-macOS-$(Version).tar.gz
-        Move-Item -Path $(Build.ArtifactStagingDirectory)/NitroPacker-Windows-$(Version)/NitroPacker-Linux-$(Version).zip -Destination $(Build.ArtifactStagingDirectory)/NitroPacker-Windows-$(Version).zip
+        Move-Item -Path $(Build.ArtifactStagingDirectory)/NitroPacker-macOS-$(Version)/NitroPacker-macOS-$(Version).tar.gz -Destination $(Build.ArtifactStagingDirectory)/NitroPacker-macOS-$(Version).tar.gz
+        Move-Item -Path $(Build.ArtifactStagingDirectory)/NitroPacker-Windows-$(Version)/NitroPacker-Windows-$(Version).zip -Destination $(Build.ArtifactStagingDirectory)/NitroPacker-Windows-$(Version).zip
       displayName: Move artifacts
     - task: GitHubRelease@1
       displayName: 'Create GitHub Release'
