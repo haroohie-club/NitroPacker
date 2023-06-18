@@ -9,9 +9,9 @@ namespace HaroohieClub.NitroPacker.Patcher.Overlay
 {
     public class OverlayAsmHack
     {
-        public static bool Insert(string path, Overlay overlay, string romInfoPath, bool useDocker, DataReceivedEventHandler outputDataReceived = null, DataReceivedEventHandler errorDataReceived = null)
+        public static bool Insert(string path, Overlay overlay, string romInfoPath, string dockerTag, DataReceivedEventHandler outputDataReceived = null, DataReceivedEventHandler errorDataReceived = null)
         {
-            if (!Compile(path, overlay, outputDataReceived, errorDataReceived, useDocker))
+            if (!Compile(path, overlay, outputDataReceived, errorDataReceived, dockerTag))
             {
                 return false;
             }
@@ -37,7 +37,7 @@ namespace HaroohieClub.NitroPacker.Patcher.Overlay
                 foreach (string subdir in Directory.GetDirectories(Path.Combine(path, overlay.Name, "replSource")))
                 {
                     replFiles.Add($"repl_{Path.GetFileNameWithoutExtension(subdir)}");
-                    if (!CompileReplace(Path.GetRelativePath(path, subdir), path, overlay, outputDataReceived, errorDataReceived, useDocker))
+                    if (!CompileReplace(Path.GetRelativePath(path, subdir), path, overlay, outputDataReceived, errorDataReceived, dockerTag))
                     {
                         return false;
                     }
@@ -104,15 +104,15 @@ namespace HaroohieClub.NitroPacker.Patcher.Overlay
             return true;
         }
 
-        private static bool Compile(string path, Overlay overlay, DataReceivedEventHandler outputDataReceived, DataReceivedEventHandler errorDataReceived, bool useDocker)
+        private static bool Compile(string path, Overlay overlay, DataReceivedEventHandler outputDataReceived, DataReceivedEventHandler errorDataReceived, string dockerTag)
         {
             ProcessStartInfo psi;
-            if (useDocker)
+            if (!string.IsNullOrEmpty(dockerTag))
             {
                 psi = new()
                 {
                     FileName = "docker",
-                    Arguments = $"run -v {Path.GetFullPath(path)}:/src -w /src devkitpro/devkitarm make TARGET={overlay.Name}/newcode SOURCES={overlay.Name}/source INCLUDES={overlay.Name}/source BUILD=build CODEADDR=0x{overlay.Address + overlay.Length:X7}",
+                    Arguments = $"run -v {Path.GetFullPath(path)}:/src -w /src devkitpro/devkitarm:{dockerTag} make TARGET={overlay.Name}/newcode SOURCES={overlay.Name}/source INCLUDES={overlay.Name}/source BUILD=build CODEADDR=0x{overlay.Address + overlay.Length:X7}",
                     UseShellExecute = false,
                     RedirectStandardError = true,
                     RedirectStandardOutput = true,
@@ -144,17 +144,18 @@ namespace HaroohieClub.NitroPacker.Patcher.Overlay
             return p.ExitCode == 0;
         }
 
-        private static bool CompileReplace(string subdir, string path, Overlay overlay, DataReceivedEventHandler outputDataReceived, DataReceivedEventHandler errorDataReceived, bool useDocker)
+        private static bool CompileReplace(string subdir, string path, Overlay overlay, DataReceivedEventHandler outputDataReceived, DataReceivedEventHandler errorDataReceived, string dockerTag)
         {
             uint address = uint.Parse(Path.GetFileNameWithoutExtension(subdir), NumberStyles.HexNumber);
             ProcessStartInfo psi;
 
-            if (useDocker)
+            if (!string.IsNullOrEmpty(dockerTag))
             {
+                subdir = subdir.Replace('\\', '/');
                 psi = new()
                 {
                     FileName = "docker",
-                    Arguments = $"run -v {Path.GetFullPath(path)}:/src -w /src devkitpro/devkitarm make TARGET={overlay.Name}/repl_{Path.GetFileNameWithoutExtension(subdir)} SOURCES={subdir} INCLUDES={subdir} NEWSYM={overlay.Name}/newcode.x BUILD=build CODEADDR=0x{address:X7}",
+                    Arguments = $"run -v {Path.GetFullPath(path)}:/src -w /src devkitpro/devkitarm:{dockerTag} make TARGET={overlay.Name}/repl_{Path.GetFileNameWithoutExtension(subdir)} SOURCES={subdir} INCLUDES={subdir} NEWSYM={overlay.Name}/newcode.x BUILD=build CODEADDR=0x{address:X7}",
                     UseShellExecute = false,
                     RedirectStandardError = true,
                     RedirectStandardOutput = true,

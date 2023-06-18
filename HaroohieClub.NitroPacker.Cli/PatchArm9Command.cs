@@ -10,9 +10,8 @@ namespace HaroohieClub.NitroPacker.Cli
 {
     public class PatchArm9Command : Command
     {
-        private string _inputDir, _outputDir;
+        private string _inputDir, _outputDir, _dockerTag;
         private uint _arenaLoOffset;
-        private bool _useDocker;
 
         public PatchArm9Command() : base("patch-arm9", "Patches the game's arm9.bin")
         {
@@ -21,7 +20,7 @@ namespace HaroohieClub.NitroPacker.Cli
                 { "i|input-dir=", "Input directory containing arm9.bin and source", i => _inputDir = i },
                 { "o|output-dir=", "Output directory for writing modified arm9.bin", o => _outputDir = o },
                 { "a|arena-lo-offset=", "ArenaLoOffset provided as a hex number", a => _arenaLoOffset = uint.Parse(a, NumberStyles.HexNumber) },
-                { "d|use-docker", "Use docker to build rather than make directly", d => _useDocker = true },
+                { "d|docker-tag=", "Indicates docker should be used and provides a docker tag of the devkitpro/devkitarm image to use", d => _dockerTag = d },
             };
         }
 
@@ -48,7 +47,7 @@ namespace HaroohieClub.NitroPacker.Cli
             }
 
             ARM9 arm9 = new(File.ReadAllBytes(Path.Combine(_inputDir, "arm9.bin")), 0x02000000);
-            if (!ARM9AsmHack.Insert(_inputDir, arm9, _arenaLoOffset, _useDocker,
+            if (!ARM9AsmHack.Insert(_inputDir, arm9, _arenaLoOffset, _dockerTag,
                 (object sender, DataReceivedEventArgs e) => Console.WriteLine(e.Data),
                 (object sender, DataReceivedEventArgs e) => Console.Error.WriteLine(e.Data)))
             {
