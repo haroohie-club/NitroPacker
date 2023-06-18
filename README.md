@@ -6,7 +6,9 @@ This code was written primarily by Ermelber and Gericom. Jonko has ported it to 
 
 ## Prerequisites
 * [.NET 6.0 Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) is required to run the tool.
-* [devkitARM](https://devkitpro.org/wiki/Getting_Started) is required to apply ASM hacks.
+* [devkitARM](https://devkitpro.org/wiki/Getting_Started) and [Make](https://www.gnu.org/software/make/) are required to apply ASM hacks.
+  - Alternatively, one can opt to install [Docker](https://www.docker.com/) (and [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) on Windows)
+    instead.
 
 ## Packing and Unpacking
 The primary purpose of NitroPacker is to pack and unpack NDS ROMs.
@@ -33,7 +35,23 @@ NitroPacker pack -p PATH/TO/PROJECT_FILE.xml -r PATH/TO/OUTPUT_ROM.nds
 The project file is expected to be in a directory with ARM9 and ARM7 binaries as well as the data and overlay subdirectories mentioned previously.
 
 ## ASM Hacks
-NitroPacker can also be used as a powerful tool to apply assembly hacks, but this functionality is a bit more complicated. For one thing, you will need to move the unpacked `arm9.bin` to a different directory with a specific structure.
+NitroPacker can also be used as a powerful tool to apply assembly hacks, but this functionality is a bit more complicated.
+
+### Install Prerequisites
+As mentioned above, NitroPacker relies on other programs to help with the assembling your hacks, namely, devkitARM and Make. DevkitARM is distributed
+by devkitPro and can be downloaded from their website. They have a graphical installer for Windows (for which you need only select the NDS workloads)
+and a package manager for Mac/Linux (for which you can run the command `dkp-pacman -S nds-dev` to install devkitARM).
+
+On Linux distros, Make can be installed from the package manager (e.g. `sudo apt install make`). On macOS, you can use [brew](https://formulae.brew.sh/formula/make). On Windows, the easiest way to install it is with Chocolatey, where the command is `choco install make`.
+
+If either of these options presents a challenge for you or doesn't work for some reason, you can instead opt to use the alternate method of assembling
+the code in Docker containers. After installing [Docker Desktop](https://www.docker.com/products/docker-desktop/) or the Docker engine, ensure the engine
+is running. Then, when calling NitroPacker, ensure you pass `-d` followed by the Docker tag you want to use. If you're not sure which one to use, we
+recommend trying `20230526` as that is the most recent tag as of this publishing (when the samples were last updated). If you want to use newer features
+or need later bugfixes, choose `latest` or a later tag.
+
+### Directory Structure
+You will need to move the unpacked `arm9.bin` to a different directory with a specific structure:
 
 * `src`
   - `overlays`
@@ -98,7 +116,7 @@ Once this directory has been constructed, source files have been created, the ar
 ### Assemble ARM9
 To assemble the hacked ARM9, run the following command:
 ```
-NitroPacker patch-arm9 -i PATH/TO/SRC/DIRECTORY -o PATH/TO/OUTPUT/DIRECTORY -a ARENA_LO_OFFSET
+NitroPacker patch-arm9 -i PATH/TO/SRC/DIRECTORY -o PATH/TO/OUTPUT/DIRECTORY -a ARENA_LO_OFFSET [-d DOCKER_TAG]
 ```
 
 This will assemble the hacks and append them to `arm9.bin`, then copy the ARM9 to the output directory (which should be the directory you will then run
@@ -107,5 +125,5 @@ the `pack` command on).
 ### Assemble Overlays
 To patch the overlays, run the following command:
 ```
-NitroPacker patch-overlays -i PATH/TO/ORIGINAL/OVERLAY/DIRECTORY -o PATH/TO/PATCHED/OVERLAY/DIRECTORY -s PATH/TO/OVERLAY/SOURCE -r PATH/TO/PROJECT/FILE
+NitroPacker patch-overlays -i PATH/TO/ORIGINAL/OVERLAY/DIRECTORY -o PATH/TO/PATCHED/OVERLAY/DIRECTORY -s PATH/TO/OVERLAY/SOURCE -r PATH/TO/PROJECT/FILE [-d DOCKER_TAG]
 ```
