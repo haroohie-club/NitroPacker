@@ -11,10 +11,10 @@ namespace HaroohieClub.NitroPacker.Patcher.Nitro
 {
     public class ARM9AsmHack
 	{
-		public static bool Insert(string path, ARM9 arm9, uint arenaLoOffset, DataReceivedEventHandler outputDataReceived = null, DataReceivedEventHandler errorDataReceived = null)
+		public static bool Insert(string path, ARM9 arm9, uint arenaLoOffset, bool useDocker, DataReceivedEventHandler outputDataReceived = null, DataReceivedEventHandler errorDataReceived = null)
 		{
 			uint arenaLo = arm9.ReadU32LE(arenaLoOffset);
-            if (!Compile(path, arenaLo, outputDataReceived, errorDataReceived))
+            if (!Compile(path, arenaLo, outputDataReceived, errorDataReceived, useDocker))
             {
                 return false;
             }
@@ -45,7 +45,7 @@ namespace HaroohieClub.NitroPacker.Patcher.Nitro
                 foreach (string subdir in Directory.GetDirectories(Path.Combine(path, "replSource")))
                 {
                     replFiles.Add($"repl_{Path.GetFileNameWithoutExtension(subdir)}");
-                    if (!CompileReplace(Path.GetRelativePath(path, subdir), path, outputDataReceived, errorDataReceived))
+                    if (!CompileReplace(Path.GetRelativePath(path, subdir), path, outputDataReceived, errorDataReceived, useDocker))
                     {
                         return false;
                     }
@@ -157,19 +157,34 @@ namespace HaroohieClub.NitroPacker.Patcher.Nitro
 			return true;
 		}
 
-		private static bool Compile(string path, uint arenaLo, DataReceivedEventHandler outputDataReceived, DataReceivedEventHandler errorDataReceived)
+		private static bool Compile(string path, uint arenaLo, DataReceivedEventHandler outputDataReceived, DataReceivedEventHandler errorDataReceived, bool useDocker)
 		{
-			ProcessStartInfo psi = new()
-			{
-				FileName = "make",
-				Arguments = $"TARGET=newcode SOURCES=source BUILD=build CODEADDR=0x{arenaLo:X8}",
-				WorkingDirectory = path,
-                CreateNoWindow = true,
-                UseShellExecute = false,
-				RedirectStandardError = true,
-				RedirectStandardOutput = true,
-			};
-			Process p = new() { StartInfo = psi };
+            ProcessStartInfo psi;
+            if (useDocker)
+            {
+                psi = new()
+                {
+                    FileName = "docker",
+                    Arguments = $"run -v {Path.GetFullPath(path)}:/src -w /src devkitpro/devkitarm make TARGET=newcode SOURCES=source BUILD=build CODEADDR=0x{arenaLo:X8}",
+                    UseShellExecute = false,
+                    RedirectStandardError = true,
+                    RedirectStandardOutput = true,
+                };
+            }
+            else
+            {
+                psi = new()
+                {
+                    FileName = "make",
+                    Arguments = $"TARGET=newcode SOURCES=source BUILD=build CODEADDR=0x{arenaLo:X8}",
+                    WorkingDirectory = path,
+                    CreateNoWindow = true,
+                    UseShellExecute = false,
+                    RedirectStandardError = true,
+                    RedirectStandardOutput = true,
+                };
+            }
+            Process p = new() { StartInfo = psi };
             static void func(object sender, DataReceivedEventArgs e)
             {
                 Console.WriteLine(e.Data);
@@ -179,22 +194,37 @@ namespace HaroohieClub.NitroPacker.Patcher.Nitro
             p.Start();
             p.BeginOutputReadLine();
             p.BeginErrorReadLine();
-			p.WaitForExit();
+            p.WaitForExit();
             return p.ExitCode == 0;
         }
 
-        private static bool CompileReplace(string subdir, string path, DataReceivedEventHandler outputDataReceived, DataReceivedEventHandler errorDataReceived)
+        private static bool CompileReplace(string subdir, string path, DataReceivedEventHandler outputDataReceived, DataReceivedEventHandler errorDataReceived, bool useDocker)
         {
             uint address = uint.Parse(Path.GetFileNameWithoutExtension(subdir), NumberStyles.HexNumber);
-            ProcessStartInfo psi = new()
+            ProcessStartInfo psi;
+            if (useDocker)
             {
-                FileName = "make",
-                Arguments = $"TARGET=repl_{Path.GetFileNameWithoutExtension(subdir)} SOURCES={subdir} BUILD=build NEWSYM=newcode.x BUILD=build CODEADDR=0x{address:X7}",
-                WorkingDirectory = path,
-                UseShellExecute = false,
-                RedirectStandardError = true,
-                RedirectStandardOutput = true,
-            };
+                psi = new()
+                {
+                    FileName = "docker",
+                    Arguments = $"run -v {Path.GetFullPath(path)}:/src -w /src devkitpro/devkitarm make TARGET=repl_{Path.GetFileNameWithoutExtension(subdir)} SOURCES={subdir} BUILD=build NEWSYM=newcode.x BUILD=build CODEADDR=0x{address:X7}",
+                    UseShellExecute = false,
+                    RedirectStandardError = true,
+                    RedirectStandardOutput = true,
+                };
+            }
+            else
+            {
+                psi = new()
+                {
+                    FileName = "make",
+                    Arguments = $"TARGET=repl_{Path.GetFileNameWithoutExtension(subdir)} SOURCES={subdir} BUILD=build NEWSYM=newcode.x BUILD=build CODEADDR=0x{address:X7}",
+                    WorkingDirectory = path,
+                    UseShellExecute = false,
+                    RedirectStandardError = true,
+                    RedirectStandardOutput = true,
+                };
+            }
             Process p = new() { StartInfo = psi };
             static void func(object sender, DataReceivedEventArgs e)
             {
