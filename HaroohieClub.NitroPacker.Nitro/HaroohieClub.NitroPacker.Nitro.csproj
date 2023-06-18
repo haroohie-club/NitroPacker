@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
-	<Version>2.1.0</Version>
+	<Version>2.2.0</Version>
 	<Title>NitroPacker.Nitro</Title>
 	<Authors>Ermelber, Gericom, Jonko</Authors>
 	<Company>Haroohie Translation Club</Company>
