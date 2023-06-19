@@ -1,5 +1,6 @@
 ﻿using HaroohieClub.NitroPacker.Core;
 using Mono.Options;
+using System;
 using System.Collections.Generic;
 
 namespace HaroohieClub.NitroPacker.Cli
@@ -22,6 +23,26 @@ namespace HaroohieClub.NitroPacker.Cli
         public override int Invoke(IEnumerable<string> arguments)
         {
             Options.Parse(arguments);
+
+            if (string.IsNullOrEmpty(_projectName))
+            {
+                CommandSet.Out.WriteLine($"Must provide project name.");
+                Options.WriteOptionDescriptions(CommandSet.Out);
+                return 1;
+            }
+            if (string.IsNullOrEmpty(_romPath))
+            {
+                CommandSet.Out.WriteLine($"Must provide path to ROM.");
+                Options.WriteOptionDescriptions(CommandSet.Out);
+                return 1;
+            }
+            if (string.IsNullOrEmpty(_unpackPath))
+            {
+                CommandSet.Out.WriteLine($"Must provide path to unpack to.");
+                Options.WriteOptionDescriptions(CommandSet.Out);
+                return 1;
+            }
+
             NdsProjectFile.Create(_projectName, _romPath, _unpackPath, _unpackArchives);
             return 0;
         }

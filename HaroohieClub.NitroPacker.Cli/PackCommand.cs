@@ -19,6 +19,20 @@ namespace HaroohieClub.NitroPacker.Cli
         public override int Invoke(IEnumerable<string> arguments)
         {
             Options.Parse(arguments);
+
+            if (string.IsNullOrEmpty(_projectXml))
+            {
+                CommandSet.Out.WriteLine($"Must provide path to project XML.");
+                Options.WriteOptionDescriptions(CommandSet.Out);
+                return 1;
+            }
+            if (string.IsNullOrEmpty(_outputRom))
+            {
+                CommandSet.Out.WriteLine($"Must provide path to output ROM to.");
+                Options.WriteOptionDescriptions(CommandSet.Out);
+                return 1;
+            }
+
             NdsProjectFile.Pack(_outputRom, _projectXml);
             return 0;
         }

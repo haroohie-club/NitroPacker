@@ -11,7 +11,7 @@ namespace HaroohieClub.NitroPacker.Cli
     public class PatchArm9Command : Command
     {
         private string _inputDir, _outputDir, _dockerTag;
-        private uint _arenaLoOffset;
+        private uint _arenaLoOffset = 0;
 
         public PatchArm9Command() : base("patch-arm9", "Patches the game's arm9.bin")
         {
@@ -28,6 +28,12 @@ namespace HaroohieClub.NitroPacker.Cli
         {
             Options.Parse(arguments);
 
+            if (_arenaLoOffset == 0)
+            {
+                CommandSet.Out.WriteLine($"ArenaLoOffset must be provided!\n\n{_arenaLoOffset}");
+                return 1;
+            }
+
             if (string.IsNullOrEmpty(_inputDir))
             {
                 _inputDir = Path.Combine(Environment.CurrentDirectory, "src");
@@ -39,7 +45,8 @@ namespace HaroohieClub.NitroPacker.Cli
 
             if (!Directory.Exists(_inputDir))
             {
-                throw new ArgumentException($"Input directory {_inputDir} does not exist!");
+                CommandSet.Out.WriteLine($"Input directory {_inputDir} does not exist!\n\n{Help}");
+                return 1;
             }
             if (!Directory.Exists(_outputDir))
             {
