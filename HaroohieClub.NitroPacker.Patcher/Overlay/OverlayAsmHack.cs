@@ -9,9 +9,10 @@ namespace HaroohieClub.NitroPacker.Patcher.Overlay
 {
     public class OverlayAsmHack
     {
-        public static bool Insert(string path, Overlay overlay, string romInfoPath, string dockerTag, DataReceivedEventHandler outputDataReceived = null, DataReceivedEventHandler errorDataReceived = null, string makePath = "make", string dockerPath = "docker")
+        public static bool Insert(string path, Overlay overlay, string romInfoPath, string dockerTag, DataReceivedEventHandler outputDataReceived = null, DataReceivedEventHandler errorDataReceived = null,
+            string makePath = "make", string dockerPath = "docker", string devkitArmPath = "")
         {
-            if (!Compile(makePath, dockerPath, path, overlay, outputDataReceived, errorDataReceived, dockerTag))
+            if (!Compile(makePath, dockerPath, path, overlay, outputDataReceived, errorDataReceived, dockerTag, devkitArmPath))
             {
                 return false;
             }
@@ -37,7 +38,7 @@ namespace HaroohieClub.NitroPacker.Patcher.Overlay
                 foreach (string subdir in Directory.GetDirectories(Path.Combine(path, overlay.Name, "replSource")))
                 {
                     replFiles.Add($"repl_{Path.GetFileNameWithoutExtension(subdir)}");
-                    if (!CompileReplace(makePath, dockerPath, Path.GetRelativePath(path, subdir), path, overlay, outputDataReceived, errorDataReceived, dockerTag))
+                    if (!CompileReplace(makePath, dockerPath, Path.GetRelativePath(path, subdir), path, overlay, outputDataReceived, errorDataReceived, dockerTag, devkitArmPath))
                     {
                         return false;
                     }
@@ -104,7 +105,7 @@ namespace HaroohieClub.NitroPacker.Patcher.Overlay
             return true;
         }
 
-        private static bool Compile(string makePath, string dockerPath, string path, Overlay overlay, DataReceivedEventHandler outputDataReceived, DataReceivedEventHandler errorDataReceived, string dockerTag)
+        private static bool Compile(string makePath, string dockerPath, string path, Overlay overlay, DataReceivedEventHandler outputDataReceived, DataReceivedEventHandler errorDataReceived, string dockerTag, string devkitArmPath)
         {
             ProcessStartInfo psi;
             if (!string.IsNullOrEmpty(dockerTag))
@@ -130,6 +131,11 @@ namespace HaroohieClub.NitroPacker.Patcher.Overlay
                     RedirectStandardOutput = true,
                 };
             }
+            if (!string.IsNullOrEmpty(devkitArmPath))
+            {
+                psi.EnvironmentVariables.Add("DEVKITARM", devkitArmPath);
+                psi.EnvironmentVariables.Add("DEVKITPRO", Path.GetDirectoryName(devkitArmPath));
+            }
             Process p = new() { StartInfo = psi };
             static void func(object sender, DataReceivedEventArgs e)
             {
@@ -144,7 +150,7 @@ namespace HaroohieClub.NitroPacker.Patcher.Overlay
             return p.ExitCode == 0;
         }
 
-        private static bool CompileReplace(string makePath, string dockerPath, string subdir, string path, Overlay overlay, DataReceivedEventHandler outputDataReceived, DataReceivedEventHandler errorDataReceived, string dockerTag)
+        private static bool CompileReplace(string makePath, string dockerPath, string subdir, string path, Overlay overlay, DataReceivedEventHandler outputDataReceived, DataReceivedEventHandler errorDataReceived, string dockerTag, string devkitArmPath)
         {
             uint address = uint.Parse(Path.GetFileNameWithoutExtension(subdir), NumberStyles.HexNumber);
             ProcessStartInfo psi;
@@ -172,6 +178,11 @@ namespace HaroohieClub.NitroPacker.Patcher.Overlay
                     RedirectStandardError = true,
                     RedirectStandardOutput = true,
                 };
+            }
+            if (!string.IsNullOrEmpty(devkitArmPath))
+            {
+                psi.EnvironmentVariables.Add("DEVKITARM", devkitArmPath);
+                psi.EnvironmentVariables.Add("DEVKITPRO", Path.GetDirectoryName(devkitArmPath));
             }
             Process p = new() { StartInfo = psi };
             static void func(object sender, DataReceivedEventArgs e)

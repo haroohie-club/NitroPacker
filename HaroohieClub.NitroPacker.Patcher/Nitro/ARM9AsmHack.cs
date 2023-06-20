@@ -11,10 +11,11 @@ namespace HaroohieClub.NitroPacker.Patcher.Nitro
 {
     public class ARM9AsmHack
 	{
-		public static bool Insert(string path, ARM9 arm9, uint arenaLoOffset, string dockerTag, DataReceivedEventHandler outputDataReceived = null, DataReceivedEventHandler errorDataReceived = null, string makePath = "make", string dockerPath = "docker")
+		public static bool Insert(string path, ARM9 arm9, uint arenaLoOffset, string dockerTag, DataReceivedEventHandler outputDataReceived = null, DataReceivedEventHandler errorDataReceived = null,
+            string makePath = "make", string dockerPath = "docker", string devkitArmPath = "")
 		{
 			uint arenaLo = arm9.ReadU32LE(arenaLoOffset);
-            if (!Compile(makePath, dockerPath, path, arenaLo, outputDataReceived, errorDataReceived, dockerTag))
+            if (!Compile(makePath, dockerPath, path, arenaLo, outputDataReceived, errorDataReceived, dockerTag, devkitArmPath))
             {
                 return false;
             }
@@ -45,7 +46,7 @@ namespace HaroohieClub.NitroPacker.Patcher.Nitro
                 foreach (string subdir in Directory.GetDirectories(Path.Combine(path, "replSource")))
                 {
                     replFiles.Add($"repl_{Path.GetFileNameWithoutExtension(subdir)}");
-                    if (!CompileReplace(makePath, dockerPath, Path.GetRelativePath(path, subdir), path, outputDataReceived, errorDataReceived, dockerTag))
+                    if (!CompileReplace(makePath, dockerPath, Path.GetRelativePath(path, subdir), path, outputDataReceived, errorDataReceived, dockerTag, devkitArmPath))
                     {
                         return false;
                     }
@@ -157,7 +158,7 @@ namespace HaroohieClub.NitroPacker.Patcher.Nitro
 			return true;
 		}
 
-		private static bool Compile(string makePath, string dockerPath, string path, uint arenaLo, DataReceivedEventHandler outputDataReceived, DataReceivedEventHandler errorDataReceived, string dockerTag)
+		private static bool Compile(string makePath, string dockerPath, string path, uint arenaLo, DataReceivedEventHandler outputDataReceived, DataReceivedEventHandler errorDataReceived, string dockerTag, string devkitArmPath)
 		{
             ProcessStartInfo psi;
             if (!string.IsNullOrEmpty(dockerTag))
@@ -184,6 +185,11 @@ namespace HaroohieClub.NitroPacker.Patcher.Nitro
                     RedirectStandardOutput = true,
                 };
             }
+            if (!string.IsNullOrEmpty(devkitArmPath))
+            {
+                psi.EnvironmentVariables.Add("DEVKITARM", devkitArmPath);
+                psi.EnvironmentVariables.Add("DEVKITPRO", Path.GetDirectoryName(devkitArmPath));
+            }
             Process p = new() { StartInfo = psi };
             static void func(object sender, DataReceivedEventArgs e)
             {
@@ -198,7 +204,7 @@ namespace HaroohieClub.NitroPacker.Patcher.Nitro
             return p.ExitCode == 0;
         }
 
-        private static bool CompileReplace(string makePath, string dockerPath, string subdir, string path, DataReceivedEventHandler outputDataReceived, DataReceivedEventHandler errorDataReceived, string dockerTag)
+        private static bool CompileReplace(string makePath, string dockerPath, string subdir, string path, DataReceivedEventHandler outputDataReceived, DataReceivedEventHandler errorDataReceived, string dockerTag, string devkitArmPath)
         {
             uint address = uint.Parse(Path.GetFileNameWithoutExtension(subdir), NumberStyles.HexNumber);
             ProcessStartInfo psi;
@@ -225,6 +231,11 @@ namespace HaroohieClub.NitroPacker.Patcher.Nitro
                     RedirectStandardError = true,
                     RedirectStandardOutput = true,
                 };
+            }
+            if (!string.IsNullOrEmpty(devkitArmPath))
+            {
+                psi.EnvironmentVariables.Add("DEVKITARM", devkitArmPath);
+                psi.EnvironmentVariables.Add("DEVKITPRO", Path.GetDirectoryName(devkitArmPath));
             }
             Process p = new() { StartInfo = psi };
             static void func(object sender, DataReceivedEventArgs e)
