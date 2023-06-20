@@ -10,8 +10,7 @@ namespace HaroohieClub.NitroPacker.Cli
 {
     public class PatchOverlaysCommand : Command
     {
-        private string _inputOverlaysDirectory, _outputOverlaysDirectory, _overlaySourceDir, _romInfoPath, _dockerTag;
-        private bool _showHelp;
+        private string _inputOverlaysDirectory, _outputOverlaysDirectory, _overlaySourceDir, _romInfoPath, _dockerTag, _devkitArm;
 
         public PatchOverlaysCommand() : base("patch-overlays", "Patches the game's overlays")
         {
@@ -24,8 +23,8 @@ namespace HaroohieClub.NitroPacker.Cli
                 { "o|output-overlays=", "Directory where patched overlays will be written", o => _outputOverlaysDirectory = o },
                 { "s|source-dir=", "Directory where overlay source code lives", s => _overlaySourceDir = s },
                 { "r|rom-info=", "rominfo.xml file containing the overlay table", r => _romInfoPath = r },
-                { "d|docker-tag=", "Indicates docker should be used and provides a docker tag of the devkitpro/devkitarm image to use", d => _dockerTag = d },
-                { "h|help", "Shows this help screen", h => _showHelp = true },
+                { "d|docker-tag=", "(Optional) Indicates docker should be used and provides a docker tag of the devkitpro/devkitarm image to use", d => _dockerTag = d },
+                { "devkitarm=", "(Optional) Location of the devkitARM installation; defaults to the DEVKITARM environment variable", dev => _devkitArm = dev },
             };
         }
 
@@ -33,7 +32,7 @@ namespace HaroohieClub.NitroPacker.Cli
         {
             Options.Parse(arguments);
 
-            if (_showHelp || string.IsNullOrEmpty(_inputOverlaysDirectory) || string.IsNullOrEmpty(_outputOverlaysDirectory) || string.IsNullOrEmpty(_overlaySourceDir) || string.IsNullOrEmpty(_romInfoPath))
+            if (string.IsNullOrEmpty(_inputOverlaysDirectory) || string.IsNullOrEmpty(_outputOverlaysDirectory) || string.IsNullOrEmpty(_overlaySourceDir) || string.IsNullOrEmpty(_romInfoPath))
             {
                 int returnValue = 0;
                 if (string.IsNullOrEmpty(_inputOverlaysDirectory))
@@ -77,7 +76,8 @@ namespace HaroohieClub.NitroPacker.Cli
                 {
                     OverlayAsmHack.Insert(_overlaySourceDir, overlay, _romInfoPath, _dockerTag,
                         (object sender, DataReceivedEventArgs e) => Console.WriteLine(e.Data),
-                        (object sender, DataReceivedEventArgs e) => Console.Error.WriteLine(e.Data));
+                        (object sender, DataReceivedEventArgs e) => Console.Error.WriteLine(e.Data),
+                        _devkitArm);
                 }
             }
 
