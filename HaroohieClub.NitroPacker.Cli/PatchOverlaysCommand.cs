@@ -77,7 +77,7 @@ namespace HaroohieClub.NitroPacker.Cli
                     OverlayAsmHack.Insert(_overlaySourceDir, overlay, _romInfoPath, _dockerTag,
                         (object sender, DataReceivedEventArgs e) => Console.WriteLine(e.Data),
                         (object sender, DataReceivedEventArgs e) => Console.Error.WriteLine(e.Data),
-                        _devkitArm);
+                        devkitArmPath: _devkitArm);
                 }
             }
 
