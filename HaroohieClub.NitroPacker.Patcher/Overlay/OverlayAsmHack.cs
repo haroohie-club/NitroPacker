@@ -133,8 +133,22 @@ namespace HaroohieClub.NitroPacker.Patcher.Overlay
             }
             if (!string.IsNullOrEmpty(devkitArmPath))
             {
-                psi.EnvironmentVariables.Add("DEVKITARM", devkitArmPath);
-                psi.EnvironmentVariables.Add("DEVKITPRO", Path.GetDirectoryName(devkitArmPath));
+                if (psi.EnvironmentVariables.ContainsKey("DEVKITARM"))
+                {
+                    psi.EnvironmentVariables["DEVKITARM"] = devkitArmPath;
+                }
+                else
+                {
+                    psi.EnvironmentVariables.Add("DEVKITARM", devkitArmPath);
+                }
+                if (psi.EnvironmentVariables.ContainsKey("DEVKITPRO"))
+                {
+                    psi.EnvironmentVariables["DEVKITPRO"] = Path.GetDirectoryName(devkitArmPath);
+                }
+                else
+                {
+                    psi.EnvironmentVariables.Add("DEVKITPRO", Path.GetDirectoryName(devkitArmPath));
+                }
             }
             Process p = new() { StartInfo = psi };
             static void func(object sender, DataReceivedEventArgs e)
@@ -181,8 +195,22 @@ namespace HaroohieClub.NitroPacker.Patcher.Overlay
             }
             if (!string.IsNullOrEmpty(devkitArmPath))
             {
-                psi.EnvironmentVariables.Add("DEVKITARM", devkitArmPath);
-                psi.EnvironmentVariables.Add("DEVKITPRO", Path.GetDirectoryName(devkitArmPath));
+                if (psi.EnvironmentVariables.ContainsKey("DEVKITARM"))
+                {
+                    psi.EnvironmentVariables["DEVKITARM"] = devkitArmPath;
+                }
+                else
+                {
+                    psi.EnvironmentVariables.Add("DEVKITARM", devkitArmPath);
+                }
+                if (psi.EnvironmentVariables.ContainsKey("DEVKITPRO"))
+                {
+                    psi.EnvironmentVariables["DEVKITPRO"] = Path.GetDirectoryName(devkitArmPath);
+                }
+                else
+                {
+                    psi.EnvironmentVariables.Add("DEVKITPRO", Path.GetDirectoryName(devkitArmPath));
+                }
             }
             Process p = new() { StartInfo = psi };
             static void func(object sender, DataReceivedEventArgs e)
