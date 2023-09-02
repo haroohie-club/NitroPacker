@@ -787,13 +787,6 @@ namespace HaroohieClub.NitroPacker.Nitro.Card
 
         public byte[] RSASignature;
 
-        //      public byte[] GetDecompressedARM9()
-        //      {
-        //          //if (StaticFooter != null) return ARM9.Decompress(MainRom, StaticFooter._start_ModuleParamsOffset);
-        //          /*else*/
-        //          return Arm9.Decompress(MainRom);
-        //      }
-
         public NitroFsArchive ToArchive()
         {
             return new NitroFsArchive(Fnt.DirectoryTable, Fnt.NameTable, FileData);

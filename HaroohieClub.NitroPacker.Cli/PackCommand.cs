@@ -6,13 +6,15 @@ namespace HaroohieClub.NitroPacker.Cli
 {
     public class PackCommand : Command
     {
-        string _projectXml, _outputRom;
+        private string _projectXml, _outputRom;
+        private bool _compressArm9 = false;
         public PackCommand() : base("pack", "Packs a ROM given a project XML file")
         {
             Options = new()
             {
                 { "p|i|project|input=", "Input project XML file", p => _projectXml = p },
                 { "r|o|rom|output=", "Output ROM path", o => _outputRom = o },
+                { "c|compress-arm9", "Indicates ARM9 should be compressed", c => _compressArm9 = true },
             };
         }
 
@@ -33,7 +35,7 @@ namespace HaroohieClub.NitroPacker.Cli
                 return 1;
             }
 
-            NdsProjectFile.Pack(_outputRom, _projectXml);
+            NdsProjectFile.Pack(_outputRom, _projectXml, _compressArm9);
             return 0;
         }
     }

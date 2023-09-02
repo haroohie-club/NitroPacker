@@ -8,7 +8,7 @@ namespace HaroohieClub.NitroPacker.Cli
     public class UnpackCommand : Command
     {
         private string _projectName, _romPath, _unpackPath;
-        private bool _unpackArchives = false;
+        private bool _unpackArchives = false, _decompressArm9 = false;
         public UnpackCommand() : base("unpack", "Unpacks a ROM to a directory and project XML file")
         {
             Options = new()
@@ -16,6 +16,7 @@ namespace HaroohieClub.NitroPacker.Cli
                 { "r|rom=", "Input ROM path", r => _romPath = r },
                 { "o|u|output|unpack-path=", "Path to unpack ROM to", u => _unpackPath = u },
                 { "p|n|project|name|project-name=", "Name of the project file", p => _projectName = p },
+                { "d|decompress-arm9", "Indicates ARM9 is compressed and should be decompressed", d => _decompressArm9 = true },
                 { "a|unpack-archives", "Flag to unpack NARC archives as well", a => _unpackArchives = true },
             };
         }
@@ -43,7 +44,7 @@ namespace HaroohieClub.NitroPacker.Cli
                 return 1;
             }
 
-            NdsProjectFile.Create(_projectName, _romPath, _unpackPath, _unpackArchives);
+            NdsProjectFile.Create(_projectName, _romPath, _unpackPath, _decompressArm9, _unpackArchives);
             return 0;
         }
     }

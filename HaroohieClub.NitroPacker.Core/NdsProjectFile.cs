@@ -1,4 +1,5 @@
 ﻿using HaroohieClub.NitroPacker.IO.Archive;
+using HaroohieClub.NitroPacker.IO.Compression;
 using HaroohieClub.NitroPacker.Nitro.Card;
 using HaroohieClub.NitroPacker.Nitro.Fs;
 using System.IO;
@@ -39,18 +40,16 @@ namespace HaroohieClub.NitroPacker.Core
         /// </summary>
         /// <param name="outputRomPath"></param>
         /// <param name="projectFilePath"></param>
-        public static void Pack(string outputRomPath, string projectFilePath)
+        public static void Pack(string outputRomPath, string projectFilePath, bool compressArm9 = false)
         {
-            using (var file = new FileStream(outputRomPath, FileMode.Create))
-            {
-                var project = FromByteArray<NdsProjectFile>(File.ReadAllBytes(projectFilePath));
+            using var file = new FileStream(outputRomPath, FileMode.Create);
+            var project = FromByteArray<NdsProjectFile>(File.ReadAllBytes(projectFilePath));
 
-                var basePath = new FileInfo(projectFilePath).DirectoryName;
+            var basePath = new FileInfo(projectFilePath).DirectoryName;
 
-                var fsRoot = new DiskArchive(Path.Combine(basePath, "data"));
+            var fsRoot = new DiskArchive(Path.Combine(basePath, "data"));
 
-                project.Build(basePath, fsRoot, file);
-            }
+            project.Build(basePath, fsRoot, file, compressArm9);
         }
 
         /// <summary>
@@ -59,11 +58,12 @@ namespace HaroohieClub.NitroPacker.Core
         /// <param name="name">Name of the project</param>
         /// <param name="romPath">Path of the NDS ROM to extract</param>
         /// <param name="outPath">Path where the project structure is gonna be created</param>
+        /// <param name="decompressArm9">Choose whether to decompress the ARM9 executable</param>
         /// <param name="unpackArc">Choose whether to unpack the archives</param>
-        public static void Create(string name, string romPath, string outPath, bool unpackArc = false)
+        public static void Create(string name, string romPath, string outPath, bool decompressArm9 = false, bool unpackArc = false)
         {
             var ndsFile = new Rom(File.ReadAllBytes(romPath));
-            Create(name, ndsFile, outPath, unpackArc);
+            Create(name, ndsFile, outPath, decompressArm9, unpackArc);
         }
 
         /// <summary>
@@ -72,8 +72,9 @@ namespace HaroohieClub.NitroPacker.Core
         /// <param name="name">Name of the project</param>
         /// <param name="rom">NDS ROM Instance</param>
         /// <param name="outPath">Path where the project structure is gonna be created</param>
+        /// <param name="decompressArm9">Choose whether to decompress the ARM9 executable</param>
         /// <param name="unpackArc">Choose whether to unpack the archives</param>
-        public static void Create(string name, Rom rom, string outPath, bool unpackArc = false)
+        public static void Create(string name, Rom rom, string outPath, bool decompressArm9 = false, bool unpackArc = false)
         {
             var projectFile = new NdsProjectFile();
             var ndsFile = rom;
@@ -92,7 +93,14 @@ namespace HaroohieClub.NitroPacker.Core
                 File.WriteAllBytes(Path.Combine(outPath, "overlay", $"sub_{vv.Id:X4}.bin"), ndsFile.FileData[vv.FileId]);
             }
 
-            File.WriteAllBytes(Path.Combine(outPath, "arm9.bin"), ndsFile.MainRom);
+            if (decompressArm9)
+            {
+                File.WriteAllBytes(Path.Combine(outPath, "arm9.bin"), Blz.Decompress(ndsFile.MainRom));
+            }
+            else
+            {
+                File.WriteAllBytes(Path.Combine(outPath, "arm9.bin"), ndsFile.MainRom);
+            }
             File.WriteAllBytes(Path.Combine(outPath, "arm7.bin"), ndsFile.SubRom);
 
             projectFile.RomInfo = new NdsRomInfo(ndsFile);
@@ -100,7 +108,7 @@ namespace HaroohieClub.NitroPacker.Core
             File.WriteAllBytes(Path.Combine(outPath, $"{name}.xml"), projectFile.Write());
         }
 
-        public void Build(string projectDir, Archive fsRoot, Stream outputStream)
+        public void Build(string projectDir, Archive fsRoot, Stream outputStream, bool compressArm9 = false)
         {
             var n = new Rom
             {
@@ -131,6 +139,11 @@ namespace HaroohieClub.NitroPacker.Core
                 fid++;
             }
             n.MainRom = File.ReadAllBytes(Path.Combine(projectDir, "arm9.bin"));
+            if (compressArm9)
+            {
+                Blz blz = new();
+                n.MainRom = blz.BLZ_Encode(n.MainRom, true);
+            }
             n.SubRom = File.ReadAllBytes(Path.Combine(projectDir, "arm7.bin"));
             n.FromArchive(fsRoot);
 

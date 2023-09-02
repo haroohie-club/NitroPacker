@@ -2,8 +2,8 @@
   "profiles": {
     "HaroohieClub.NitroPacker.Cli": {
       "commandName": "Project",
-      "commandLineArgs": "patch-arm9 -i ./src -o ./rom -a 02005ECC -d 20221115",
-      "workingDirectory": "C:\\Users\\jonko\\source\\repos\\ChokuretsuTranslationBuild\\"
+      "commandLineArgs": "unpack -r .\\breaking-bad-ds.nds -o .\\bbad -p bbad",
+      "workingDirectory": "C:\\Users\\jonko\\Downloads"
     }
   }
 }
