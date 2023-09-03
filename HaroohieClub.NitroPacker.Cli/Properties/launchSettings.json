@@ -1,9 +1,0 @@
-{
-  "profiles": {
-    "HaroohieClub.NitroPacker.Cli": {
-      "commandName": "Project",
-      "commandLineArgs": "unpack -r .\\breaking-bad-ds.nds -o .\\bbad -p bbad",
-      "workingDirectory": "C:\\Users\\jonko\\Downloads"
-    }
-  }
-}

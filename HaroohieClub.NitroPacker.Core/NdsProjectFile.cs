@@ -86,11 +86,25 @@ namespace HaroohieClub.NitroPacker.Core
             dir.CreateSubdirectory("overlay");
             foreach (var vv in ndsFile.MainOvt)
             {
-                File.WriteAllBytes(Path.Combine(outPath, "overlay", $"main_{vv.Id:X4}.bin"), ndsFile.FileData[vv.FileId]);
+                if (vv.Compressed > 0)
+                {
+                    File.WriteAllBytes(Path.Combine(outPath, "overlay", $"main_{vv.Id:X4}.bin"), Blz.Decompress(ndsFile.FileData[vv.FileId]));
+                }
+                else
+                {
+                    File.WriteAllBytes(Path.Combine(outPath, "overlay", $"main_{vv.Id:X4}.bin"), ndsFile.FileData[vv.FileId]);
+                }
             }
             foreach (var vv in ndsFile.SubOvt)
             {
-                File.WriteAllBytes(Path.Combine(outPath, "overlay", $"sub_{vv.Id:X4}.bin"), ndsFile.FileData[vv.FileId]);
+                if (vv.Compressed > 0)
+                {
+                    File.WriteAllBytes(Path.Combine(outPath, "overlay", $"sub_{vv.Id:X4}.bin"), Blz.Decompress(ndsFile.FileData[vv.FileId]));
+                }
+                else
+                {
+                    File.WriteAllBytes(Path.Combine(outPath, "overlay", $"sub_{vv.Id:X4}.bin"), ndsFile.FileData[vv.FileId]);
+                }
             }
 
             if (decompressArm9)
@@ -128,14 +142,30 @@ namespace HaroohieClub.NitroPacker.Core
             {
                 vv.FileId = fid;
                 n.Fat[fid] = new FatEntry(0, 0);
-                n.FileData[fid] = File.ReadAllBytes(Path.Combine(projectDir, "overlay", $"main_{vv.Id:X4}.bin"));
+                if (vv.Compressed > 0)
+                {
+                    Blz blz = new();
+                    n.FileData[fid] = blz.BLZ_Encode(File.ReadAllBytes(Path.Combine(projectDir, "overlay", $"main_{vv.Id:X4}.bin")), false);
+                }
+                else
+                {
+                    n.FileData[fid] = File.ReadAllBytes(Path.Combine(projectDir, "overlay", $"main_{vv.Id:X4}.bin"));
+                }
                 fid++;
             }
             foreach (var vv in n.SubOvt)
             {
                 vv.FileId = fid;
                 n.Fat[fid] = new FatEntry(0, 0);
-                n.FileData[fid] = File.ReadAllBytes(Path.Combine(projectDir, "overlay", $"sub_{vv.Id:X4}.bin"));
+                if (vv.Compressed > 0)
+                {
+                    Blz blz = new();
+                    n.FileData[fid] = blz.BLZ_Encode(File.ReadAllBytes(Path.Combine(projectDir, "overlay", $"sub_{vv.Id:X4}.bin")), false);
+                }
+                else
+                {
+                    n.FileData[fid] = File.ReadAllBytes(Path.Combine(projectDir, "overlay", $"sub_{vv.Id:X4}.bin"));
+                }
                 fid++;
             }
             n.MainRom = File.ReadAllBytes(Path.Combine(projectDir, "arm9.bin"));
