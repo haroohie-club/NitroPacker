@@ -78,7 +78,7 @@ stages:
         ArtifactName: '$(artifactName)'
         publishLocation: 'Container'
       displayName: Publish build artifact
-- stage: Publish NuGet Packages
+- stage: Publish
   jobs:
   - job:
     pool:
