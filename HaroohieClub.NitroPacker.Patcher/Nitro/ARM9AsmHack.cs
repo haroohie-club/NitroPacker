@@ -9,10 +9,28 @@ using System.Text.RegularExpressions;
 
 namespace HaroohieClub.NitroPacker.Patcher.Nitro
 {
+    /// <summary>
+    /// Static class for handling ARM9 ASM hack patching
+    /// </summary>
     public class ARM9AsmHack
 	{
+        /// <summary>
+        /// Compiles a directory containing ASM hacks and inserts them into the ARM9 binary
+        /// </summary>
+        /// <param name="path">The path to the directory containing the ASM hacks laid out in the structure defined in the documentation</param>
+        /// <param name="arm9">The ARM9 object to patch</param>
+        /// <param name="arenaLoOffset">The ArenaLo offset of the ROM (can be determined as described in the documentation)</param>
+        /// <param name="dockerTag">If using Docker to compile the hacks, the tag of the devkitpro/devkitarm to use (e.g. "latest"); leave empty or null if not using Docker</param>
+        /// <param name="outputDataReceived">A handler for standard output from make/Docker</param>
+        /// <param name="errorDataReceived">A handler for standard error from make/Docker</param>
+        /// <param name="makePath">The path to the make executable (if using and not on path)</param>
+        /// <param name="dockerPath">The path to the docker executable (if using and not on path)</param>
+        /// <param name="devkitArmPath">The path to devkitARM (if not defined by the DEVKITARM environment variable)</param>
+        /// <param name="dockerContainerName">The name of the Docker container to create if using Docker; excluding or leaving blank will result in a randomized container name created by Docker</param>
+        /// <returns>True if patching succeeds, false if patching fails</returns>
+        /// <exception cref="Exception"></exception>
 		public static bool Insert(string path, ARM9 arm9, uint arenaLoOffset, string dockerTag, DataReceivedEventHandler outputDataReceived = null, DataReceivedEventHandler errorDataReceived = null,
-            string makePath = "make", string dockerPath = "docker", string devkitArmPath = "")
+            string makePath = "make", string dockerPath = "docker", string devkitArmPath = "", string dockerContainerName = "")
 		{
 			uint arenaLo = arm9.ReadU32LE(arenaLoOffset);
             if (!Compile(makePath, dockerPath, path, arenaLo, outputDataReceived, errorDataReceived, dockerTag, devkitArmPath))
@@ -158,7 +176,7 @@ namespace HaroohieClub.NitroPacker.Patcher.Nitro
 			return true;
 		}
 
-		private static bool Compile(string makePath, string dockerPath, string path, uint arenaLo, DataReceivedEventHandler outputDataReceived, DataReceivedEventHandler errorDataReceived, string dockerTag, string devkitArmPath)
+		private static bool Compile(string makePath, string dockerPath, string path, uint arenaLo, DataReceivedEventHandler outputDataReceived, DataReceivedEventHandler errorDataReceived, string dockerTag, string devkitArmPath, string dockerContainerName = "")
 		{
             ProcessStartInfo psi;
             if (!string.IsNullOrEmpty(dockerTag))
@@ -166,7 +184,7 @@ namespace HaroohieClub.NitroPacker.Patcher.Nitro
                 psi = new()
                 {
                     FileName = dockerPath,
-                    Arguments = $"run -v \"{Path.GetFullPath(path)}\":/src -w /src devkitpro/devkitarm:{dockerTag} make TARGET=newcode SOURCES=source BUILD=build CODEADDR=0x{arenaLo:X8}",
+                    Arguments = $"run -v \"{Path.GetFullPath(path)}\":/src -w /src devkitpro/devkitarm:{dockerTag}{(string.IsNullOrEmpty(dockerContainerName) ? "" : $" --name {dockerContainerName}")} make TARGET=newcode SOURCES=source BUILD=build CODEADDR=0x{arenaLo:X8}",
                     UseShellExecute = false,
                     RedirectStandardError = true,
                     RedirectStandardOutput = true,

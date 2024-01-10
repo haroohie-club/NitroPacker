@@ -7,10 +7,27 @@ using System.Text.RegularExpressions;
 
 namespace HaroohieClub.NitroPacker.Patcher.Overlay
 {
+    /// <summary>
+    /// Static class for handling overlay ASM hack patching
+    /// </summary>
     public class OverlayAsmHack
     {
+        /// <summary>
+        /// Compiles a directory containing ASM hacks and inserts them into an overlay binary
+        /// </summary>
+        /// <param name="path">The path to the directory containing the ASM hacks laid out in the structure defined in the documentation</param>
+        /// <param name="overlay">The overlay object to patch</param>
+        /// <param name="romInfoPath">The path to the rominfo XML file created by NitroPacker during unpack</param>
+        /// <param name="dockerTag">If using Docker to compile the hacks, the tag of the devkitpro/devkitarm to use (e.g. "latest"); leave empty or null if not using Docker</param>
+        /// <param name="outputDataReceived">A handler for standard output from make/Docker</param>
+        /// <param name="errorDataReceived">A handler for standard error from make/Docker</param>
+        /// <param name="makePath">The path to the make executable (if using and not on path)</param>
+        /// <param name="dockerPath">The path to the docker executable (if using and not on path)</param>
+        /// <param name="devkitArmPath">>The path to devkitARM (if not defined by the DEVKITARM environment variable)</param>
+        /// <param name="dockerContainerName">The name of the Docker container to create if using Docker; excluding or leaving blank will result in a randomized container name created by Docker</param>
+        /// <returns>True if patching succeeds, false if patching fails</returns>
         public static bool Insert(string path, Overlay overlay, string romInfoPath, string dockerTag, DataReceivedEventHandler outputDataReceived = null, DataReceivedEventHandler errorDataReceived = null,
-            string makePath = "make", string dockerPath = "docker", string devkitArmPath = "")
+            string makePath = "make", string dockerPath = "docker", string devkitArmPath = "", string dockerContainerName = "")
         {
             if (!Compile(makePath, dockerPath, path, overlay, outputDataReceived, errorDataReceived, dockerTag, devkitArmPath))
             {

@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace HaroohieClub.NitroPacker.Patcher.Nitro
 {
-	public class CRT0
+	internal class CRT0
 	{
 		public class ModuleParams
         {
@@ -49,7 +49,7 @@ namespace HaroohieClub.NitroPacker.Patcher.Nitro
 			}
 		}
 
-		public class AutoLoadEntry
+        public class AutoLoadEntry
         {
             public uint Address { get; set; }
             public uint Size { get; set; }

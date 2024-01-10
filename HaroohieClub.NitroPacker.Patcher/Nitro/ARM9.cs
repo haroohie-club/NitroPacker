@@ -6,6 +6,9 @@ using System.Linq;
 
 namespace HaroohieClub.NitroPacker.Patcher.Nitro
 {
+    /// <summary>
+    /// Object representing the ARM9 binary
+    /// </summary>
     public class ARM9
     {
         private readonly uint _ramAddress;
@@ -15,9 +18,20 @@ namespace HaroohieClub.NitroPacker.Patcher.Nitro
 
         private readonly List<CRT0.AutoLoadEntry> _autoLoadList;
 
-        public ARM9(byte[] Data, uint RamAddress)
-            : this(Data, RamAddress, FindModuleParams(Data)) { }
+        /// <summary>
+        /// Create an ARM9 object from binary data in memory (the module params offset is dynamically determined)
+        /// </summary>
+        /// <param name="data">The ARM9 binary data</param>
+        /// <param name="ramAddress">The address at which the ARM9 binary is loaded into RAM</param>
+        public ARM9(byte[] data, uint ramAddress)
+            : this(data, ramAddress, FindModuleParams(data)) { }
 
+        /// <summary>
+        /// Create an ARM9 object from binary data in memory while specifying the module params offset
+        /// </summary>
+        /// <param name="data">The ARM9 binary data</param>
+        /// <param name="ramAddress">The address at which the ARM9 binary is loaded into RAM</param>
+        /// <param name="moduleParamsOffset">The offset in the data where the module params are located</param>
         public ARM9(byte[] data, uint ramAddress, uint moduleParamsOffset)
         {
             //Unimportant static footer! Use it for _start_ModuleParamsOffset and remove it.
@@ -49,6 +63,10 @@ namespace HaroohieClub.NitroPacker.Patcher.Nitro
             }
         }
 
+        /// <summary>
+        /// Get the raw ARM9 binary
+        /// </summary>
+        /// <returns>A byte array of the ARM9 binary data</returns>
         public byte[] GetBytes()
         {
             List<byte> bytes = new();
@@ -70,18 +88,18 @@ namespace HaroohieClub.NitroPacker.Patcher.Nitro
             return bytes.ToArray();
         }
 
-        public void AddAutoLoadEntry(uint address, byte[] data)
+        internal void AddAutoLoadEntry(uint address, byte[] data)
         {
             _autoLoadList.Add(new CRT0.AutoLoadEntry(address, data));
         }
 
-        public void WriteBytes(uint address, IEnumerable<byte> bytes)
+        internal void WriteBytes(uint address, IEnumerable<byte> bytes)
         {
             _staticData.RemoveRange((int)(address - _ramAddress), bytes.Count());
             _staticData.InsertRange((int)(address - _ramAddress), bytes);
         }
 
-        public bool WriteU16LE(uint address, ushort value)
+        internal bool WriteU16LE(uint address, ushort value)
         {
             if (address > _ramAddress && address < _start_ModuleParams.AutoLoadStart)
             {
@@ -101,7 +119,7 @@ namespace HaroohieClub.NitroPacker.Patcher.Nitro
             return false;
         }
 
-        public uint ReadU32LE(uint address)
+        internal uint ReadU32LE(uint address)
         {
             if (address > _ramAddress && address < _start_ModuleParams.AutoLoadStart)
             {
@@ -117,7 +135,7 @@ namespace HaroohieClub.NitroPacker.Patcher.Nitro
             return 0xFFFFFFFF;
         }
 
-        public bool WriteU32LE(uint address, uint value)
+        internal bool WriteU32LE(uint address, uint value)
         {
             if (address > _ramAddress && address < _start_ModuleParams.AutoLoadStart)
             {

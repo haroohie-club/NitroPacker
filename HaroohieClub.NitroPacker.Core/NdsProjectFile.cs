@@ -6,16 +6,61 @@ using System.IO;
 
 namespace HaroohieClub.NitroPacker.Core
 {
+    /// <summary>
+    /// Represents an NDS project file which is an abstraction of the NDS ROM itself
+    /// </summary>
     public class NdsProjectFile : ProjectFile
     {
-        public NdsRomInfo RomInfo;
+        /// <summary>
+        /// The ROM info for this project file
+        /// </summary>
+        public NdsRomInfo RomInfo { get; set; }
 
+        /// <summary>
+        /// An object representing the NDS ROM info
+        /// </summary>
         public class NdsRomInfo
         {
+            /// <summary>
+            /// The ROM header of the ROM, containing all the ROM metadata
+            /// </summary>
+            public Rom.RomHeader Header { get; set; }
+            /// <summary>
+            /// The Nitro footer
+            /// </summary>
+            public Rom.NitroFooter NitroFooter { get; set; }
+            /// <summary>
+            /// Data representation of the ARM9 overlay table
+            /// </summary>
+            public Rom.RomOVT[] ARM9Ovt { get; set; }
+            /// <summary>
+            /// Data representation of the ARM7 overlay table
+            /// </summary>
+            public Rom.RomOVT[] ARM7Ovt { get; set; }
+            /// <summary>
+            /// The banner of the ROM
+            /// </summary>
+            public Rom.RomBanner Banner { get; set; }
+            /// <summary>
+            /// The ROM's RSA signature
+            /// </summary>
+            public byte[] RSASignature { get; private set; }
+            /// <summary>
+            /// The path to the ARM9 binary
+            /// </summary>
+            public string ExternalARM9Path { get; set; }
+
+            /// <summary>
+            /// Creates blank NDS ROM info
+            /// </summary>
             public NdsRomInfo()
             {
             }
 
+            /// <summary>
+            /// Creates NDS ROM info given a ROM
+            /// </summary>
+            /// <param name="Rom">The ROM object</param>
             public NdsRomInfo(Rom Rom)
             {
                 Header = Rom.Header;
@@ -25,21 +70,14 @@ namespace HaroohieClub.NitroPacker.Core
                 Banner = Rom.Banner;
                 RSASignature = Rom.RSASignature;
             }
-
-            public Rom.RomHeader Header;
-            public Rom.NitroFooter NitroFooter;
-            public Rom.RomOVT[] ARM9Ovt;
-            public Rom.RomOVT[] ARM7Ovt;
-            public Rom.RomBanner Banner;
-            public byte[] RSASignature;
-            public string ExternalARM9Path;
         }
 
         /// <summary>
-        /// 
+        /// Packs an NDS ROM given a project file
         /// </summary>
-        /// <param name="outputRomPath"></param>
-        /// <param name="projectFilePath"></param>
+        /// <param name="outputRomPath">The ROM to be output</param>
+        /// <param name="projectFilePath">The path to the project file on disk</param>
+        /// <param name="compressArm9">If set, will compress the ARM9 binary</param>
         public static void Pack(string outputRomPath, string projectFilePath, bool compressArm9 = false)
         {
             using var file = new FileStream(outputRomPath, FileMode.Create);
@@ -53,7 +91,7 @@ namespace HaroohieClub.NitroPacker.Core
         }
 
         /// <summary>
-        /// Creates an NDS ROM project folder structure.
+        /// Creates an NDS ROM project folder structure
         /// </summary>
         /// <param name="name">Name of the project</param>
         /// <param name="romPath">Path of the NDS ROM to extract</param>
@@ -67,7 +105,7 @@ namespace HaroohieClub.NitroPacker.Core
         }
 
         /// <summary>
-        /// Creates an NDS ROM project folder structure.
+        /// Creates an NDS ROM project folder structure
         /// </summary>
         /// <param name="name">Name of the project</param>
         /// <param name="rom">NDS ROM Instance</param>
@@ -122,6 +160,13 @@ namespace HaroohieClub.NitroPacker.Core
             File.WriteAllBytes(Path.Combine(outPath, $"{name}.xml"), projectFile.Write());
         }
 
+        /// <summary>
+        /// Builds a project and writes the resulting ROM to an output stream
+        /// </summary>
+        /// <param name="projectDir">The directory containing the unpacked NDS project</param>
+        /// <param name="fsRoot">The Nitro filesystem root</param>
+        /// <param name="outputStream">The stream to which to output the ROM</param>
+        /// <param name="compressArm9">If set to true, will compress the ARM9 binary</param>
         public void Build(string projectDir, Archive fsRoot, Stream outputStream, bool compressArm9 = false)
         {
             var n = new Rom

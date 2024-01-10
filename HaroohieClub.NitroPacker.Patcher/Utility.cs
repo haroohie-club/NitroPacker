@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace HaroohieClub.NitroPacker.Patcher
 {
-    public static class Utility
+    internal static class Utility
     {
         public static int IndexOfSequence<T>(this IEnumerable<T> items, IEnumerable<T> search)
         {
