@@ -6,7 +6,7 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <AssemblyName>NitroPacker</AssemblyName>
-    <Version>2.4.0</Version>
+    <Version>$(NPVersion)</Version>
   </PropertyGroup>
 
   <ItemGroup>

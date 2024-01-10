@@ -14,7 +14,7 @@ namespace HaroohieClub.NitroPacker.Patcher.Overlay
         /// <summary>
         /// The name of the overlay as designated by NitroPacker
         /// </summary>
-        public string Name { get; private set; }
+        public string Name { get; set; }
         /// <summary>
         /// The integer ID of the overlay (e.g. main_0001's ID is 1)
         /// </summary>

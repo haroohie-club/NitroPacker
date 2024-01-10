@@ -44,7 +44,7 @@ namespace HaroohieClub.NitroPacker.Core
             /// <summary>
             /// The ROM's RSA signature
             /// </summary>
-            public byte[] RSASignature { get; private set; }
+            public byte[] RSASignature { get; set; }
             /// <summary>
             /// The path to the ARM9 binary
             /// </summary>

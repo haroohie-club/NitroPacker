@@ -4,12 +4,13 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
-	  <Version>2.4.0</Version>
+	  <Version>$(NPVersion)</Version>
 	  <Title>NitroPacker.Patcher</Title>
 	  <Authors>Ermelber, Gericom, Jonko</Authors>
 	  <Company>Haroohie Translation Club</Company>
 	  <Description>The IO library for NitroPacker.</Description>
 	  <PackageId>NitroPacker.Patcher</PackageId>
+      <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
 </Project>
