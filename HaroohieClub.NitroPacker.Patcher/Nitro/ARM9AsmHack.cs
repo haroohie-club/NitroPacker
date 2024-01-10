@@ -184,7 +184,7 @@ namespace HaroohieClub.NitroPacker.Patcher.Nitro
                 psi = new()
                 {
                     FileName = dockerPath,
-                    Arguments = $"run -v \"{Path.GetFullPath(path)}\":/src -w /src devkitpro/devkitarm:{dockerTag}{(string.IsNullOrEmpty(dockerContainerName) ? "" : $" --name {dockerContainerName}")} make TARGET=newcode SOURCES=source BUILD=build CODEADDR=0x{arenaLo:X8}",
+                    Arguments = $"run -v \"{Path.GetFullPath(path)}\":/src -w /src {(string.IsNullOrEmpty(dockerContainerName) ? "" : $"--name {dockerContainerName} ")}devkitpro/devkitarm:{dockerTag} make TARGET=newcode SOURCES=source BUILD=build CODEADDR=0x{arenaLo:X8}",
                     UseShellExecute = false,
                     RedirectStandardError = true,
                     RedirectStandardOutput = true,
@@ -246,7 +246,7 @@ namespace HaroohieClub.NitroPacker.Patcher.Nitro
                 psi = new()
                 {
                     FileName = dockerPath,
-                    Arguments = $"run -v \"{Path.GetFullPath(path)}\":/src -w /src devkitpro/devkitarm:{dockerTag}{(string.IsNullOrEmpty(dockerContainerName) ? "" : $" --name {dockerContainerName}")} make TARGET=repl_{Path.GetFileNameWithoutExtension(subdir)} SOURCES={subdir} BUILD=build NEWSYM=newcode.x CODEADDR=0x{address:X7}",
+                    Arguments = $"run -v \"{Path.GetFullPath(path)}\":/src -w /src {(string.IsNullOrEmpty(dockerContainerName) ? "" : $"--name {dockerContainerName} ")}devkitpro/devkitarm:{dockerTag} make TARGET=repl_{Path.GetFileNameWithoutExtension(subdir)} SOURCES={subdir} BUILD=build NEWSYM=newcode.x CODEADDR=0x{address:X7}",
                     UseShellExecute = false,
                     RedirectStandardError = true,
                     RedirectStandardOutput = true,
