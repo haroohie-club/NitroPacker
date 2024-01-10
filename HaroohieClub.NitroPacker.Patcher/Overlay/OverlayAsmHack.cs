@@ -29,7 +29,7 @@ namespace HaroohieClub.NitroPacker.Patcher.Overlay
         public static bool Insert(string path, Overlay overlay, string romInfoPath, string dockerTag, DataReceivedEventHandler outputDataReceived = null, DataReceivedEventHandler errorDataReceived = null,
             string makePath = "make", string dockerPath = "docker", string devkitArmPath = "", string dockerContainerName = "")
         {
-            if (!Compile(makePath, dockerPath, path, overlay, outputDataReceived, errorDataReceived, dockerTag, devkitArmPath))
+            if (!Compile(makePath, dockerPath, path, overlay, outputDataReceived, errorDataReceived, dockerTag, devkitArmPath, dockerContainerName))
             {
                 return false;
             }
@@ -122,7 +122,7 @@ namespace HaroohieClub.NitroPacker.Patcher.Overlay
             return true;
         }
 
-        private static bool Compile(string makePath, string dockerPath, string path, Overlay overlay, DataReceivedEventHandler outputDataReceived, DataReceivedEventHandler errorDataReceived, string dockerTag, string devkitArmPath)
+        private static bool Compile(string makePath, string dockerPath, string path, Overlay overlay, DataReceivedEventHandler outputDataReceived, DataReceivedEventHandler errorDataReceived, string dockerTag, string devkitArmPath, string dockerContainerName = "")
         {
             ProcessStartInfo psi;
             if (!string.IsNullOrEmpty(dockerTag))
@@ -130,7 +130,7 @@ namespace HaroohieClub.NitroPacker.Patcher.Overlay
                 psi = new()
                 {
                     FileName = dockerPath,
-                    Arguments = $"run -v \"{Path.GetFullPath(path)}\":/src -w /src devkitpro/devkitarm:{dockerTag} make TARGET={overlay.Name}/newcode SOURCES={overlay.Name}/source INCLUDES={overlay.Name}/source BUILD=build CODEADDR=0x{overlay.Address + overlay.Length:X7}",
+                    Arguments = $"run -v \"{Path.GetFullPath(path)}\":/src -w /src devkitpro/devkitarm:{dockerTag}{(string.IsNullOrEmpty(dockerContainerName) ? "" : $" --name {dockerContainerName}")} make TARGET={overlay.Name}/newcode SOURCES={overlay.Name}/source INCLUDES={overlay.Name}/source BUILD=build CODEADDR=0x{overlay.Address + overlay.Length:X7}",
                     UseShellExecute = false,
                     RedirectStandardError = true,
                     RedirectStandardOutput = true,
@@ -181,7 +181,7 @@ namespace HaroohieClub.NitroPacker.Patcher.Overlay
             return p.ExitCode == 0;
         }
 
-        private static bool CompileReplace(string makePath, string dockerPath, string subdir, string path, Overlay overlay, DataReceivedEventHandler outputDataReceived, DataReceivedEventHandler errorDataReceived, string dockerTag, string devkitArmPath)
+        private static bool CompileReplace(string makePath, string dockerPath, string subdir, string path, Overlay overlay, DataReceivedEventHandler outputDataReceived, DataReceivedEventHandler errorDataReceived, string dockerTag, string devkitArmPath, string dockerContainerName = "")
         {
             uint address = uint.Parse(Path.GetFileNameWithoutExtension(subdir), NumberStyles.HexNumber);
             ProcessStartInfo psi;
@@ -192,7 +192,7 @@ namespace HaroohieClub.NitroPacker.Patcher.Overlay
                 psi = new()
                 {
                     FileName = dockerPath,
-                    Arguments = $"run -v \"{Path.GetFullPath(path)}\":/src -w /src devkitpro/devkitarm:{dockerTag} make TARGET={overlay.Name}/repl_{Path.GetFileNameWithoutExtension(subdir)} SOURCES={subdir} INCLUDES={subdir} NEWSYM={overlay.Name}/newcode.x BUILD=build CODEADDR=0x{address:X7}",
+                    Arguments = $"run -v \"{Path.GetFullPath(path)}\":/src -w /src devkitpro/devkitarm:{dockerTag}{(string.IsNullOrEmpty(dockerContainerName) ? "" : $" --name {dockerContainerName}")} make TARGET={overlay.Name}/repl_{Path.GetFileNameWithoutExtension(subdir)} SOURCES={subdir} INCLUDES={subdir} NEWSYM={overlay.Name}/newcode.x BUILD=build CODEADDR=0x{address:X7}",
                     UseShellExecute = false,
                     RedirectStandardError = true,
                     RedirectStandardOutput = true,

@@ -33,7 +33,7 @@ namespace HaroohieClub.NitroPacker.Patcher.Nitro
             string makePath = "make", string dockerPath = "docker", string devkitArmPath = "", string dockerContainerName = "")
 		{
 			uint arenaLo = arm9.ReadU32LE(arenaLoOffset);
-            if (!Compile(makePath, dockerPath, path, arenaLo, outputDataReceived, errorDataReceived, dockerTag, devkitArmPath))
+            if (!Compile(makePath, dockerPath, path, arenaLo, outputDataReceived, errorDataReceived, dockerTag, devkitArmPath, dockerContainerName))
             {
                 return false;
             }
@@ -64,7 +64,7 @@ namespace HaroohieClub.NitroPacker.Patcher.Nitro
                 foreach (string subdir in Directory.GetDirectories(Path.Combine(path, "replSource")))
                 {
                     replFiles.Add($"repl_{Path.GetFileNameWithoutExtension(subdir)}");
-                    if (!CompileReplace(makePath, dockerPath, Path.GetRelativePath(path, subdir), path, outputDataReceived, errorDataReceived, dockerTag, devkitArmPath))
+                    if (!CompileReplace(makePath, dockerPath, Path.GetRelativePath(path, subdir), path, outputDataReceived, errorDataReceived, dockerTag, devkitArmPath, dockerContainerName))
                     {
                         return false;
                     }
@@ -236,7 +236,7 @@ namespace HaroohieClub.NitroPacker.Patcher.Nitro
             return p.ExitCode == 0;
         }
 
-        private static bool CompileReplace(string makePath, string dockerPath, string subdir, string path, DataReceivedEventHandler outputDataReceived, DataReceivedEventHandler errorDataReceived, string dockerTag, string devkitArmPath)
+        private static bool CompileReplace(string makePath, string dockerPath, string subdir, string path, DataReceivedEventHandler outputDataReceived, DataReceivedEventHandler errorDataReceived, string dockerTag, string devkitArmPath, string dockerContainerName = "")
         {
             uint address = uint.Parse(Path.GetFileNameWithoutExtension(subdir), NumberStyles.HexNumber);
             ProcessStartInfo psi;
@@ -246,7 +246,7 @@ namespace HaroohieClub.NitroPacker.Patcher.Nitro
                 psi = new()
                 {
                     FileName = dockerPath,
-                    Arguments = $"run -v \"{Path.GetFullPath(path)}\":/src -w /src devkitpro/devkitarm:{dockerTag} make TARGET=repl_{Path.GetFileNameWithoutExtension(subdir)} SOURCES={subdir} BUILD=build NEWSYM=newcode.x CODEADDR=0x{address:X7}",
+                    Arguments = $"run -v \"{Path.GetFullPath(path)}\":/src -w /src devkitpro/devkitarm:{dockerTag}{(string.IsNullOrEmpty(dockerContainerName) ? "" : $" --name {dockerContainerName}")} make TARGET=repl_{Path.GetFileNameWithoutExtension(subdir)} SOURCES={subdir} BUILD=build NEWSYM=newcode.x CODEADDR=0x{address:X7}",
                     UseShellExecute = false,
                     RedirectStandardError = true,
                     RedirectStandardOutput = true,
