@@ -10,7 +10,7 @@ namespace HaroohieClub.NitroPacker.Cli
 {
     public class PatchArm9Command : Command
     {
-        private string _inputDir, _outputDir, _dockerTag, _devkitArm;
+        private string _inputDir, _outputDir, _dockerTag, _devkitArm, _containerName;
         private uint _arenaLoOffset = 0;
 
         public PatchArm9Command() : base("patch-arm9", "Patches the game's arm9.bin")
@@ -20,7 +20,8 @@ namespace HaroohieClub.NitroPacker.Cli
                 { "i|input-dir=", "Input directory containing arm9.bin and source", i => _inputDir = i },
                 { "o|output-dir=", "Output directory for writing modified arm9.bin", o => _outputDir = o },
                 { "a|arena-lo-offset=", "ArenaLoOffset provided as a hex number", a => _arenaLoOffset = uint.Parse(a, NumberStyles.HexNumber) },
-                { "d|docker-tag=", "(Optional) Indicates docker should be used and provides a docker tag of the devkitpro/devkitarm image to use", d => _dockerTag = d },
+                { "d|docker-tag=", "(Optional) Indicates Docker should be used and provides a docker tag of the devkitpro/devkitarm image to use", d => _dockerTag = d },
+                { "container-name=", "(Optional) If using Docker, specifies the name of the container to use when patching", n => _containerName = n },
                 { "devkitarm=", "(Optional) Location of the devkitARM installation; defaults to the DEVKITARM environment variable", dev => _devkitArm = dev },
             };
         }
@@ -58,7 +59,7 @@ namespace HaroohieClub.NitroPacker.Cli
             if (!ARM9AsmHack.Insert(_inputDir, arm9, _arenaLoOffset, _dockerTag,
                 (object sender, DataReceivedEventArgs e) => Console.WriteLine(e.Data),
                 (object sender, DataReceivedEventArgs e) => Console.Error.WriteLine(e.Data),
-                devkitArmPath: _devkitArm))
+                devkitArmPath: _devkitArm, dockerContainerName: _containerName))
             {
                 Console.WriteLine("ERROR: ASM hack insertion failed!");
                 return 1;

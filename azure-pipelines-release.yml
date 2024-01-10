@@ -49,13 +49,13 @@ stages:
       inputs:
         command: 'publish'
         projects: $(Build.SourcesDirectory)/HaroohieClub.NitroPacker.Cli/HaroohieClub.NitroPacker.Cli.csproj
-        arguments: '-c Release -f net6.0 -r $(rid) --self-contained /p:PublishSingleFile=true'
+        arguments: '-c Release -f net8.0 -r $(rid) --self-contained /p:PublishSingleFile=true'
         publishWebProjects: false
       displayName: Build & Publish NitroPacker
         
     - pwsh: |
         mkdir publish
-        Expand-Archive -Path $(Build.SourcesDirectory)/HaroohieClub.NitroPacker.Cli/bin/Release/net6.0/$(rid)/publish.zip -DestinationPath ./publish
+        Expand-Archive -Path $(Build.SourcesDirectory)/HaroohieClub.NitroPacker.Cli/bin/Release/net8.0/$(rid)/publish.zip -DestinationPath ./publish
         Push-Location publish
         chmod +x ./NitroPacker
         tar -czvf $(artifactPath) ./NitroPacker
@@ -65,7 +65,7 @@ stages:
 
     - pwsh: |
         mkdir publish
-        Expand-Archive -Path $(Build.SourcesDirectory)/HaroohieClub.NitroPacker.Cli/bin/Release/net6.0/$(rid)/publish.zip .\publish
+        Expand-Archive -Path $(Build.SourcesDirectory)/HaroohieClub.NitroPacker.Cli/bin/Release/net8.0/$(rid)/publish.zip .\publish
         Push-Location publish
         Compress-Archive -Path .\NitroPacker.exe -DestinationPath $(artifactPath)
         Pop-Location

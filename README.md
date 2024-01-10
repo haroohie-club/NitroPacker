@@ -2,10 +2,9 @@
 NitroPacker is an open source, cross-platform utility for packing and unpacking Nintendo DS ROMs. It also can apply ASM hacks to both ARM9 and overlay files.
 
 ## Authors
-This code was written primarily by Ermelber and Gericom. Jonko has ported it to .NET 6.0 and made modifications to make it cross-platform.
+This code was written primarily by Ermelber and Gericom. Jonko has ported it to .NET 8.0 and made modifications to make it cross-platform.
 
 ## Prerequisites
-* [.NET 6.0 Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) is required to run the tool.
 * [devkitARM](https://devkitpro.org/wiki/Getting_Started) and [Make](https://www.gnu.org/software/make/) are required to apply ASM hacks.
   - Alternatively, one can opt to install [Docker](https://www.docker.com/) (and [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) on Windows)
     instead.
