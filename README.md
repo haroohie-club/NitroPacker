@@ -118,6 +118,8 @@ To assemble the hacked ARM9, run the following command:
 NitroPacker patch-arm9 -i PATH/TO/SRC/DIRECTORY -o PATH/TO/OUTPUT/DIRECTORY -a ARENA_LO_OFFSET [-d DOCKER_TAG]
 ```
 
+> To be able to use the `patch-arm9` on a given `arm9.bin` it must be decompressed, by default, the `unpack` command does not decompress it, you can use the `--decompress-arm9` option if required.
+
 This will assemble the hacks and append them to `arm9.bin`, then copy the ARM9 to the output directory (which should be the directory you will then run
 the `pack` command on).
 
