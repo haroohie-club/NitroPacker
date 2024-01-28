@@ -19,7 +19,7 @@ namespace HaroohieClub.NitroPacker.Cli
             {
                 { "i|input-dir=", "Input directory containing arm9.bin and source", i => _inputDir = i },
                 { "o|output-dir=", "Output directory for writing modified arm9.bin", o => _outputDir = o },
-                { "a|arena-lo-offset=", "ArenaLoOffset provided as a hex number", a => _arenaLoOffset = uint.Parse(a.StartsWith("0x")?a[2..]:a, NumberStyles.HexNumber) },
+                { "a|arena-lo-offset=", "ArenaLoOffset provided as a hex number", a => _arenaLoOffset = uint.Parse(a.StartsWith("0x") ? a[2..] : a, NumberStyles.HexNumber) },
                 { "d|docker-tag=", "(Optional) Indicates Docker should be used and provides a docker tag of the devkitpro/devkitarm image to use", d => _dockerTag = d },
                 { "devkitarm=", "(Optional) Location of the devkitARM installation; defaults to the DEVKITARM environment variable", dev => _devkitArm = dev },
             };
