@@ -129,7 +129,7 @@ namespace HaroohieClub.NitroPacker.Patcher.Overlay
                 psi = new()
                 {
                     FileName = dockerPath,
-                    Arguments = $"run --rm -v \"{Path.GetFullPath(path)}\":/src -w /src devkitpro/devkitarm:{dockerTag} make TARGET={overlay.Name}/newcode SOURCES={overlay.Name}/source INCLUDES={overlay.Name}/source BUILD=build CODEADDR=0x{overlay.Address + overlay.Length:X7}",
+                    Arguments = $"run --rm -v \"{Path.GetFullPath(path)}:/src\" -w /src devkitpro/devkitarm:{dockerTag} make TARGET={overlay.Name}/newcode SOURCES={overlay.Name}/source INCLUDES={overlay.Name}/source BUILD=build CODEADDR=0x{overlay.Address + overlay.Length:X7}",
                     UseShellExecute = false,
                     RedirectStandardError = true,
                     RedirectStandardOutput = true,
@@ -191,7 +191,7 @@ namespace HaroohieClub.NitroPacker.Patcher.Overlay
                 psi = new()
                 {
                     FileName = dockerPath,
-                    Arguments = $"run --rm -v \"{Path.GetFullPath(path)}\":/src -w /src devkitpro/devkitarm:{dockerTag} make TARGET={overlay.Name}/repl_{Path.GetFileNameWithoutExtension(subdir)} SOURCES={subdir} INCLUDES={subdir} NEWSYM={overlay.Name}/newcode.x BUILD=build CODEADDR=0x{address:X7}",
+                    Arguments = $"run --rm -v \"{Path.GetFullPath(path)}:/src\" -w /src devkitpro/devkitarm:{dockerTag} make TARGET={overlay.Name}/repl_{Path.GetFileNameWithoutExtension(subdir)} SOURCES={subdir} INCLUDES={subdir} NEWSYM={overlay.Name}/newcode.x BUILD=build CODEADDR=0x{address:X7}",
                     UseShellExecute = false,
                     RedirectStandardError = true,
                     RedirectStandardOutput = true,

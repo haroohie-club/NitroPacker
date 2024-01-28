@@ -1,17 +1,19 @@
-﻿using HaroohieClub.NitroPacker.Patcher.Nitro;
+﻿using HaroohieClub.NitroPacker.Core;
+using HaroohieClub.NitroPacker.Patcher.Nitro;
 using Mono.Options;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Xml.Serialization;
 
 namespace HaroohieClub.NitroPacker.Cli
 {
     public class PatchArm9Command : Command
     {
-        private string _inputDir, _outputDir, _dockerTag, _devkitArm;
-        private uint _arenaLoOffset = 0;
+        private string _inputDir, _outputDir, _projectFilePath, _dockerTag, _devkitArm;
+        private uint _arenaLoOffset = 0, _ramAddress = 0;
 
         public PatchArm9Command() : base("patch-arm9", "Patches the game's arm9.bin")
         {
@@ -19,7 +21,9 @@ namespace HaroohieClub.NitroPacker.Cli
             {
                 { "i|input-dir=", "Input directory containing arm9.bin and source", i => _inputDir = i },
                 { "o|output-dir=", "Output directory for writing modified arm9.bin", o => _outputDir = o },
-                { "a|arena-lo-offset=", "ArenaLoOffset provided as a hex number", a => _arenaLoOffset = uint.Parse(a.StartsWith("0x") ? a[2..] : a, NumberStyles.HexNumber) },
+                { "a|arena-lo-offset=", "ArenaLoOffset provided as a hex number", a => _arenaLoOffset = uint.Parse(a.StartsWith("0x", StringComparison.OrdinalIgnoreCase) ? a[2..] : a, NumberStyles.HexNumber) },
+                { "p|project-file=", "An NDS project file from extracting with NitroPacker (can be provided instead of a RAM address)", p => _projectFilePath = p },
+                { "r|ram-address=", "The address at which the ROM is loaded into NDS RAM", r => _ramAddress = uint.Parse(r.StartsWith("0x", StringComparison.OrdinalIgnoreCase) ? r[2..] : r, NumberStyles.HexNumber) },
                 { "d|docker-tag=", "(Optional) Indicates Docker should be used and provides a docker tag of the devkitpro/devkitarm image to use", d => _dockerTag = d },
                 { "devkitarm=", "(Optional) Location of the devkitARM installation; defaults to the DEVKITARM environment variable", dev => _devkitArm = dev },
             };
@@ -31,8 +35,21 @@ namespace HaroohieClub.NitroPacker.Cli
 
             if (_arenaLoOffset == 0)
             {
-                CommandSet.Out.WriteLine($"ArenaLoOffset must be provided!\n\n{_arenaLoOffset}");
+                CommandSet.Out.WriteLine($"ArenaLoOffset must be provided!\n\n{Help}");
                 return 1;
+            }
+
+            if (string.IsNullOrEmpty(_projectFilePath) && _ramAddress == 0)
+            {
+                CommandSet.Out.WriteLine("Neither project file nor RAM address were specified; assuming ARM9 RAM address is 0x2000000...");
+                _ramAddress = 0x2000000;
+            }
+            else if (_ramAddress == 0)
+            {
+                XmlSerializer serializer = new(typeof(NdsProjectFile));
+                using FileStream fs = File.OpenRead(_projectFilePath);
+                NdsProjectFile project = (NdsProjectFile)serializer.Deserialize(fs);
+                _ramAddress = project.RomInfo.Header.MainRamAddress;
             }
 
             if (string.IsNullOrEmpty(_inputDir))
@@ -54,7 +71,7 @@ namespace HaroohieClub.NitroPacker.Cli
                 Directory.CreateDirectory(_outputDir);
             }
 
-            ARM9 arm9 = new(File.ReadAllBytes(Path.Combine(_inputDir, "arm9.bin")), 0x02000000);
+            ARM9 arm9 = new(File.ReadAllBytes(Path.Combine(_inputDir, "arm9.bin")), _ramAddress);
             if (!ARM9AsmHack.Insert(_inputDir, arm9, _arenaLoOffset, _dockerTag,
                 (object sender, DataReceivedEventArgs e) => Console.WriteLine(e.Data),
                 (object sender, DataReceivedEventArgs e) => Console.Error.WriteLine(e.Data),
