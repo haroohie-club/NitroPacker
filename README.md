@@ -25,13 +25,18 @@ Replace the capitalized arguments with:
 This command will unpack all the game's files and place them in the specified directory. The ROM's file system will go in the `data` subdirectory, while
 any overlays present will be placed in the `overlay` subdirectory. The main ARM9 and ARM7 binaries will be placed in the root directory. Additionally, the created project file contains a bunch of metadata about the ROM, such as the ROM header, the overlay table, and the banner.
 
+In order to disassemble or patch arm9.bin, you'll need it to be decompressed. If the arm9 binary is compressed, you can append the `-d` flag to the above command to decompress it, e.g.
+```
+NitroPacker unpack -r PATH/TO/ROM.nds -o PATH/TO/UNPACK/DIRECTORY -p PROJECT_NAME -d
+```
+
 ### Packing
 NitroPacker can only pack a directory that was previously unpacked with NitroPacker (or something structured exactly like that). To pack a ROM, run the following command:
 ```
 NitroPacker pack -p PATH/TO/PROJECT_FILE.xml -r PATH/TO/OUTPUT_ROM.nds
 ```
 
-The project file is expected to be in a directory with ARM9 and ARM7 binaries as well as the data and overlay subdirectories mentioned previously.
+The project file is expected to be in a directory with ARM9 and ARM7 binaries as well as the data and overlay subdirectories mentioned previously. If the ARM9 binary was decompressed previously, you will need to add `-c` in order to compress it at this stage.
 
 ## ASM Hacks
 NitroPacker can also be used as a powerful tool to apply assembly hacks, but this functionality is a bit more complicated.
@@ -115,13 +120,14 @@ Once this directory has been constructed, source files have been created, the ar
 ### Assemble ARM9
 To assemble the hacked ARM9, run the following command:
 ```
-NitroPacker patch-arm9 -i PATH/TO/SRC/DIRECTORY -o PATH/TO/OUTPUT/DIRECTORY -a ARENA_LO_OFFSET [-d DOCKER_TAG]
+NitroPacker patch-arm9 -i PATH/TO/SRC/DIRECTORY -o PATH/TO/OUTPUT/DIRECTORY -p PROJECT_FILE -a ARENA_LO_OFFSET [-d DOCKER_TAG]
 ```
-
-> To be able to use the `patch-arm9` on a given `arm9.bin` it must be decompressed, by default, the `unpack` command does not decompress it, you can use the `--decompress-arm9` option if required.
+The project file you need to supply is the one created by unpacking the ROM with NitroPacker. The project file is only needed for determining the ARM9's RAM address; if you would rather specify this address manually, you may use `-r RAM_ADDRESS` instead.
 
 This will assemble the hacks and append them to `arm9.bin`, then copy the ARM9 to the output directory (which should be the directory you will then run
 the `pack` command on).
+
+Note: To be able to use the `patch-arm9` command, the `arm9.bin` *must* be decompressed. See the [`Unpacking`](#Unpacking) section for more information on how to do this. 
 
 ### Assemble Overlays
 To patch the overlays, run the following command:
