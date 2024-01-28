@@ -47,7 +47,7 @@ If either of these options presents a challenge for you or doesn't work for some
 the code in Docker containers. After installing [Docker Desktop](https://www.docker.com/products/docker-desktop/) or the Docker engine, ensure the engine
 is running. Then, when calling NitroPacker, ensure you pass `-d` followed by the Docker tag you want to use. If you're not sure which one to use, we
 recommend trying `20230526` as that is the most recent tag as of this publishing (when the samples were last updated). If you want to use newer features
-or need later bugfixes, choose `latest` or a later tag.
+or need later bugfixes, choose `latest` or a later tag. See [devkitpro/devkitarm on DockerHub](https://hub.docker.com/r/devkitpro/devkitarm) for more details.
 
 ### Directory Structure
 You will need to move the unpacked `arm9.bin` to a different directory with a specific structure:
