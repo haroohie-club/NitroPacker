@@ -124,7 +124,7 @@ namespace HaroohieClub.NitroPacker.Core
             dir.CreateSubdirectory("overlay");
             foreach (var vv in ndsFile.MainOvt)
             {
-                if (vv.Compressed > 0)
+                if (vv.Flag.HasFlag(Rom.RomOVT.OVTFlag.Compressed))
                 {
                     File.WriteAllBytes(Path.Combine(outPath, "overlay", $"main_{vv.Id:X4}.bin"), Blz.Decompress(ndsFile.FileData[vv.FileId]));
                 }
@@ -135,7 +135,7 @@ namespace HaroohieClub.NitroPacker.Core
             }
             foreach (var vv in ndsFile.SubOvt)
             {
-                if (vv.Compressed > 0)
+                if (vv.Flag.HasFlag(Rom.RomOVT.OVTFlag.Compressed))
                 {
                     File.WriteAllBytes(Path.Combine(outPath, "overlay", $"sub_{vv.Id:X4}.bin"), Blz.Decompress(ndsFile.FileData[vv.FileId]));
                 }
@@ -187,7 +187,7 @@ namespace HaroohieClub.NitroPacker.Core
             {
                 vv.FileId = fid;
                 n.Fat[fid] = new FatEntry(0, 0);
-                if (vv.Compressed > 0)
+                if (vv.Flag.HasFlag(Rom.RomOVT.OVTFlag.Compressed))
                 {
                     Blz blz = new();
                     n.FileData[fid] = blz.BLZ_Encode(File.ReadAllBytes(Path.Combine(projectDir, "overlay", $"main_{vv.Id:X4}.bin")), false);
@@ -202,7 +202,7 @@ namespace HaroohieClub.NitroPacker.Core
             {
                 vv.FileId = fid;
                 n.Fat[fid] = new FatEntry(0, 0);
-                if (vv.Compressed > 0)
+                if (vv.Flag.HasFlag(Rom.RomOVT.OVTFlag.Compressed))
                 {
                     Blz blz = new();
                     n.FileData[fid] = blz.BLZ_Encode(File.ReadAllBytes(Path.Combine(projectDir, "overlay", $"sub_{vv.Id:X4}.bin")), false);
