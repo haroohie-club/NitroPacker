@@ -85,7 +85,7 @@ You will need to move the unpacked `arm9.bin` to a different directory with a sp
   - `Makefile` &ndash; boilerplate Makefile for ARM9
   - `symbols.x` &ndash; an editable symbols file that allows for naming specific offsets for use in ARM9 source files
 
-This directory structure should be copied from the `asm_sample` directory in this repo. A fully fleshed-out example can be found in the[ChokuretsuTranslationBuild repository](https://github.com/haroohie-club/ChokuretsuTranslationBuild/tree/main/src).
+This directory structure should be copied from the `asm_sample` directory in this repo. A fully fleshed-out example can be found in the [ChokuretsuTranslationBuild repository](https://github.com/haroohie-club/ChokuretsuTranslationBuild/tree/main/src).
 
 Additionally, prior to assembling the ARM9, you will need to find the arena lo offset. This value can be found by searching for `0x37F8000` in the ROM.
 IDA or Ghidra should be used to search for this value. Once you find it, you'll want to go back a few values until you see an offset that has a value
