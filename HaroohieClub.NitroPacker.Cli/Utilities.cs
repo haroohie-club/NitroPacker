@@ -13,6 +13,7 @@ namespace HaroohieClub.NitroPacker.Cli
             {
                 if (Path.GetExtension(file).Equals(overrideSuffix, StringComparison.OrdinalIgnoreCase))
                 {
+                    log.WriteLine($"Found override file '{file}'");
                     string overridableFile = Path.GetFileNameWithoutExtension(file);
                     string ignoredFile = $"{overridableFile}.ignore";
                     renames.Add((overridableFile, file));
@@ -20,6 +21,7 @@ namespace HaroohieClub.NitroPacker.Cli
                     {
                         renames.Add((ignoredFile, overridableFile));
                         File.Move(overridableFile, ignoredFile);
+                        log.WriteLine($"Overrode file '{overridableFile}");
                     }
                     File.Move(file, overridableFile);
                 }
