@@ -11,7 +11,7 @@ namespace HaroohieClub.NitroPacker.Cli
             List<(string, string)> renames = [];
             foreach (string file in Directory.GetFiles(sourceDir, "*", SearchOption.AllDirectories))
             {
-                if (Path.GetExtension(file).Equals(overrideSuffix, StringComparison.OrdinalIgnoreCase))
+                if (Path.GetExtension(file).Equals($".{overrideSuffix}", StringComparison.OrdinalIgnoreCase))
                 {
                     log.WriteLine($"Found override file '{file}'");
                     string overridableFile = Path.GetFileNameWithoutExtension(file);
