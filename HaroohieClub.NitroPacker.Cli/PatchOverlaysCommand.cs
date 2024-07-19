@@ -1,7 +1,9 @@
 ﻿using HaroohieClub.NitroPacker.Patcher.Overlay;
 using Mono.Options;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -10,7 +12,7 @@ namespace HaroohieClub.NitroPacker.Cli
 {
     public class PatchOverlaysCommand : Command
     {
-        private string _inputOverlaysDirectory, _outputOverlaysDirectory, _overlaySourceDir, _romInfoPath, _dockerTag, _devkitArm;
+        private string _inputOverlaysDirectory, _outputOverlaysDirectory, _overlaySourceDir, _romInfoPath, _dockerTag, _devkitArm, _overrideSuffix;
 
         public PatchOverlaysCommand() : base("patch-overlays", "Patches the game's overlays")
         {
@@ -25,6 +27,7 @@ namespace HaroohieClub.NitroPacker.Cli
                 { "r|rom-info=", "rominfo.xml file containing the overlay table", r => _romInfoPath = r },
                 { "d|docker-tag=", "(Optional) Indicates docker should be used and provides a docker tag of the devkitpro/devkitarm image to use", d => _dockerTag = d },
                 { "devkitarm=", "(Optional) Location of the devkitARM installation; defaults to the DEVKITARM environment variable", dev => _devkitArm = dev },
+                { "override-suffix=", "(Optional) A file extension suffix to indicate that a general file should be overridden, good for using with e.g. locales", o => _overrideSuffix = o },
             };
         }
 
@@ -64,11 +67,13 @@ namespace HaroohieClub.NitroPacker.Cli
                 Directory.CreateDirectory(_outputOverlaysDirectory);
             }
 
-            List<Overlay> overlays = new();
+            List<Overlay> overlays = [];
             foreach (string file in Directory.GetFiles(_inputOverlaysDirectory))
             {
                 overlays.Add(new(file, _romInfoPath));
             }
+
+            List<(string, string)> renames = Utilities.RenameOverrideFiles(_overlaySourceDir, _overrideSuffix, CommandSet.Out);
 
             foreach (Overlay overlay in overlays)
             {
@@ -80,6 +85,8 @@ namespace HaroohieClub.NitroPacker.Cli
                         devkitArmPath: _devkitArm);
                 }
             }
+
+            Utilities.RevertOverrideFiles(renames);
 
             foreach (Overlay overlay in overlays)
             {

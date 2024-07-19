@@ -65,8 +65,9 @@ You will need to move the unpacked `arm9.bin` to a different directory with a sp
           - `HEXLOCATION.s` &ndash; a source file containing an instruction to replace at the specified `HEXLOCATION`
       - `source` &ndash; a directory containing source files to append to the specified overlay
         - `file.s` &ndash; ARM assembly source files that will be assembled and appended to the overlay
-        - `file.c` &ndash; C source files that will be assembled and appended to the overlay
-        - `file.cpp` &ndash; C++ source file that will be assembled and appended to the overlay
+        - `file.c` &ndash; C source files that will be compiled and appended to the overlay
+        - `file.cpp` &ndash; C++ source file that will be compiled and appended to the overlay
+        - `file.s.override` &ndash; a source file that will be assembled _only if_ `--override-suffix "override"` is passed to NitroPacker (and will replace `file.s` in that case)
       - `symbols.x` &ndash; an editable symbols file that allows for naming specific offsets for use in specified overlay's source files
     - `linker.x` &ndash; boilerplate linker file for overlays
     - `Makefile` &ndash; boilerplate Makefile for overlays
@@ -75,8 +76,9 @@ You will need to move the unpacked `arm9.bin` to a different directory with a sp
       - `HEXLOCATION.s` &ndash; a source file containing an instruction to replace at the specified `HEXLOCATION`
   - `source` &ndash; a directory contianing source files to append to the ARM9
     - `file.s` &ndash; ARM assembly source files that will be assembled and appended to the ARM9
-    - `file.c` &ndash; C source files that will be assembled and appended to the ARM9
-    - `file.cpp` &ndash; C++ source file that will be assembled and appended to the ARM9
+    - `file.c` &ndash; C source files that will be compiled and appended to the ARM9
+    - `file.cpp` &ndash; C++ source file that will be compiled and appended to the ARM9
+    - `file.s.override` &ndash; a source file that will be assembled _only if_ `--override-suffix "override"` is passed to NitroPacker (and will replace `file.s` in that case)
   - `arm9.bin` &ndash; the main ARM9 &ndash; must be copied in from the unpacked ROM directory
   - `.clang-format` &ndash; boilerplate CLang format file
   - `linker.x` &ndash; boilerplate linker file for ARM9
