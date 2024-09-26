@@ -41,6 +41,10 @@ namespace HaroohieClub.NitroPacker.Patcher.Nitro
 				return false;
 			}
 			byte[] newCode = File.ReadAllBytes(Path.Combine(path, "newcode.bin"));
+            if (newCode.Length % 4 != 0)
+            {
+                newCode = [.. newCode, .. new byte[4 - newCode.Length % 4]];
+            }
 
 			StreamReader r = new(Path.Combine(path, "newcode.sym"));
 			string[] newSymLines = File.ReadAllLines(Path.Combine(path, "newcode.sym"));
@@ -123,7 +127,7 @@ namespace HaroohieClub.NitroPacker.Patcher.Nitro
 							}
 						case "thook_":
 							{
-								string replaceOffsetString = lines[3].Replace("trepl_", "");
+								string replaceOffsetString = lines[3].Replace("thook_", "");
 								uint replaceOffset = uint.Parse(replaceOffsetString, NumberStyles.HexNumber);
 								ushort replace1 = 0xF000;//BLX Instruction (Part 1)
 								ushort replace2 = 0xE800;//BLX Instruction (Part 2)
