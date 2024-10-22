@@ -2,7 +2,7 @@
 NitroPacker is an open source, cross-platform utility for packing and unpacking Nintendo DS ROMs. It also can apply ASM hacks to both ARM9 and overlay files.
 
 ## Authors
-This code was written primarily by Ermelber and Gericom. Jonko has ported it to .NET 8.0 and made modifications to make it cross-platform.
+This code was written primarily by Ermelber and Gericom. Jonko has ported it to .NET 8.0 and made modifications to make it cross-platform and has added a number of features since the project was open sourced.
 
 ## Prerequisites
 * [devkitARM](https://devkitpro.org/wiki/Getting_Started) and [Make](https://www.gnu.org/software/make/) are required to apply ASM hacks.
@@ -50,9 +50,8 @@ On Linux distros, Make can be installed from the package manager (e.g. `sudo apt
 
 If either of these options presents a challenge for you or doesn't work for some reason, you can instead opt to use the alternate method of assembling
 the code in Docker containers. After installing [Docker Desktop](https://www.docker.com/products/docker-desktop/) or the Docker engine, ensure the engine
-is running. Then, when calling NitroPacker, ensure you pass `-d` followed by the Docker tag you want to use. If you're not sure which one to use, we
-recommend trying `20230526` as that is the most recent tag as of this publishing (when the samples were last updated). If you want to use newer features
-or need later bugfixes, choose `latest` or a later tag. See [devkitpro/devkitarm on DockerHub](https://hub.docker.com/r/devkitpro/devkitarm) for more details.
+is running. Then, when calling NitroPacker, ensure you pass `-d` followed by the Docker tag you want to use. If you're not sure which one to use, 
+we recommend choosing `latest`. See [devkitpro/devkitarm on DockerHub](https://hub.docker.com/r/devkitpro/devkitarm) for more details.
 
 ### Directory Structure
 You will need to move the unpacked `arm9.bin` to a different directory with a specific structure:
@@ -89,7 +88,8 @@ This directory structure should be copied from the `asm_sample` directory in thi
 
 Additionally, prior to assembling the ARM9, you will need to find the arena lo offset. This value can be found by searching for `0x37F8000` in the ROM.
 IDA or Ghidra should be used to search for this value. Once you find it, you'll want to go back a few values until you see an offset that has a value
-between 0x20C0000 and 0x20F0000 &ndash; the offset (not the value) is the arena lo offset. It will most likely be followed by two subroutines that look like:
+between 0x20C0000 and 0x20F0000 (typically, although it could be higher or lower!) &ndash; the offset (not the value) is the arena lo offset.
+It will most likely be followed by two subroutines that look like:
 
 ```arm
 MOV             R0, R0,LSL#2
@@ -136,3 +136,8 @@ To patch the overlays, run the following command:
 ```
 NitroPacker patch-overlays -i PATH/TO/ORIGINAL/OVERLAY/DIRECTORY -o PATH/TO/PATCHED/OVERLAY/DIRECTORY -s PATH/TO/OVERLAY/SOURCE -r PATH/TO/PROJECT/FILE [-d DOCKER_TAG]
 ```
+
+## Building from Source
+To build the project from source, ensure [.NET 8](https://dot.net) is installed. After you have installed .NET, you should be able
+to simply run `dotnet build` from the terminal within the root directory and it will build the NitroPacker executable. You can also
+open the solution in Visual Studio, Rider, or another IDE and build it from there.
