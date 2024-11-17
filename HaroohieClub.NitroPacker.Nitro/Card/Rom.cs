@@ -193,7 +193,7 @@ public class Rom
             StaticFooter?.Write(er);
             if (MainOvt.Length != 0)
             {
-                er.WritePadding(0x200);
+                er.WritePadding(0x200, 0xFF);
                 //Main Ovt
                 Header.MainOvtOffset = (uint)er.BaseStream.Position;
                 Header.MainOvtSize = (uint)MainOvt.Length * 0x20;
@@ -201,7 +201,7 @@ public class Rom
                     v.Write(er);
                 foreach (var v in MainOvt)
                 {
-                    er.WritePadding(0x200);
+                    er.WritePadding(0x200, 0xFF);
                     Fat[v.FileId].FileTop = (uint)er.BaseStream.Position;
                     Fat[v.FileId].FileBottom = (uint)er.BaseStream.Position + (uint)FileData[v.FileId].Data.Length;
                     er.Write(FileData[v.FileId].Data, 0, FileData[v.FileId].Data.Length);
@@ -221,7 +221,7 @@ public class Rom
             //I assume this works the same as the main ovt?
             if (SubOvt.Length != 0)
             {
-                er.WritePadding(0x200);
+                er.WritePadding(0x200, 0xFF);
                 //Sub Ovt
                 Header.SubOvtOffset = (uint)er.BaseStream.Position;
                 Header.SubOvtSize = (uint)SubOvt.Length * 0x20;
@@ -229,7 +229,7 @@ public class Rom
                     v.Write(er);
                 foreach (var v in SubOvt)
                 {
-                    er.WritePadding(0x200);
+                    er.WritePadding(0x200, 0xFF);
                     Fat[v.FileId].FileTop = (uint)er.BaseStream.Position;
                     Fat[v.FileId].FileBottom = (uint)er.BaseStream.Position + (uint)FileData[v.FileId].Data.Length;
                     er.Write(FileData[v.FileId].Data, 0, FileData[v.FileId].Data.Length);
