@@ -1,22 +1,21 @@
 ﻿using System;
 
-namespace HaroohieClub.NitroPacker.IO.Serialization
+namespace HaroohieClub.NitroPacker.IO.Serialization;
+
+[AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = false)]
+public sealed class ArraySizeAttribute : Attribute
 {
-    [AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = false)]
-    public sealed class ArraySizeAttribute : Attribute
+    public int FixedSize { get; }
+    public string SizeField { get; }
+
+    public ArraySizeAttribute(int fixedSize)
     {
-        public int FixedSize { get; }
-        public string SizeField { get; }
+        FixedSize = fixedSize;
+    }
 
-        public ArraySizeAttribute(int fixedSize)
-        {
-            FixedSize = fixedSize;
-        }
-
-        public ArraySizeAttribute(string sizeField)
-        {
-            FixedSize = -1;
-            SizeField = sizeField;
-        }
+    public ArraySizeAttribute(string sizeField)
+    {
+        FixedSize = -1;
+        SizeField = sizeField;
     }
 }

@@ -1,8 +1,7 @@
-﻿namespace HaroohieClub.NitroPacker.IO
+﻿namespace HaroohieClub.NitroPacker.IO;
+
+public enum Endianness
 {
-    public enum Endianness
-    {
-        BigEndian,
-        LittleEndian
-    }
+    BigEndian,
+    LittleEndian
 }

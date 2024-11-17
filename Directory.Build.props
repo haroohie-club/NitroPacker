@@ -2,7 +2,7 @@
 <Project>
 
   <PropertyGroup Condition="'$(NPVersion)' == ''">
-    <NPVersion>2.5.1</NPVersion>
+    <NPVersion>2.6.0</NPVersion>
   </PropertyGroup>
 
 </Project>

@@ -1,15 +1,14 @@
 ﻿using System;
 
-namespace HaroohieClub.NitroPacker.IO.Serialization
-{
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Class | AttributeTargets.Struct, Inherited = true, AllowMultiple = false)]
-    public sealed class AlignAttribute : Attribute
-    {
-        public int Alignment { get; }
+namespace HaroohieClub.NitroPacker.IO.Serialization;
 
-        public AlignAttribute(int alignment)
-        {
-            Alignment = alignment;
-        }
+[AttributeUsage(AttributeTargets.Field | AttributeTargets.Class | AttributeTargets.Struct, Inherited = true, AllowMultiple = false)]
+public sealed class AlignAttribute : Attribute
+{
+    public int Alignment { get; }
+
+    public AlignAttribute(int alignment)
+    {
+        Alignment = alignment;
     }
 }

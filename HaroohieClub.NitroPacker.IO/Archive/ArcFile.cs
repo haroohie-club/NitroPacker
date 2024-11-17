@@ -1,13 +1,12 @@
-﻿namespace HaroohieClub.NitroPacker.IO.Archive
-{
-    public class ArcFile : ArcEntry
-    {
-        public ArcFile(string name, ArcDirectory parent, byte[] data)
-            : base(name, parent)
-        {
-            Data = data;
-        }
+﻿namespace HaroohieClub.NitroPacker.IO.Archive;
 
-        public byte[] Data { get; set; }
+public class ArcFile : ArcEntry
+{
+    public ArcFile(string name, ArcDirectory parent, byte[] data)
+        : base(name, parent)
+    {
+        Data = data;
     }
+
+    public byte[] Data { get; set; }
 }

@@ -1,34 +1,33 @@
 ﻿using System;
 
-namespace HaroohieClub.NitroPacker.Nitro.Gx
+namespace HaroohieClub.NitroPacker.Nitro.Gx;
+
+public class Rgba8Bitmap
 {
-    public class Rgba8Bitmap
+    public int Width { get; }
+    public int Height { get; }
+    public uint[] Pixels { get; }
+
+    public Rgba8Bitmap(int width, int height)
     {
-        public int Width { get; }
-        public int Height { get; }
-        public uint[] Pixels { get; }
+        Width = width;
+        Height = height;
 
-        public Rgba8Bitmap(int width, int height)
-        {
-            Width = width;
-            Height = height;
+        Pixels = new uint[width * height];
+    }
 
-            Pixels = new uint[width * height];
-        }
+    public Rgba8Bitmap(int width, int height, uint[] data)
+    {
+        Width = width;
+        Height = height;
 
-        public Rgba8Bitmap(int width, int height, uint[] data)
-        {
-            Width = width;
-            Height = height;
+        Pixels = new uint[width * height];
+        Array.Copy(data, Pixels, Pixels.Length);
+    }
 
-            Pixels = new uint[width * height];
-            Array.Copy(data, Pixels, Pixels.Length);
-        }
-
-        public uint this[int x, int y]
-        {
-            get => Pixels[y * Width + x];
-            set => Pixels[y * Width + x] = value;
-        }
+    public uint this[int x, int y]
+    {
+        get => Pixels[y * Width + x];
+        set => Pixels[y * Width + x] = value;
     }
 }

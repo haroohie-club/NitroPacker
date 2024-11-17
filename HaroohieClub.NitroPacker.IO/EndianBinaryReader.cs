@@ -3,170 +3,169 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace HaroohieClub.NitroPacker.IO
+namespace HaroohieClub.NitroPacker.IO;
+
+public class EndianBinaryReader : IDisposable
 {
-    public class EndianBinaryReader : IDisposable
+    private bool _disposed;
+    private byte[] _buffer;
+
+    public Stream BaseStream { get; }
+    public Endianness Endianness { get; }
+
+    public static Endianness SystemEndianness =>
+        BitConverter.IsLittleEndian ? Endianness.LittleEndian : Endianness.BigEndian;
+
+    private bool Reverse => SystemEndianness != Endianness;
+
+    public EndianBinaryReader(Stream baseStream, Endianness endianness = Endianness.LittleEndian)
     {
-        private bool _disposed;
-        private byte[] _buffer;
+        if (baseStream == null)
+            throw new ArgumentNullException(nameof(baseStream));
+        if (!baseStream.CanRead)
+            throw new ArgumentException(nameof(baseStream));
 
-        public Stream BaseStream { get; }
-        public Endianness Endianness { get; }
+        BaseStream = baseStream;
+        Endianness = endianness;
+    }
 
-        public static Endianness SystemEndianness =>
-            BitConverter.IsLittleEndian ? Endianness.LittleEndian : Endianness.BigEndian;
+    ~EndianBinaryReader()
+    {
+        Dispose(false);
+    }
 
-        private bool Reverse => SystemEndianness != Endianness;
+    private void FillBuffer(int bytes, int stride)
+    {
+        if (_buffer == null || _buffer.Length < bytes)
+            _buffer = new byte[bytes];
 
-        public EndianBinaryReader(Stream baseStream, Endianness endianness = Endianness.LittleEndian)
+        BaseStream.Read(_buffer, 0, bytes);
+
+        if (Reverse && stride > 1)
         {
-            if (baseStream == null)
-                throw new ArgumentNullException(nameof(baseStream));
-            if (!baseStream.CanRead)
-                throw new ArgumentException(nameof(baseStream));
-
-            BaseStream = baseStream;
-            Endianness = endianness;
+            for (int i = 0; i < bytes; i += stride)
+                Array.Reverse(_buffer, i, stride);
         }
+    }
 
-        ~EndianBinaryReader()
-        {
-            Dispose(false);
-        }
+    public char ReadChar(Encoding encoding)
+    {
+        int size;
 
-        private void FillBuffer(int bytes, int stride)
-        {
-            if (_buffer == null || _buffer.Length < bytes)
-                _buffer = new byte[bytes];
+        size = GetEncodingSize(encoding);
+        FillBuffer(size, size);
+        return encoding.GetChars(_buffer, 0, size)[0];
+    }
 
-            BaseStream.Read(_buffer, 0, bytes);
+    public char[] ReadChars(Encoding encoding, int count)
+    {
+        int size;
 
-            if (Reverse && stride > 1)
-            {
-                for (int i = 0; i < bytes; i += stride)
-                    Array.Reverse(_buffer, i, stride);
-            }
-        }
+        size = GetEncodingSize(encoding);
+        FillBuffer(size * count, size);
+        return encoding.GetChars(_buffer, 0, size * count);
+    }
 
-        public char ReadChar(Encoding encoding)
-        {
-            int size;
-
-            size = GetEncodingSize(encoding);
-            FillBuffer(size, size);
-            return encoding.GetChars(_buffer, 0, size)[0];
-        }
-
-        public char[] ReadChars(Encoding encoding, int count)
-        {
-            int size;
-
-            size = GetEncodingSize(encoding);
-            FillBuffer(size * count, size);
-            return encoding.GetChars(_buffer, 0, size * count);
-        }
-
-        private static int GetEncodingSize(Encoding encoding)
-        {
-            if (encoding == Encoding.UTF8 || encoding == Encoding.ASCII)
-                return 1;
-            else if (encoding == Encoding.Unicode || encoding == Encoding.BigEndianUnicode)
-                return 2;
-
+    private static int GetEncodingSize(Encoding encoding)
+    {
+        if (encoding == Encoding.UTF8 || encoding == Encoding.ASCII)
             return 1;
-        }
+        else if (encoding == Encoding.Unicode || encoding == Encoding.BigEndianUnicode)
+            return 2;
 
-        public string ReadStringNT(Encoding encoding)
+        return 1;
+    }
+
+    public string ReadStringNT(Encoding encoding)
+    {
+        string text;
+
+        text = "";
+
+        do
         {
-            string text;
+            text += ReadChar(encoding);
+        } while (!text.EndsWith("\0", StringComparison.Ordinal));
 
-            text = "";
+        return text.Remove(text.Length - 1);
+    }
 
-            do
-            {
-                text += ReadChar(encoding);
-            } while (!text.EndsWith("\0", StringComparison.Ordinal));
+    public string ReadString(Encoding encoding, int count)
+    {
+        return new string(ReadChars(encoding, count));
+    }
 
-            return text.Remove(text.Length - 1);
-        }
+    public unsafe T Read<T>() where T : unmanaged
+    {
+        int size = sizeof(T);
+        FillBuffer(size, size);
+        return MemoryMarshal.Read<T>(_buffer);
+    }
 
-        public string ReadString(Encoding encoding, int count)
+    public unsafe T[] Read<T>(int count) where T : unmanaged
+    {
+        int size = sizeof(T);
+        var result = new T[count];
+        var byteResult = MemoryMarshal.Cast<T, byte>(result);
+        BaseStream.Read(byteResult);
+
+        if (Reverse && size > 1)
         {
-            return new string(ReadChars(encoding, count));
+            for (int i = 0; i < size * count; i += size)
+                byteResult.Slice(i, size).Reverse();
         }
 
-        public unsafe T Read<T>() where T : unmanaged
-        {
-            int size = sizeof(T);
-            FillBuffer(size, size);
-            return MemoryMarshal.Read<T>(_buffer);
-        }
+        return result;
+    }
 
-        public unsafe T[] Read<T>(int count) where T : unmanaged
-        {
-            int size = sizeof(T);
-            var result = new T[count];
-            var byteResult = MemoryMarshal.Cast<T, byte>(result);
-            BaseStream.Read(byteResult);
+    public double ReadFx16()
+    {
+        return Read<short>() / 4096d;
+    }
 
-            if (Reverse && size > 1)
-            {
-                for (int i = 0; i < size * count; i += size)
-                    byteResult.Slice(i, size).Reverse();
-            }
+    public double[] ReadFx16s(int count)
+    {
+        var result = new double[count];
+        for (int i = 0; i < count; i++)
+            result[i] = ReadFx16();
 
-            return result;
-        }
+        return result;
+    }
 
-        public double ReadFx16()
-        {
-            return Read<short>() / 4096d;
-        }
+    public double ReadFx32()
+    {
+        return Read<int>() / 4096d;
+    }
 
-        public double[] ReadFx16s(int count)
-        {
-            var result = new double[count];
-            for (int i = 0; i < count; i++)
-                result[i] = ReadFx16();
+    public double[] ReadFx32s(int count)
+    {
+        var result = new double[count];
+        for (int i = 0; i < count; i++)
+            result[i] = ReadFx32();
 
-            return result;
-        }
+        return result;
+    }
 
-        public double ReadFx32()
-        {
-            return Read<int>() / 4096d;
-        }
+    public void Close()
+    {
+        Dispose();
+    }
 
-        public double[] ReadFx32s(int count)
-        {
-            var result = new double[count];
-            for (int i = 0; i < count; i++)
-                result[i] = ReadFx32();
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
 
-            return result;
-        }
+    private void Dispose(bool disposing)
+    {
+        if (_disposed)
+            return;
 
-        public void Close()
-        {
-            Dispose();
-        }
+        if (disposing)
+            BaseStream?.Close();
 
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        private void Dispose(bool disposing)
-        {
-            if (_disposed)
-                return;
-
-            if (disposing)
-                BaseStream?.Close();
-
-            _buffer = null;
-            _disposed = true;
-        }
+        _buffer = null;
+        _disposed = true;
     }
 }

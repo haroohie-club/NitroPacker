@@ -1,21 +1,20 @@
 ﻿using System;
 
-namespace HaroohieClub.NitroPacker.IO.Serialization
+namespace HaroohieClub.NitroPacker.IO.Serialization;
+
+public enum FieldAlignment
 {
-    public enum FieldAlignment
-    {
-        Packed,
-        FieldSize
-    }
+    Packed,
+    FieldSize
+}
 
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = true, AllowMultiple = false)]
-    public sealed class FieldAlignmentAttribute : Attribute
-    {
-        public FieldAlignment Alignment { get; }
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = true, AllowMultiple = false)]
+public sealed class FieldAlignmentAttribute : Attribute
+{
+    public FieldAlignment Alignment { get; }
 
-        public FieldAlignmentAttribute(FieldAlignment alignment)
-        {
-            Alignment = alignment;
-        }
+    public FieldAlignmentAttribute(FieldAlignment alignment)
+    {
+        Alignment = alignment;
     }
 }
