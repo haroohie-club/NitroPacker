@@ -198,7 +198,10 @@ public class Rom
                 Header.MainOvtOffset = (uint)er.BaseStream.Position;
                 Header.MainOvtSize = (uint)MainOvt.Length * 0x20;
                 foreach (var v in MainOvt)
+                {
+                    v.Compressed = (uint)FileData[v.FileId].Data.Length;
                     v.Write(er);
+                }
                 foreach (var v in MainOvt)
                 {
                     er.WritePadding(0x200, 0xFF);
