@@ -275,12 +275,14 @@ public class Rom
             }
             else
             {
-                foreach ((int i, byte[] data) in FileData.Select((f, i) => (f, i))
-                             .OrderBy(t => t.f.NameFat?.FatOffset ?? uint.MaxValue).Select(t => (t.i, t.f.Data)))
+                foreach ((int i, byte[] data) in FileData.Skip((int)(Header.MainOvtSize / 32 + Header.SubOvtSize / 32))
+                             .Select((f, i) => (f, i))
+                             .OrderBy(t => t.f.NameFat?.FatOffset ?? 0).Select(t => (t.i, t.f.Data)))
                 {
+                    int idx = i + (int)(Header.MainOvtSize / 32 + Header.SubOvtSize / 32);
                     er.WritePadding(0x200, 0xFF);
-                    Fat[i].FileTop = (uint)er.BaseStream.Position;
-                    Fat[i].FileBottom = (uint)er.BaseStream.Position + (uint)data.Length;
+                    Fat[idx].FileTop = (uint)er.BaseStream.Position;
+                    Fat[idx].FileBottom = (uint)er.BaseStream.Position + (uint)data.Length;
                     er.Write(data, 0, data.Length);
                 }
             }
