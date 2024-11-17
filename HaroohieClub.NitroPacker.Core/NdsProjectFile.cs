@@ -104,7 +104,7 @@ public class NdsProjectFile : ProjectFile
     /// <param name="outPath">Path where the project structure is gonna be created</param>
     /// <param name="decompressArm9">Choose whether to decompress the ARM9 executable</param>
     /// <param name="unpackArc">Choose whether to unpack the archives</param>
-    /// <param name="includeFileOrder">Choose whether to include the order files are specified in the FAT in the project file (necessary for repacking some games)</param>
+    /// <param name="includeFileOrder">Choose whether to include the order files are specified in the FAT in the project file (necessary for repacking some games, maybe)</param>
     /// <remarks>Note that if <paramref name="includeFileOrder"/> is specified, files cannot be added or removed from the project</remarks>
     public static void Create(string name, string romPath, string outPath, bool decompressArm9 = false, bool unpackArc = false, bool includeFileOrder = false)
     {
@@ -120,7 +120,7 @@ public class NdsProjectFile : ProjectFile
     /// <param name="outPath">Path where the project structure is gonna be created</param>
     /// <param name="decompressArm9">Choose whether to decompress the ARM9 executable</param>
     /// <param name="unpackArc">Choose whether to unpack the archives</param>
-    /// <param name="includeFileOrder">Choose whether to include the order files are specified in the FAT in the project file (necessary for repacking some games)</param>
+    /// <param name="includeFileOrder">Choose whether to include the order files are specified in the FAT in the project file (necessary for repacking some games, maybe)</param>
     /// <remarks>Note that if <paramref name="includeFileOrder"/> is specified, files cannot be added or removed from the project</remarks>
     public static void Create(string name, Rom rom, string outPath, bool decompressArm9 = false, bool unpackArc = false, bool includeFileOrder = false)
     {

@@ -30,6 +30,8 @@ In order to disassemble or patch arm9.bin, you'll need it to be decompressed. If
 NitroPacker unpack -r PATH/TO/ROM.nds -o PATH/TO/UNPACK/DIRECTORY -p PROJECT_NAME -d
 ```
 
+Finally, it is possible some games may require that their file allocation tables be in a certain order. In this case, to be able to repack successfully, you will need to pass `-f`.
+
 ### Packing
 NitroPacker can only pack a directory that was previously unpacked with NitroPacker (or something structured exactly like that). To pack a ROM, run the following command:
 ```

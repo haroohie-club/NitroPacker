@@ -17,7 +17,7 @@ public class UnpackCommand : Command
             { "o|u|output|unpack-path=", "Path to unpack ROM to", u => _unpackPath = u },
             { "p|n|project|name|project-name=", "Name of the project file", p => _projectName = p },
             { "d|decompress-arm9", "If specified, will attempt to decompress the ARM9 binary", d => _decompressArm9 = true },
-            { "f|include-file-order", "If specified, will include the order of the files in the project file (some games require this to repack);" +
+            { "f|include-file-order", "If specified, will include the order of the files in the project file (some games might require this to repack); " +
                                "if true, no files can be added or removed after unpacking (though they still can be modified)", f => _includeFnt = true },
             { "a|unpack-archives", "If specified, will unpack NARC archives as well", a => _unpackArchives = true },
         };
