@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Xml.Linq;
+using HaroohieClub.NitroPacker.Core;
 
 namespace HaroohieClub.NitroPacker.Patcher.Overlay;
 
@@ -65,14 +67,12 @@ public class Overlay
         _data.InsertRange(loc, patchData);
     }
 
-    internal void Append(byte[] appendData, string ndsProjectFile)
+    internal void Append(byte[] appendData, string projectPath)
     {
         _data.AddRange(appendData);
-        XDocument ndsProjectFileDocument = XDocument.Load(ndsProjectFile);
+        NdsProjectFile project = JsonSerializer.Deserialize<NdsProjectFile>(File.ReadAllText(projectPath));
         Console.WriteLine($"Expanding RAM size in overlay table for overlay {Id}...");
-        var overlayTableEntry = ndsProjectFileDocument.Root.Element("RomInfo").Element("ARM9Ovt").Elements()
-            .First(o => o.Attribute("Id").Value == $"{Id}");
-        overlayTableEntry.Element("RamSize").Value = $"{_data.Count}";
-        ndsProjectFileDocument.Save(ndsProjectFile);
+        project.RomInfo.ARM9Ovt.First(o => o.Id == Id).RamSize = (uint)_data.Count;
+        File.WriteAllText(projectPath, JsonSerializer.Serialize(project));
     }
 }

@@ -17,7 +17,7 @@ public class OverlayAsmHack
     /// </summary>
     /// <param name="path">The path to the directory containing the ASM hacks laid out in the structure defined in the documentation</param>
     /// <param name="overlay">The overlay object to patch</param>
-    /// <param name="romInfoPath">The path to the rominfo XML file created by NitroPacker during unpack</param>
+    /// <param name="romInfoPath">The path to the rominfo JSON file created by NitroPacker during unpack</param>
     /// <param name="dockerTag">If using Docker to compile the hacks, the tag of the devkitpro/devkitarm to use (e.g. "latest"); leave empty or null if not using Docker</param>
     /// <param name="outputDataReceived">A handler for standard output from make/Docker</param>
     /// <param name="errorDataReceived">A handler for standard error from make/Docker</param>

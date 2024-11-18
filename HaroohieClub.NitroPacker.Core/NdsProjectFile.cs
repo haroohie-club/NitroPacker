@@ -5,13 +5,14 @@ using HaroohieClub.NitroPacker.Nitro.Card;
 using HaroohieClub.NitroPacker.Nitro.Fs;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 
 namespace HaroohieClub.NitroPacker.Core;
 
 /// <summary>
 /// Represents an NDS project file which is an abstraction of the NDS ROM itself
 /// </summary>
-public class NdsProjectFile : ProjectFile
+public class NdsProjectFile
 {
     /// <summary>
     /// The ROM info for this project file
@@ -87,7 +88,7 @@ public class NdsProjectFile : ProjectFile
     public static void Pack(string outputRomPath, string projectFilePath, bool compressArm9 = false)
     {
         using FileStream file = File.Create(outputRomPath);
-        NdsProjectFile project = FromByteArray<NdsProjectFile>(File.ReadAllBytes(projectFilePath));
+        NdsProjectFile project = JsonSerializer.Deserialize<NdsProjectFile>(File.ReadAllText(projectFilePath));
 
         string basePath = new FileInfo(projectFilePath).DirectoryName;
 
@@ -165,7 +166,7 @@ public class NdsProjectFile : ProjectFile
             ];
         }
 
-        File.WriteAllBytes(Path.Combine(outPath, $"{name}.xml"), projectFile.Write());
+        File.WriteAllText(Path.Combine(outPath, $"{name}.json"), JsonSerializer.Serialize(projectFile));
     }
 
     /// <summary>

@@ -16,7 +16,6 @@
   <ItemGroup>
     <ProjectReference Include="..\HaroohieClub.NitroPacker.IO\HaroohieClub.NitroPacker.IO.csproj" />
     <ProjectReference Include="..\HaroohieClub.NitroPacker.Nitro\HaroohieClub.NitroPacker.Nitro.csproj" />
-    <ProjectReference Include="..\HaroohieClub.NitroPacker.Patcher\HaroohieClub.NitroPacker.Patcher.csproj" />
   </ItemGroup>
 
 </Project>
