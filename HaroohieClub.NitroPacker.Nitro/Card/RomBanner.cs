@@ -1,130 +1,127 @@
 using System;
-using System.Text;
+using System.Data;
 using System.Text.Json.Serialization;
-using System.Xml.Serialization;
 using HaroohieClub.NitroPacker.IO;
 using HaroohieClub.NitroPacker.IO.Serialization;
-using HaroohieClub.NitroPacker.Nitro.Gx;
+using HaroohieClub.NitroPacker.Nitro.Card.Banners;
 
 namespace HaroohieClub.NitroPacker.Nitro.Card;
 
+/// <summary>
+/// Representation of the ROM's icon/title/banner
+/// </summary>
 public class RomBanner
-    {
-        public RomBanner() { }
+{
+    /// <summary>
+    /// Empty constructor for serialization
+    /// </summary>
+    public RomBanner() { }
 
-        public RomBanner(EndianBinaryReaderEx er)
+    /// <summary>
+    /// Constructs a banner with an extended endian binary reader
+    /// </summary>
+    /// <param name="er"><see cref="EndianBinaryReaderEx"/> with initialized stream</param>
+    public RomBanner(EndianBinaryReaderEx er)
+    {
+        Header = new(er);
+        Banner = Header.Version switch
         {
-            Header = new(er);
-            Banner = new(er);
+            0x001 => new BannerV1(er),
+            0x002 => new BannerV2(er),
+            0x003 => new BannerV3(er),
+            0x103 => new BannerV103(er),
+            _ => throw new DataException("Unsupported banner version!"),
+        };
+    }
+
+    /// <summary>
+    /// Writes the banner with an extended endian binary writer
+    /// </summary>
+    /// <param name="er"><see cref="EndianBinaryWriterEx"/> with an initialized stream</param>
+    public void Write(EndianBinaryWriterEx er)
+    {
+        Header.Crc16s = Banner.GetCrcs();
+        Header.Write(er);
+        Banner.Write(er);
+    }
+
+    /// <summary>
+    /// The header of the banner
+    /// </summary>
+    public BannerHeader Header { get; set; }
+
+    /// <summary>
+    /// A banner's header
+    /// </summary>
+    public class BannerHeader
+    {
+        /// <summary>
+        /// Blank constructor for serialization
+        /// </summary>
+        public BannerHeader() { }
+
+        /// <summary>
+        /// Constructs a banner header with an extended endian binary reader
+        /// </summary>
+        /// <param name="er"><see cref="EndianBinaryReaderEx"/> with an initialized stream</param>
+        public BannerHeader(EndianBinaryReaderEx er)
+        {
+            er.ReadObject(this);
         }
 
+        /// <summary>
+        /// Writes a banner with an extended endian binary writer
+        /// </summary>
+        /// <param name="er"><see cref="EndianBinaryWriterEx"/> with an initialized stream</param>
         public void Write(EndianBinaryWriterEx er)
         {
-            Header.CRC16_v1 = Banner.GetCrc();
-            Header.Write(er);
-            Banner.Write(er);
+            er.WriteObject(this);
         }
 
-        public BannerHeader Header { get; set; }
+        /// <summary>
+        /// The version of the banner (0x0001, 0x0002, 0x0003, or 0x0103)
+        /// </summary>
+        public ushort Version { get; set; }
 
-        public class BannerHeader
+        /// <summary>
+        /// Deprecated. Formerly thought to be reserved but is actually part of the <see cref="Version"/>
+        /// </summary>
+        [JsonIgnore]
+        [Obsolete("ReservedA is deprecated; please use the Version instead.")]
+        public byte ReservedA
         {
-            public BannerHeader() { }
-
-            public BannerHeader(EndianBinaryReaderEx er)
-            {
-                er.ReadObject(this);
-            }
-
-            public void Write(EndianBinaryWriterEx er)
-            {
-                er.WriteObject(this);
-            }
-
-            public byte Version { get; set; }
-            public byte ReservedA { get; set; }
-
-            [JsonIgnore]
-            public ushort CRC16_v1 { get; set; }
-
-            [ArraySize(28)]
-            public byte[] ReservedB { get; set; }
+            get => BitConverter.GetBytes(Version)[1];
+            set => Version = (ushort)((value << 8) | Version);
         }
 
-        public BannerV1 Banner { get; set; }
+        [JsonIgnore]
+        internal ushort[] Crc16s { get; set; }
 
-        public class BannerV1
+        private byte[] _reservedB;
+        /// <summary>
+        /// Reserved
+        /// </summary>
+        // [ArraySize(22)]
+        public byte[] ReservedB
         {
-            public BannerV1() { }
-
-            public BannerV1(EndianBinaryReader er)
+            get => _reservedB;
+            set
             {
-                Image = er.Read<byte>(32 * 32 / 2);
-                Pltt = er.Read<byte>(16 * 2);
-                GameName = new string[6];
-                GameName[0] = er.ReadString(Encoding.Unicode, 128).Replace("\0", "");
-                GameName[1] = er.ReadString(Encoding.Unicode, 128).Replace("\0", "");
-                GameName[2] = er.ReadString(Encoding.Unicode, 128).Replace("\0", "");
-                GameName[3] = er.ReadString(Encoding.Unicode, 128).Replace("\0", "");
-                GameName[4] = er.ReadString(Encoding.Unicode, 128).Replace("\0", "");
-                GameName[5] = er.ReadString(Encoding.Unicode, 128).Replace("\0", "");
-            }
-
-            public void Write(EndianBinaryWriter er)
-            {
-                er.Write(Image, 0, 32 * 32 / 2);
-                er.Write(Pltt, 0, 16 * 2);
-                foreach (string s in GameName) er.Write(GameName[0].PadRight(128, '\0'), Encoding.Unicode, false);
-            }
-
-            [ArraySize(32 * 32 / 2)]
-            public byte[] Image { get; set; }
-
-            [ArraySize(16 * 2)]
-            public byte[] Pltt { get; set; }
-
-            [JsonIgnore]
-            [XmlIgnore]
-            public string[] GameName { get; set; } //6, 128 chars (UTF16-LE)
-
-            [XmlElement("GameName")]
-            [JsonPropertyName("GameName")]
-            public string[] Base64GameName
-            {
-                get
+                if (value.Length == 0x28)
                 {
-                    string[] b = new string[6];
-                    for (int i = 0; i < 6; i++)
-                    {
-                        b[i] = Convert.ToBase64String(Encoding.Unicode.GetBytes(GameName[i]));
-                    }
-
-                    return b;
+                    // We don't need to set the CRCs here since they're ignored by serialization anyway
+                    _reservedB = value[6..];
                 }
-                set
+                else
                 {
-                    GameName = new string[6];
-                    for (int i = 0; i < 6; i++)
-                    {
-                        GameName[i] = Encoding.Unicode.GetString(Convert.FromBase64String(value[i]));
-                    }
+                    _reservedB = value;
                 }
             }
-
-            public ushort GetCrc()
-            {
-                byte[] data = new byte[2080];
-                Array.Copy(Image, data, 512);
-                Array.Copy(Pltt, 0, data, 512, 32);
-                Array.Copy(Encoding.Unicode.GetBytes(GameName[0].PadRight(128, '\0')), 0, data, 544, 256);
-                Array.Copy(Encoding.Unicode.GetBytes(GameName[1].PadRight(128, '\0')), 0, data, 544 + 256, 256);
-                Array.Copy(Encoding.Unicode.GetBytes(GameName[2].PadRight(128, '\0')), 0, data, 544 + 256 * 2, 256);
-                Array.Copy(Encoding.Unicode.GetBytes(GameName[3].PadRight(128, '\0')), 0, data, 544 + 256 * 3, 256);
-                Array.Copy(Encoding.Unicode.GetBytes(GameName[4].PadRight(128, '\0')), 0, data, 544 + 256 * 4, 256);
-                Array.Copy(Encoding.Unicode.GetBytes(GameName[5].PadRight(128, '\0')), 0, data, 544 + 256 * 5, 256);
-                return Crc16.GetCrc16(data);
-            }
-
-            public Rgba8Bitmap GetIcon() => GxUtil.DecodeChar(Image, Pltt, ImageFormat.Pltt16, 32, 32, true);
         }
     }
+    
+    /// <summary>
+    /// The actual ROM banner
+    /// </summary>
+    public Banner Banner { get; set; }
+}

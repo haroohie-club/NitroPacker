@@ -7,13 +7,27 @@ using HaroohieClub.NitroPacker.Nitro.Fs;
 
 namespace HaroohieClub.NitroPacker.Nitro.Card;
 
+/// <summary>
+/// Representation of an NDS ROM file
+/// </summary>
 public class Rom
 {
+    /// <summary>
+    /// Blank constructor used for serialization
+    /// </summary>
     public Rom() { }
 
+    /// <summary>
+    /// Constructs a ROM from binary data
+    /// </summary>
+    /// <param name="data">A byte array of the ROM's binary</param>
     public Rom(byte[] data)
         : this(new MemoryStream(data)) { }
 
+    /// <summary>
+    /// Constructs the ROM from a stream
+    /// </summary>
+    /// <param name="stream">A stream to the ROM</param>
     public Rom(Stream stream)
     {
         using (var er = new EndianBinaryReaderEx(stream, Endianness.LittleEndian))
@@ -88,6 +102,11 @@ public class Rom
         }
     }
 
+    /// <summary>
+    /// Returns a binary representation of the ROM to be written to disk
+    /// </summary>
+    /// <param name="trimmed">If set, trims the junk data off the end of the ROM</param>
+    /// <returns>Returns a byte array containing the binary data representing the ROM</returns>
     public byte[] Write(bool trimmed = true)
     {
         using (var m = new MemoryStream())
@@ -98,6 +117,12 @@ public class Rom
         }
     }
 
+    /// <summary>
+    /// Writes the ROM to a stream
+    /// </summary>
+    /// <param name="stream">The stream to write to</param>
+    /// <param name="trimmed">If set, trims the junk data off the end of the ROM</param>
+    /// <exception cref="Exception">Throws if the ROM is invalid</exception>
     public void Write(Stream stream, bool trimmed = true)
     {
         using (var ew = new EndianBinaryWriterEx(stream, Endianness.LittleEndian))
@@ -258,7 +283,9 @@ public class Rom
                 Banner.Write(ew);
             }
             else
+            {
                 Header.IconTitleOffset = 0;
+            }
 
             //Files
             if (FileData.All(f => f.NameFat is null))
