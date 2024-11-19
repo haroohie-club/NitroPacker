@@ -87,7 +87,10 @@ public class RomHeader
     [XmlAttribute("Property")]
     public byte AutoStart { get; set; }
 
-    internal uint Arm9RomOffset { get; set; }
+    /// <summary>
+    /// The offset of ARM9 in the ROM
+    /// </summary>
+    public uint Arm9RomOffset { get; set; }
     /// <summary>
     /// Entry address of ARM9 in RAM (0x2000000..0x23BFE00)
     /// </summary>
@@ -98,9 +101,15 @@ public class RomHeader
     /// </summary>
     [XmlAttribute("MainRamAddress")]
     public uint Arm9RamAddress { get; set; }
-    internal uint Arm9Size { get; set; }
+    /// <summary>
+    /// The size of arm9.bin
+    /// </summary>
+    public uint Arm9Size { get; set; }
 
-    internal uint Arm7RomOffset { get; set; }
+    /// <summary>
+    /// The offset of ARM7 in the ROM
+    /// </summary>
+    public uint Arm7RomOffset { get; set; }
     /// <summary>
     /// ARM7 entry address in RAM (0x2000000..0x23BFE00, or 0x37F8000..0x3807E00)
     /// </summary>
@@ -111,18 +120,33 @@ public class RomHeader
     /// </summary>
     [XmlAttribute("SubRamAddress")]
     public uint Arm7RamAddress { get; set; }
-    internal uint Arm7Size { get; set; }
+    /// <summary>
+    /// The size of arm7.bin
+    /// </summary>
+    public uint Arm7Size { get; set; }
 
-    internal uint FntOffset { get; set; }
-    internal uint FntSize { get; set; }
+    /// <summary>
+    /// The offset of the file name table in the ROM
+    /// </summary>
+    public uint FntOffset { get; set; }
+    /// <summary>
+    /// The size of the file name table
+    /// </summary>
+    public uint FntSize { get; set; }
 
-    internal uint FatOffset { get; set; }
-    internal uint FatSize { get; set; }
+    /// <summary>
+    /// The offset of the file allocation table in the ROM
+    /// </summary>
+    public uint FatOffset { get; set; }
+    /// <summary>
+    /// The size of the file allocation table
+    /// </summary>
+    public uint FatSize { get; set; }
 
-    internal uint Arm9OvtOffset { get; set; }
-    internal uint Arm9OvtSize { get; set; }
-    internal uint Arm7OvtOffset { get; set; }
-    internal uint Arm7OvtSize { get; set; }
+    public uint Arm9OvtOffset { get; set; }
+    public uint Arm9OvtSize { get; set; }
+    public uint Arm7OvtOffset { get; set; }
+    public uint Arm7OvtSize { get; set; }
 
     /// <summary>
     /// Deprecated property for unknown values that are now known to be <see cref="NormalCommandSettings"/> and <see cref="Key1CommandSettings"/>
@@ -152,7 +176,7 @@ public class RomHeader
     [XmlIgnore]
     public uint Key1CommandSettings { get; set; }
     
-    internal uint IconTitleOffset { get; set; }
+    public uint IconTitleOffset { get; set; }
 
     /// <summary>
     /// Secure Area Checksum, CRC-16 of [[0x020]..0x00007FFF]
@@ -191,9 +215,9 @@ public class RomHeader
     [XmlAttribute("RomParamC")]
     public byte[] SecureAreaDisable { get; set; } //8
 
-    internal uint RomSizeExcludingDSiArea { get; set; }
+    public uint RomSizeExcludingDSiArea { get; set; }
 
-    internal uint HeaderSize { get; set; }
+    public uint HeaderSize { get; set; }
     
     /// <summary>
     /// Unknown on the NDS, and not well-documented on the DSi
@@ -246,10 +270,10 @@ public class RomHeader
     public byte[] NintendoLogoData { get; set; }
     
     [JsonIgnore]
-    internal ushort LogoCRC { get; set; }
+    public ushort LogoCRC { get; set; }
 
     [JsonIgnore]
-    internal ushort NTRHeaderCRC { get; set; }
+    public ushort NTRHeaderCRC { get; set; }
 
     /// <summary>
     /// The DSi portion of the ROM header

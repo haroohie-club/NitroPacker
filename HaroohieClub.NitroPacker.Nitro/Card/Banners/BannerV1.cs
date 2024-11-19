@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 using HaroohieClub.NitroPacker.IO;
 
@@ -23,5 +24,17 @@ public class BannerV1 : Banner
         {
             GameName[i] = er.ReadString(Encoding.Unicode, 128).Replace("\0", "");
         }
+    }
+
+    public override ushort[] GetCrcs()
+    {
+        byte[] data = new byte[0x820];
+        Array.Copy(Image, data, 512);
+        Array.Copy(Palette, 0, data, 512, 32);
+        for (int i = 0; i < 6; i++)
+        {
+            Array.Copy(Encoding.Unicode.GetBytes(GameName[i].PadRight(128, '\0')), 0, data, 544 + 256 * i, 256);
+        }
+        return [Crc16.GetCrc16(data), 0, 0, 0];
     }
 }

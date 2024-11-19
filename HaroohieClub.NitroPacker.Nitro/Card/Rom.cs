@@ -30,75 +30,74 @@ public class Rom
     /// <param name="stream">A stream to the ROM</param>
     public Rom(Stream stream)
     {
-        using (var er = new EndianBinaryReaderEx(stream, Endianness.LittleEndian))
+        using EndianBinaryReaderEx er = new(stream, Endianness.LittleEndian);
+        
+        Header = new(er);
+        
+        if (er.BaseStream.Length >= 0x4000)
         {
-            Header = new(er);
+            er.BaseStream.Position = 0x1000;
 
-            if (er.BaseStream.Length >= 0x4000)
-            {
-                er.BaseStream.Position = 0x1000;
+            KeyPadding0 = er.Read<byte>(0x600);
+            PTable = er.Read<uint>(Blowfish.PTableEntryCount);
+            KeyPadding1 = er.Read<byte>(0x5B8);
 
-                KeyPadding0 = er.Read<byte>(0x600);
-                PTable = er.Read<uint>(Blowfish.PTableEntryCount);
-                KeyPadding1 = er.Read<byte>(0x5B8);
+            SBoxes = new uint[Blowfish.SBoxCount][];
+            for (int i = 0; i < Blowfish.SBoxCount; i++)
+                SBoxes[i] = er.Read<uint>(Blowfish.SBoxEntryCount);
 
-                SBoxes = new uint[Blowfish.SBoxCount][];
-                for (int i = 0; i < Blowfish.SBoxCount; i++)
-                    SBoxes[i] = er.Read<uint>(Blowfish.SBoxEntryCount);
+            KeyPadding2 = er.Read<byte>(0x400);
+        }
 
-                KeyPadding2 = er.Read<byte>(0x400);
-            }
+        er.BaseStream.Position = Header.Arm9RomOffset;
+        MainRom = er.Read<byte>((int)Header.Arm9Size);
+        if (er.Read<uint>() == 0xDEC00621) //Nitro Footer
+        {
+            er.BaseStream.Position -= 4;
+            StaticFooter = new(er);
+        }
 
-            er.BaseStream.Position = Header.Arm9RomOffset;
-            MainRom = er.Read<byte>((int)Header.Arm9Size);
-            if (er.Read<uint>() == 0xDEC00621) //Nitro Footer
-            {
-                er.BaseStream.Position -= 4;
-                StaticFooter = new(er);
-            }
+        er.BaseStream.Position = Header.Arm7RomOffset;
+        SubRom = er.Read<byte>((int)Header.Arm7Size);
 
-            er.BaseStream.Position = Header.Arm7RomOffset;
-            SubRom = er.Read<byte>((int)Header.Arm7Size);
+        er.BaseStream.Position = Header.FntOffset;
+        Fnt = new(er);
 
-            er.BaseStream.Position = Header.FntOffset;
-            Fnt = new(er);
+        er.BaseStream.Position = Header.Arm9OvtOffset;
+        MainOvt = new RomOVT[Header.Arm9OvtSize / 32];
+        for (int i = 0; i < Header.Arm9OvtSize / 32; i++) MainOvt[i] = new(er);
 
-            er.BaseStream.Position = Header.Arm9OvtOffset;
-            MainOvt = new RomOVT[Header.Arm9OvtSize / 32];
-            for (int i = 0; i < Header.Arm9OvtSize / 32; i++) MainOvt[i] = new(er);
+        er.BaseStream.Position = Header.Arm7OvtOffset;
+        SubOvt = new RomOVT[Header.Arm7OvtSize / 32];
+        for (int i = 0; i < Header.Arm7OvtSize / 32; i++) SubOvt[i] = new(er);
 
-            er.BaseStream.Position = Header.Arm7OvtOffset;
-            SubOvt = new RomOVT[Header.Arm7OvtSize / 32];
-            for (int i = 0; i < Header.Arm7OvtSize / 32; i++) SubOvt[i] = new(er);
+        er.BaseStream.Position = Header.FatOffset;
+        Fat = new FatEntry[Header.FatSize / 8];
+        for (int i = 0; i < Header.FatSize / 8; i++)
+            Fat[i] = new(er);
 
-            er.BaseStream.Position = Header.FatOffset;
-            Fat = new FatEntry[Header.FatSize / 8];
-            for (int i = 0; i < Header.FatSize / 8; i++)
-                Fat[i] = new(er);
+        if (Header.IconTitleOffset != 0)
+        {
+            er.BaseStream.Position = Header.IconTitleOffset;
+            Banner = new(er);
+        }
 
-            if (Header.IconTitleOffset != 0)
-            {
-                er.BaseStream.Position = Header.IconTitleOffset;
-                Banner = new(er);
-            }
+        var fileData = new byte[Header.FatSize / 8][];
+        for (int i = 0; i < Header.FatSize / 8; i++)
+        {
+            er.BaseStream.Position = Fat[i].FileTop;
+            fileData[i] = er.Read<byte>((int)Fat[i].FileSize);
+        }
 
-            byte[][] fileData = new byte[Header.FatSize / 8][];
-            for (int i = 0; i < Header.FatSize / 8; i++)
-            {
-                er.BaseStream.Position = Fat[i].FileTop;
-                fileData[i] = er.Read<byte>((int)Fat[i].FileSize);
-            }
+        FileData = fileData.Select(t => new NameFatWithData(t)).ToArray();
 
-            FileData = fileData.Select(t => new NameFatWithData(t)).ToArray();
-
-            //RSA Signature
-            if (Header.RomSizeExcludingDSiArea + 0x88 <= er.BaseStream.Length)
-            {
-                er.BaseStream.Position = Header.RomSizeExcludingDSiArea;
-                byte[] rsaSig = er.Read<byte>(0x88);
-                if (rsaSig[0] == 'a' && rsaSig[1] == 'c')
-                    RSASignature = rsaSig;
-            }
+        //RSA Signature
+        if (Header.RomSizeExcludingDSiArea + 0x88 <= er.BaseStream.Length)
+        {
+            er.BaseStream.Position = Header.RomSizeExcludingDSiArea;
+            byte[] rsaSig = er.Read<byte>(0x88);
+            if (rsaSig[0] == 'a' && rsaSig[1] == 'c')
+                RSASignature = rsaSig;
         }
     }
 

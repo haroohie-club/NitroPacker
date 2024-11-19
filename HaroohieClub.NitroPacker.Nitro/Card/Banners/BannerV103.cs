@@ -1,5 +1,5 @@
 using System;
-using System.Text;
+using System.Buffers.Binary;
 using HaroohieClub.NitroPacker.IO;
 using HaroohieClub.NitroPacker.IO.Serialization;
 using HaroohieClub.NitroPacker.Nitro.Gx;
@@ -37,10 +37,39 @@ public class BannerV103 : BannerV3
     /// <inheritdoc />
     public BannerV103(EndianBinaryReader er) : base(er)
     {
-        
+        er.Skip(0x800);
+        AnimationBitmaps = er.Read<byte>(0x1000);
+        AnimationPalettes = er.Read<byte>(0x100);
+        AnimationSequences = er.Read<byte>(0x80);
     }
 
-    public Rgba8Bitmap[] GetAnimatedBitmaps()
+    public override void Write(EndianBinaryWriter ew)
+    {
+        base.Write(ew);
+        ew.Skip(0x800);
+        ew.Write(AnimationBitmaps);
+        ew.Write(AnimationPalettes);
+        ew.Write(AnimationSequences);
+    }
+
+    public override ushort[] GetCrcs()
+    {
+        ushort[] crcs = base.GetCrcs();
+
+        byte[] data = new byte[0x1180];
+        Array.Copy(AnimationBitmaps, data, AnimationBitmaps.Length);
+        Array.Copy(AnimationPalettes, data, AnimationPalettes.Length);
+        Array.Copy(AnimationSequences, data, AnimationSequences.Length);
+
+        crcs[3] = Crc16.GetCrc16(data);
+        return crcs;
+    }
+
+    /// <summary>
+    /// Gets a series of 8 RGBA bitmaps representing the animation frames
+    /// </summary>
+    /// <returns>The animation frames as 8 RGBA8 bitmaps</returns>
+    public Rgba8Bitmap[] GetAnimatedBitmapFrames()
     {
         var animationFrames = new Rgba8Bitmap[8];
         for (int i = 0; i < animationFrames.Length; i++)
@@ -49,5 +78,22 @@ public class BannerV103 : BannerV3
         }
 
         return animationFrames;
+    }
+
+    /// <summary>
+    /// Unpacks the icon animation sequence data into an array of objects
+    /// </summary>
+    /// <returns>An array of 64 icon animation sequence objects</returns>
+    public IconAnimationSequence[] GetAnimationSequences()
+    {
+        var animationSequences = new IconAnimationSequence[64];
+        
+        for (int i = 0; i < animationSequences.Length; i++)
+        {
+            animationSequences[i] = 
+                new(BinaryPrimitives.ReadUInt16LittleEndian(AnimationSequences.AsSpan()[(i * 2)..(i * 2 + 1)]));
+        }
+
+        return animationSequences;
     }
 }

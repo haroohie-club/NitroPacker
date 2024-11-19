@@ -34,7 +34,7 @@ public class BannerV3 : BannerV2
         byte[] data = new byte[0xA20];
         Array.Copy(Image, data, 512);
         Array.Copy(Palette, 0, data, 512, 32);
-        for (int i = 0; i < GameName.Length; i++)
+        for (int i = 0; i < 8; i++)
         {
             Array.Copy(Encoding.Unicode.GetBytes(GameName[i].PadRight(128, '\0')), 0, data, 544 + 256 * i, 256);
         }

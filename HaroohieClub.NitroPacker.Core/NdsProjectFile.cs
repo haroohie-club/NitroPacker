@@ -154,7 +154,7 @@ public class NdsProjectFile
         File.WriteAllBytes(Path.Combine(outPath, "arm9.bin"),
             decompressArm9 ? Blz.Decompress(ndsFile.MainRom) : ndsFile.MainRom);
         File.WriteAllBytes(Path.Combine(outPath, "arm7.bin"), ndsFile.SubRom);
-        using FileStream bannerStream = File.OpenWrite(Path.Combine(outPath, "banner.bin"));
+        using FileStream bannerStream = File.Create(Path.Combine(outPath, "banner.bin"));
         using EndianBinaryWriterEx bw = new(bannerStream);
         ndsFile.Banner.Write(bw);
 
@@ -258,7 +258,7 @@ public class NdsProjectFile
             .Deserialize(oldProjectStream);
         File.WriteAllText(Path.Combine(Path.GetDirectoryName(oldXmlProject), $"{Path.GetFileNameWithoutExtension(oldXmlProject)}.json"),
             JsonSerializer.Serialize(project));
-        using FileStream bannerStream = File.OpenWrite(Path.Combine(Path.GetDirectoryName(oldXmlProject), "banner.bin"));
+        using FileStream bannerStream = File.Create(Path.Combine(Path.GetDirectoryName(oldXmlProject), "banner.bin"));
         using EndianBinaryWriterEx bw = new(bannerStream);
         project.RomInfo.Banner.Write(bw);
     }

@@ -275,7 +275,7 @@ public class EndianBinaryReaderEx : EndianBinaryReader
     {
         var properties = SerializationUtil.GetPropertiesInOrder<T>();
 
-        PropertyAlignment alignment = SerializationUtil.GetFieldAlignment<T>();
+        PropertyAlignment alignment = SerializationUtil.GetPropertyAlignment<T>();
         foreach (PropertyInfo property in properties)
         {
             long curPos = BaseStream.Position;

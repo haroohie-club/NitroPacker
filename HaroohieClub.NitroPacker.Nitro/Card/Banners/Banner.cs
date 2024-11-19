@@ -29,14 +29,14 @@ public abstract class Banner
     /// <summary>
     /// Writes the banner using an endian binary writer
     /// </summary>
-    /// <param name="er"><see cref="EndianBinaryWriter"/> with initialized stream</param>
-    public virtual void Write(EndianBinaryWriter er)
+    /// <param name="ew"><see cref="EndianBinaryWriter"/> with initialized stream</param>
+    public virtual void Write(EndianBinaryWriter ew)
     {
-        er.Write(Image, 0, 32 * 32 / 2);
-        er.Write(Palette, 0, 16 * 2);
+        ew.Write(Image, 0, 32 * 32 / 2);
+        ew.Write(Palette, 0, 16 * 2);
         foreach (string s in GameName)
         {
-            er.Write(GameName[0].PadRight(128, '\0'), Encoding.Unicode, false);
+            ew.Write(GameName[0].PadRight(128, '\0'), Encoding.Unicode, false);
         }
     }
 
@@ -102,15 +102,12 @@ public abstract class Banner
     /// <returns>An array of up to four CRC16 hashes</returns>
     public virtual ushort[] GetCrcs()
     {
-        byte[] data = new byte[0x820];
-        Array.Copy(Image, data, 512);
-        Array.Copy(Palette, 0, data, 512, 32);
-        for (int i = 0; i < GameName.Length; i++)
-        {
-            Array.Copy(Encoding.Unicode.GetBytes(GameName[i].PadRight(128, '\0')), 0, data, 544 + 256 * i, 256);
-        }
-        return [Crc16.GetCrc16(data), 0, 0, 0];
+        return new ushort[4];
     }
 
+    /// <summary>
+    /// Gets an RGBA bitmap representation of the icon
+    /// </summary>
+    /// <returns>An RGBA8 Bitmap representing the icon</returns>
     public Rgba8Bitmap GetIcon() => GxUtil.DecodeChar(Image, Palette, ImageFormat.Pltt16, 32, 32, true);
 }

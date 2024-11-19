@@ -9,7 +9,7 @@ namespace HaroohieClub.NitroPacker.IO.Serialization;
 
 public static class SerializationUtil
 {
-    public static PropertyType TypeToFieldType(Type type)
+    public static PropertyType TypeToPropertyType(Type type)
     {
         if (type == typeof(byte))
             return PropertyType.U8;
@@ -107,32 +107,32 @@ public static class SerializationUtil
         {
             Type elemType = property.PropertyType.GetElementType();
             if (elemType.IsEnum)
-                return TypeToFieldType(elemType.GetEnumUnderlyingType());
-            return TypeToFieldType(elemType);
+                return TypeToPropertyType(elemType.GetEnumUnderlyingType());
+            return TypeToPropertyType(elemType);
         }
 
         if (property.PropertyType.IsEnum)
-            return TypeToFieldType(property.PropertyType.GetEnumUnderlyingType());
+            return TypeToPropertyType(property.PropertyType.GetEnumUnderlyingType());
 
-        return TypeToFieldType(property.PropertyType);
+        return TypeToPropertyType(property.PropertyType);
     }
 
-    public static PropertyType GetVectorPrimitiveType(PropertyInfo field)
+    public static PropertyType GetVectorPrimitiveType(PropertyInfo property)
     {
-        bool isFx32 = field.GetCustomAttribute<Fx32Attribute>() != null;
-        bool isFx16 = field.GetCustomAttribute<Fx16Attribute>() != null;
-        bool hasFieldType = field.GetCustomAttribute<TypeAttribute>() != null;
-        int count = (isFx32 ? 1 : 0) + (isFx16 ? 1 : 0) + (hasFieldType ? 1 : 0);
+        bool isFx32 = property.GetCustomAttribute<Fx32Attribute>() != null;
+        bool isFx16 = property.GetCustomAttribute<Fx16Attribute>() != null;
+        bool hasPropertyType = property.GetCustomAttribute<TypeAttribute>() != null;
+        int count = (isFx32 ? 1 : 0) + (isFx16 ? 1 : 0) + (hasPropertyType ? 1 : 0);
         if (count > 1)
-            throw new("More than one field type specified for field " + field.Name + " in type " +
-                      field.DeclaringType?.Name);
+            throw new("More than one property type specified for property " + property.Name + " in type " +
+                      property.DeclaringType?.Name);
 
         if (isFx32)
             return PropertyType.Fx32;
         if (isFx16)
             return PropertyType.Fx16;
-        if (hasFieldType)
-            return field.GetCustomAttribute<TypeAttribute>().Type;
+        if (hasPropertyType)
+            return property.GetCustomAttribute<TypeAttribute>().Type;
         return PropertyType.Float;
     }
 
@@ -147,11 +147,11 @@ public static class SerializationUtil
             .OrderBy(f => f.MetadataToken);
     }
 
-    public static PropertyAlignment GetFieldAlignment<T>()
-        => GetFieldAlignment(typeof(T));
+    public static PropertyAlignment GetPropertyAlignment<T>()
+        => GetPropertyAlignment(typeof(T));
 
-    public static PropertyAlignment GetFieldAlignment(Type type)
-        => type.GetCustomAttribute<FieldAlignmentAttribute>()?.Alignment ?? PropertyAlignment.Packed;
+    public static PropertyAlignment GetPropertyAlignment(Type type)
+        => type.GetCustomAttribute<PropertyAlignmentAttribute>()?.Alignment ?? PropertyAlignment.Packed;
 
     private static readonly ConcurrentDictionary<(Type, Type), Delegate> CastCache = new();
 

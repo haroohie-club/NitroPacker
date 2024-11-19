@@ -32,7 +32,11 @@ public class IconAnimationSequence
     /// <param name="packed"></param>
     public IconAnimationSequence(ushort packed)
     {
-        
+        FrameDuration = (byte)packed;
+        BitmapIndex = (byte)((packed >> 8) & 0b111);
+        PaletteIndex = (byte)((packed >> 11) & 0b111);
+        FlipHorizontally = (packed & 0b0100_0000_0000_0000) > 0;
+        FlipVertically = (packed & 0b1000_0000_0000_0000) > 0;
     }
     
     /// <summary>
@@ -43,6 +47,6 @@ public class IconAnimationSequence
     {
         return (ushort)(FrameDuration | ((BitmapIndex & 0b111) << 8) | ((PaletteIndex & 0b111) << 11)
                         | (FlipHorizontally ? 0b0100_0000_0000_0000 : 0) 
-                        | (FlipVertically ? 0b10000_0000_0000_0000 : 0));
+                        | (FlipVertically ? 0b1000_0000_0000_0000 : 0));
     }
 }

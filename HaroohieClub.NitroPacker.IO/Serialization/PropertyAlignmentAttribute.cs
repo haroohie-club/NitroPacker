@@ -9,11 +9,11 @@ public enum PropertyAlignment
 }
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = true, AllowMultiple = false)]
-public sealed class FieldAlignmentAttribute : Attribute
+public sealed class PropertyAlignmentAttribute : Attribute
 {
     public PropertyAlignment Alignment { get; }
 
-    public FieldAlignmentAttribute(PropertyAlignment alignment)
+    public PropertyAlignmentAttribute(PropertyAlignment alignment)
     {
         Alignment = alignment;
     }

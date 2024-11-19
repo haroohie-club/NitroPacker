@@ -455,7 +455,7 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
     {
         var fields = SerializationUtil.GetPropertiesInOrder<T>();
 
-        PropertyAlignment alignment = SerializationUtil.GetFieldAlignment<T>();
+        PropertyAlignment alignment = SerializationUtil.GetPropertyAlignment<T>();
         foreach (PropertyInfo field in fields)
         {
             var refAttrib = field.GetCustomAttribute<ReferenceAttribute>();
