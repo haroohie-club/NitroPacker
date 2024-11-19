@@ -51,6 +51,11 @@ public class EndianBinaryWriter : IDisposable
             _buffer = new byte[size];
     }
 
+    public void Skip(long numBytes)
+    {
+        BaseStream.Seek(numBytes, SeekOrigin.Current);
+    }
+
     public void Write(byte value)
     {
         CreateBuffer(1);

@@ -2,7 +2,7 @@
 
 namespace HaroohieClub.NitroPacker.Nitro.Card;
 
-public static class Crc16
+internal static class Crc16
 {
     private static readonly ushort[] Crc16Table =
     {

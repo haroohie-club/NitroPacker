@@ -3,7 +3,7 @@ using HaroohieClub.NitroPacker.IO;
 
 namespace HaroohieClub.NitroPacker.Nitro.Card;
 
-public static class KeyTransform
+internal static class KeyTransform
 {
     private static void ApplyKeyCode(byte[] keyCode, int modulo, byte[] keyTable)
     {

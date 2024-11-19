@@ -3,7 +3,7 @@ using HaroohieClub.NitroPacker.IO;
 
 namespace HaroohieClub.NitroPacker.Nitro.Card;
 
-public class Blowfish
+internal class Blowfish
 {
     public const int KeyTableLength = 0x1048;
 

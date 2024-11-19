@@ -2,7 +2,7 @@
 
 namespace HaroohieClub.NitroPacker.Nitro.Card;
 
-public static class Keys
+internal static class Keys
 {
     public static ReadOnlySpan<byte> NtrBlowfishTable => new byte[]
     {

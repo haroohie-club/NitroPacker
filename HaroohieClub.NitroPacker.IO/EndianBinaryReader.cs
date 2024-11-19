@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -46,6 +47,11 @@ public class EndianBinaryReader : IDisposable
             for (int i = 0; i < bytes; i += stride)
                 Array.Reverse(_buffer, i, stride);
         }
+    }
+
+    public void Skip(long numBytes)
+    {
+        BaseStream.Seek(numBytes, SeekOrigin.Current);
     }
 
     public char ReadChar(Encoding encoding)
