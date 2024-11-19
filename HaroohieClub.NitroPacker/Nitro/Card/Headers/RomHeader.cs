@@ -6,9 +6,9 @@ using System.Text.Json.Serialization;
 using System.Xml.Serialization;
 using HaroohieClub.NitroPacker.IO;
 using HaroohieClub.NitroPacker.IO.Serialization;
-using HaroohieClub.NitroPacker.Nitro.Card.Twl;
+using HaroohieClub.NitroPacker.Nitro.Card.Cryptography;
 
-namespace HaroohieClub.NitroPacker.Nitro.Card;
+namespace HaroohieClub.NitroPacker.Nitro.Card.Headers;
 
 /// <summary>
 /// Representation of the NDS (and DSi) ROM header

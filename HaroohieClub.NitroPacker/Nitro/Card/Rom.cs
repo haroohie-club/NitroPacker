@@ -3,6 +3,8 @@ using System.IO;
 using System.Linq;
 using HaroohieClub.NitroPacker.IO;
 using HaroohieClub.NitroPacker.IO.Archive;
+using HaroohieClub.NitroPacker.Nitro.Card.Cryptography;
+using HaroohieClub.NitroPacker.Nitro.Card.Headers;
 using HaroohieClub.NitroPacker.Nitro.Fs;
 
 namespace HaroohieClub.NitroPacker.Nitro.Card;

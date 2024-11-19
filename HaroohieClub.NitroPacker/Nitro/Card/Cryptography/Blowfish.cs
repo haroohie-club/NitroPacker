@@ -1,7 +1,7 @@
 ﻿using System;
 using HaroohieClub.NitroPacker.IO;
 
-namespace HaroohieClub.NitroPacker.Nitro.Card;
+namespace HaroohieClub.NitroPacker.Nitro.Card.Cryptography;
 
 internal class Blowfish
 {

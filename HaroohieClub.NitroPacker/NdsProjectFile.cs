@@ -7,6 +7,7 @@ using HaroohieClub.NitroPacker.IO;
 using HaroohieClub.NitroPacker.IO.Archive;
 using HaroohieClub.NitroPacker.IO.Compression;
 using HaroohieClub.NitroPacker.Nitro.Card;
+using HaroohieClub.NitroPacker.Nitro.Card.Headers;
 using HaroohieClub.NitroPacker.Nitro.Fs;
 
 namespace HaroohieClub.NitroPacker;

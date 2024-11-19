@@ -1,6 +1,6 @@
 using HaroohieClub.NitroPacker.IO.Serialization;
 
-namespace HaroohieClub.NitroPacker.Nitro.Card.Twl;
+namespace HaroohieClub.NitroPacker.Nitro.Card.Headers;
 
 /// <summary>
 /// Class representing the TWL/DSi portion of the ROM header

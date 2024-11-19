@@ -1,6 +1,7 @@
 using System;
 using System.Text;
 using HaroohieClub.NitroPacker.IO;
+using HaroohieClub.NitroPacker.Nitro.Card.Cryptography;
 
 namespace HaroohieClub.NitroPacker.Nitro.Card.Banners;
 

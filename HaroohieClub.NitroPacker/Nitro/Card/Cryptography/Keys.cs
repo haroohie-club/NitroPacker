@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HaroohieClub.NitroPacker.Nitro.Card;
+namespace HaroohieClub.NitroPacker.Nitro.Card.Cryptography;
 
 internal static class Keys
 {

@@ -1,6 +1,6 @@
 using HaroohieClub.NitroPacker.IO.Serialization;
 
-namespace HaroohieClub.NitroPacker.Nitro.Card.Twl;
+namespace HaroohieClub.NitroPacker.Nitro.Card.Headers;
 
 /// <summary>
 /// [DSi] Representation of the hashes/encryption section of the DSi header

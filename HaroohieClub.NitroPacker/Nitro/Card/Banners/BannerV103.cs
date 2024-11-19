@@ -2,6 +2,7 @@ using System;
 using System.Buffers.Binary;
 using HaroohieClub.NitroPacker.IO;
 using HaroohieClub.NitroPacker.IO.Serialization;
+using HaroohieClub.NitroPacker.Nitro.Card.Cryptography;
 using HaroohieClub.NitroPacker.Nitro.Gx;
 
 namespace HaroohieClub.NitroPacker.Nitro.Card.Banners;
