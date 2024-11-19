@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using HaroohieClub.NitroPacker.Core;
+using HaroohieClub.NitroPacker;
 using HaroohieClub.NitroPacker.Nitro.Card;
 
 namespace HaroohieClub.NitroPacker.Patcher.Overlay;

@@ -9,7 +9,7 @@ using HaroohieClub.NitroPacker.IO.Compression;
 using HaroohieClub.NitroPacker.Nitro.Card;
 using HaroohieClub.NitroPacker.Nitro.Fs;
 
-namespace HaroohieClub.NitroPacker.Core;
+namespace HaroohieClub.NitroPacker;
 
 /// <summary>
 /// Represents an NDS project file which is an abstraction of the NDS ROM itself

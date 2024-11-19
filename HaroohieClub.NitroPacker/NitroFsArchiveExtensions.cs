@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using HaroohieClub.NitroPacker.Nitro.Fs;
 
-namespace HaroohieClub.NitroPacker.Core;
+namespace HaroohieClub.NitroPacker;
 
 internal static class NitroFsArchiveExtensions
 {

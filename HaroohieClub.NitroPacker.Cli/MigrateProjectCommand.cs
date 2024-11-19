@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
-using HaroohieClub.NitroPacker.Core;
+using HaroohieClub.NitroPacker;
 using Mono.Options;
 
 namespace HaroohieClub.NitroPacker.Cli;

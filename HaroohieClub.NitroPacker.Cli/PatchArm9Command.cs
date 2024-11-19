@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Text.Json;
-using HaroohieClub.NitroPacker.Core;
+using HaroohieClub.NitroPacker;
 using HaroohieClub.NitroPacker.Patcher.Nitro;
 using Mono.Options;
 

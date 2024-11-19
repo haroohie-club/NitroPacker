@@ -4,6 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Version>$(NPVersion)</Version>
     <Title>NitroPacker.Core</Title>
     <Authors>Ermelber, Gericom, Jonko</Authors>
@@ -12,10 +13,5 @@
     <PackageId>NitroPacker.Core</PackageId>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\HaroohieClub.NitroPacker.IO\HaroohieClub.NitroPacker.IO.csproj" />
-    <ProjectReference Include="..\HaroohieClub.NitroPacker.Nitro\HaroohieClub.NitroPacker.Nitro.csproj" />
-  </ItemGroup>
 
 </Project>
