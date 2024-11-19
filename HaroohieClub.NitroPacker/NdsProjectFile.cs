@@ -75,8 +75,8 @@ public class NdsProjectFile
         {
             Header = Rom.Header;
             NitroFooter = Rom.StaticFooter;
-            ARM9Ovt = Rom.MainOvt;
-            ARM7Ovt = Rom.SubOvt;
+            ARM9Ovt = Rom.Arm9OverlayTable;
+            ARM7Ovt = Rom.Arm7OverlayTable;
             Banner = Rom.Banner;
             RSASignature = Rom.RSASignature;
         }
@@ -136,14 +136,14 @@ public class NdsProjectFile
         fs.Export(dir.CreateSubdirectory("data").FullName, unpackArc);
 
         dir.CreateSubdirectory("overlay");
-        foreach (RomOVT vv in ndsFile.MainOvt)
+        foreach (RomOVT vv in ndsFile.Arm9OverlayTable)
         {
             File.WriteAllBytes(Path.Combine(outPath, "overlay", $"main_{vv.Id:X4}.bin"),
                 vv.Flag.HasFlag(RomOVT.OVTFlag.Compressed)
                     ? Blz.Decompress(ndsFile.FileData[vv.FileId].Data)
                     : ndsFile.FileData[vv.FileId].Data);
         }
-        foreach (RomOVT vv in ndsFile.SubOvt)
+        foreach (RomOVT vv in ndsFile.Arm7OverlayTable)
         {
             File.WriteAllBytes(Path.Combine(outPath, "overlay", $"sub_{vv.Id:X4}.bin"),
                 vv.Flag.HasFlag(RomOVT.OVTFlag.Compressed)
@@ -152,8 +152,8 @@ public class NdsProjectFile
         }
 
         File.WriteAllBytes(Path.Combine(outPath, "arm9.bin"),
-            decompressArm9 ? Blz.Decompress(ndsFile.MainRom) : ndsFile.MainRom);
-        File.WriteAllBytes(Path.Combine(outPath, "arm7.bin"), ndsFile.SubRom);
+            decompressArm9 ? Blz.Decompress(ndsFile.Arm9Binary) : ndsFile.Arm9Binary);
+        File.WriteAllBytes(Path.Combine(outPath, "arm7.bin"), ndsFile.Arm7Binary);
         using FileStream bannerStream = File.Create(Path.Combine(outPath, "banner.bin"));
         using EndianBinaryWriterEx bw = new(bannerStream);
         ndsFile.Banner.Write(bw);
@@ -164,7 +164,7 @@ public class NdsProjectFile
             projectFile.RomInfo.NameEntryWithFatEntries =
             [
                 .. ndsFile.Fnt.NameTable.SelectMany((t, i) => t.Where(e => e.Type == NameTableEntryType.File).Select(e => (i, e)))
-                    .Zip(ndsFile.Fat.Skip(ndsFile.MainOvt.Length + ndsFile.SubOvt.Length)).Select(n => new NameEntryWithFatEntry
+                    .Zip(ndsFile.Fat.Skip(ndsFile.Arm9OverlayTable.Length + ndsFile.Arm7OverlayTable.Length)).Select(n => new NameEntryWithFatEntry
                     {
                         Path = NitroFsArchive.JoinPath(NitroFsArchive.GetPathFromDir(n.First.i, "/", ndsFile.Fnt), n.First.e.Name),
                         FatOffset = n.Second.FileTop,
@@ -194,17 +194,17 @@ public class NdsProjectFile
         {
             Header = RomInfo.Header,
             StaticFooter = RomInfo.NitroFooter,
-            MainOvt = RomInfo.ARM9Ovt,
-            SubOvt = RomInfo.ARM7Ovt,
+            Arm9OverlayTable = RomInfo.ARM9Ovt,
+            Arm7OverlayTable = RomInfo.ARM7Ovt,
             Banner = RomInfo.Banner,
             RSASignature = RomInfo.RSASignature,
             Fnt = new(),
         };
 
-        n.Fat = new FatEntry[n.MainOvt.Length + n.SubOvt.Length];
-        byte[][] fileData = new byte[n.MainOvt.Length + n.SubOvt.Length][];
+        n.Fat = new FatEntry[n.Arm9OverlayTable.Length + n.Arm7OverlayTable.Length];
+        byte[][] fileData = new byte[n.Arm9OverlayTable.Length + n.Arm7OverlayTable.Length][];
         uint fid = 0;
-        foreach (RomOVT vv in n.MainOvt)
+        foreach (RomOVT vv in n.Arm9OverlayTable)
         {
             vv.FileId = fid;
             n.Fat[fid] = new(0, 0);
@@ -219,7 +219,7 @@ public class NdsProjectFile
             }
             fid++;
         }
-        foreach (RomOVT vv in n.SubOvt)
+        foreach (RomOVT vv in n.Arm7OverlayTable)
         {
             vv.FileId = fid;
             n.Fat[fid] = new(0, 0);
@@ -235,13 +235,13 @@ public class NdsProjectFile
             fid++;
         }
         n.FileData = fileData.Select(t => new NameFatWithData(t)).ToArray();
-        n.MainRom = File.ReadAllBytes(Path.Combine(projectDir, "arm9.bin"));
+        n.Arm9Binary = File.ReadAllBytes(Path.Combine(projectDir, "arm9.bin"));
         if (compressArm9)
         {
             Blz blz = new();
-            n.MainRom = blz.BLZ_Encode(n.MainRom, true);
+            n.Arm9Binary = blz.BLZ_Encode(n.Arm9Binary, true);
         }
-        n.SubRom = File.ReadAllBytes(Path.Combine(projectDir, "arm7.bin"));
+        n.Arm7Binary = File.ReadAllBytes(Path.Combine(projectDir, "arm7.bin"));
         n.FromArchive(fsRoot, RomInfo.NameEntryWithFatEntries);
 
         n.Write(outputStream);

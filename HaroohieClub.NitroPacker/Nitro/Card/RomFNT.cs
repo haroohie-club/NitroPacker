@@ -4,14 +4,24 @@ using HaroohieClub.NitroPacker.Nitro.Fs;
 
 namespace HaroohieClub.NitroPacker.Nitro.Card;
 
+/// <summary>
+/// Representation of the file name table
+/// </summary>
 public class RomFNT
 {
+    /// <summary>
+    /// Constructs a blank file name table (used for serialization)
+    /// </summary>
     public RomFNT()
     {
         DirectoryTable = new[] { new DirectoryTableEntry { ParentId = 1 } };
         NameTable = new[] { new[] { NameTableEntry.EndOfDirectory() } };
     }
 
+    /// <summary>
+    /// Constructs a file name table using an extended endian binary reader
+    /// </summary>
+    /// <param name="er"><see cref="EndianBinaryReaderEx"/> with an initialized stream</param>
     public RomFNT(EndianBinaryReaderEx er)
     {
         er.BeginChunk();
@@ -64,6 +74,9 @@ public class RomFNT
         er.EndChunk();
     }
 
+    /// <summary>
+    /// The directory table portion of the FNT
+    /// </summary>
     public DirectoryTableEntry[] DirectoryTable { get; set; }
     public NameTableEntry[][] NameTable { get; set; }
 }

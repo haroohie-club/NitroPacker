@@ -50,7 +50,7 @@ public class Rom
         }
 
         er.BaseStream.Position = Header.Arm9RomOffset;
-        MainRom = er.Read<byte>((int)Header.Arm9Size);
+        Arm9Binary = er.Read<byte>((int)Header.Arm9Size);
         if (er.Read<uint>() == 0xDEC00621) //Nitro Footer
         {
             er.BaseStream.Position -= 4;
@@ -58,18 +58,18 @@ public class Rom
         }
 
         er.BaseStream.Position = Header.Arm7RomOffset;
-        SubRom = er.Read<byte>((int)Header.Arm7Size);
+        Arm7Binary = er.Read<byte>((int)Header.Arm7Size);
 
         er.BaseStream.Position = Header.FntOffset;
         Fnt = new(er);
 
         er.BaseStream.Position = Header.Arm9OvtOffset;
-        MainOvt = new RomOVT[Header.Arm9OvtSize / 32];
-        for (int i = 0; i < Header.Arm9OvtSize / 32; i++) MainOvt[i] = new(er);
+        Arm9OverlayTable = new RomOVT[Header.Arm9OvtSize / 32];
+        for (int i = 0; i < Header.Arm9OvtSize / 32; i++) Arm9OverlayTable[i] = new(er);
 
         er.BaseStream.Position = Header.Arm7OvtOffset;
-        SubOvt = new RomOVT[Header.Arm7OvtSize / 32];
-        for (int i = 0; i < Header.Arm7OvtSize / 32; i++) SubOvt[i] = new(er);
+        Arm7OverlayTable = new RomOVT[Header.Arm7OvtSize / 32];
+        for (int i = 0; i < Header.Arm7OvtSize / 32; i++) Arm7OverlayTable[i] = new(er);
 
         er.BaseStream.Position = Header.FatOffset;
         Fat = new FatEntry[Header.FatSize / 8];
@@ -206,22 +206,22 @@ public class Rom
             Header.HeaderSize = (uint)ew.BaseStream.Position;
             //MainRom
             Header.Arm9RomOffset = (uint)ew.BaseStream.Position;
-            Header.Arm9Size = (uint)MainRom.Length;
-            ew.Write(MainRom, 0, MainRom.Length);
+            Header.Arm9Size = (uint)Arm9Binary.Length;
+            ew.Write(Arm9Binary, 0, Arm9Binary.Length);
             //Static Footer
             StaticFooter?.Write(ew);
-            if (MainOvt.Length != 0)
+            if (Arm9OverlayTable.Length != 0)
             {
                 ew.WritePadding(0x200, 0xFF);
                 //Main Ovt
                 Header.Arm9OvtOffset = (uint)ew.BaseStream.Position;
-                Header.Arm9OvtSize = (uint)MainOvt.Length * 0x20;
-                foreach (RomOVT v in MainOvt)
+                Header.Arm9OvtSize = (uint)Arm9OverlayTable.Length * 0x20;
+                foreach (RomOVT v in Arm9OverlayTable)
                 {
                     v.Compressed = (uint)FileData[v.FileId].Data.Length;
                     v.Write(ew);
                 }
-                foreach (RomOVT v in MainOvt)
+                foreach (RomOVT v in Arm9OverlayTable)
                 {
                     ew.WritePadding(0x200, 0xFF);
                     Fat[v.FileId].FileTop = (uint)ew.BaseStream.Position;
@@ -238,18 +238,18 @@ public class Rom
             ew.WritePadding(0x200, 0xFF);
             //SubRom
             Header.Arm7RomOffset = (uint)ew.BaseStream.Position;
-            Header.Arm7Size = (uint)SubRom.Length;
-            ew.Write(SubRom, 0, SubRom.Length);
+            Header.Arm7Size = (uint)Arm7Binary.Length;
+            ew.Write(Arm7Binary, 0, Arm7Binary.Length);
             //I assume this works the same as the main ovt?
-            if (SubOvt.Length != 0)
+            if (Arm7OverlayTable.Length != 0)
             {
                 ew.WritePadding(0x200, 0xFF);
                 //Sub Ovt
                 Header.Arm7OvtOffset = (uint)ew.BaseStream.Position;
-                Header.Arm7OvtSize = (uint)SubOvt.Length * 0x20;
-                foreach (RomOVT v in SubOvt)
+                Header.Arm7OvtSize = (uint)Arm7OverlayTable.Length * 0x20;
+                foreach (RomOVT v in Arm7OverlayTable)
                     v.Write(ew);
-                foreach (RomOVT v in SubOvt)
+                foreach (RomOVT v in Arm7OverlayTable)
                 {
                     ew.WritePadding(0x200, 0xFF);
                     Fat[v.FileId].FileTop = (uint)ew.BaseStream.Position;
@@ -349,38 +349,96 @@ public class Rom
         }
     }
 
+    /// <summary>
+    /// ROM header (<see cref="RomHeader"/>)
+    /// </summary>
     public RomHeader Header { get; set; }
 
+    /// <summary>
+    /// TODO
+    /// </summary>
     public byte[] KeyPadding0 { get; set; }
+    /// <summary>
+    /// TODO
+    /// </summary>
     public uint[] PTable { get; set; }
+    /// <summary>
+    /// TODO
+    /// </summary>
     public byte[] KeyPadding1 { get; set; }
+    /// <summary>
+    /// TODO
+    /// </summary>
     public uint[][] SBoxes { get; set; }
+    /// <summary>
+    /// TODO
+    /// </summary>
     public byte[] KeyPadding2 { get; set; }
 
-    public byte[] MainRom { get; set; }
+    /// <summary>
+    /// The contents of the game's arm9.bin
+    /// </summary>
+    public byte[] Arm9Binary { get; set; }
+    /// <summary>
+    /// Static footer for ARM9
+    /// </summary>
     public NitroFooter StaticFooter { get; set; }
     
-    public byte[] SubRom { get; set; }
+    /// <summary>
+    /// The contents of the game's arm7.bin
+    /// </summary>
+    public byte[] Arm7Binary { get; set; }
+    /// <summary>
+    /// File name table
+    /// </summary>
     public RomFNT Fnt { get; set; }
 
-    public RomOVT[] MainOvt { get; set; }
-    public RomOVT[] SubOvt { get; set; }
+    /// <summary>
+    /// The ARM9 overlay table
+    /// </summary>
+    public RomOVT[] Arm9OverlayTable { get; set; }
+    /// <summary>
+    /// The ARM7 overlay table
+    /// </summary>
+    public RomOVT[] Arm7OverlayTable { get; set; }
 
+    /// <summary>
+    /// File allocation table
+    /// </summary>
     public FatEntry[] Fat { get; set; }
+    /// <summary>
+    /// The ROM's banner/title/icon
+    /// </summary>
     public RomBanner Banner { get; set; }
 
+    /// <summary>
+    /// NitroFS file data
+    /// </summary>
     public NameFatWithData[] FileData { get; set; }
 
+    /// <summary>
+    /// RSA signature
+    /// </summary>
     public byte[] RSASignature { get; set; }
 
+    /// <summary>
+    /// Generates a Nitro filesystem archive from a ROM
+    /// </summary>
+    /// <returns>A <see cref="NitroFsArchive"/> with the contents of the ROM</returns>
     public NitroFsArchive ToArchive()
     {
         return new(Fnt.DirectoryTable, Fnt.NameTable, FileData);
     }
 
+    /// <summary>
+    /// Packs an arbitrary archive into a ROM
+    /// </summary>
+    /// <param name="archive">The generic archive to pack into the ROM</param>
+    /// <param name="nameFat">Optionally, a table correlating name table entries to FAT entries
+    /// (used for maintaining file offset structure)</param>
     public void FromArchive(Archive archive, NameEntryWithFatEntry[] nameFat = null)
     {
-        int nrOverlays = MainOvt.Length + SubOvt.Length;
+        int nrOverlays = Arm9OverlayTable.Length + Arm7OverlayTable.Length;
         
         NitroFsArchive nitroArc = new(archive, (ushort)nrOverlays, nameFat?.ToList());
         Fnt.DirectoryTable = nitroArc.DirTable;
