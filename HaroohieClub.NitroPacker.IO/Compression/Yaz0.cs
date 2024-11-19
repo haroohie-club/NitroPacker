@@ -27,7 +27,7 @@ public class Yaz0
             for (int i = 0; i < 8; i++)
             {
                 header <<= 1;
-                var (pos, len) = context.FindRun();
+                (uint pos, int len) = context.FindRun();
                 if (len > 0)
                 {
                     uint back = context.Position - pos;

@@ -24,7 +24,7 @@ public class Rom
     {
         using (var er = new EndianBinaryReaderEx(stream, Endianness.LittleEndian))
         {
-            Header = new RomHeader(er);
+            Header = new(er);
 
             if (er.BaseStream.Length >= 0x4000)
             {
@@ -46,32 +46,32 @@ public class Rom
             if (er.Read<uint>() == 0xDEC00621) //Nitro Footer
             {
                 er.BaseStream.Position -= 4;
-                StaticFooter = new NitroFooter(er);
+                StaticFooter = new(er);
             }
 
             er.BaseStream.Position = Header.SubRomOffset;
             SubRom = er.Read<byte>((int)Header.SubSize);
 
             er.BaseStream.Position = Header.FntOffset;
-            Fnt = new RomFNT(er);
+            Fnt = new(er);
 
             er.BaseStream.Position = Header.MainOvtOffset;
             MainOvt = new RomOVT[Header.MainOvtSize / 32];
-            for (int i = 0; i < Header.MainOvtSize / 32; i++) MainOvt[i] = new RomOVT(er);
+            for (int i = 0; i < Header.MainOvtSize / 32; i++) MainOvt[i] = new(er);
 
             er.BaseStream.Position = Header.SubOvtOffset;
             SubOvt = new RomOVT[Header.SubOvtSize / 32];
-            for (int i = 0; i < Header.SubOvtSize / 32; i++) SubOvt[i] = new RomOVT(er);
+            for (int i = 0; i < Header.SubOvtSize / 32; i++) SubOvt[i] = new(er);
 
             er.BaseStream.Position = Header.FatOffset;
             Fat = new FatEntry[Header.FatSize / 8];
             for (int i = 0; i < Header.FatSize / 8; i++)
-                Fat[i] = new FatEntry(er);
+                Fat[i] = new(er);
 
             if (Header.BannerOffset != 0)
             {
                 er.BaseStream.Position = Header.BannerOffset;
-                Banner = new RomBanner(er);
+                Banner = new(er);
             }
 
             byte[][] fileData = new byte[Header.FatSize / 8][];
@@ -116,39 +116,39 @@ public class Rom
                 if (KeyPadding0 != null)
                 {
                     if (KeyPadding0.Length != 0x600)
-                        throw new Exception();
+                        throw new();
                     er.Write(KeyPadding0);
                 }
                 else
                     er.BaseStream.Position += 0x600;
 
                 if (PTable.Length != Blowfish.PTableEntryCount)
-                    throw new Exception();
+                    throw new();
                 er.Write(PTable);
 
                 if (KeyPadding1 != null)
                 {
                     if (KeyPadding1.Length != 0x5B8)
-                        throw new Exception();
+                        throw new();
                     er.Write(KeyPadding1);
                 }
                 else
                     er.BaseStream.Position += 0x5B8;
 
                 if (SBoxes.Length != Blowfish.SBoxCount)
-                    throw new Exception();
+                    throw new();
 
                 for (int i = 0; i < Blowfish.SBoxCount; i++)
                 {
                     if (SBoxes[i] == null || SBoxes[i].Length != Blowfish.SBoxEntryCount)
-                        throw new Exception();
+                        throw new();
                     er.Write(SBoxes[i]);
                 }
 
                 if (KeyPadding2 != null)
                 {
                     if (KeyPadding2.Length != 0x400)
-                        throw new Exception();
+                        throw new();
                     er.Write(KeyPadding2);
                 }
                 else
@@ -198,12 +198,12 @@ public class Rom
                 //Main Ovt
                 Header.MainOvtOffset = (uint)er.BaseStream.Position;
                 Header.MainOvtSize = (uint)MainOvt.Length * 0x20;
-                foreach (var v in MainOvt)
+                foreach (RomOVT v in MainOvt)
                 {
                     v.Compressed = (uint)FileData[v.FileId].Data.Length;
                     v.Write(er);
                 }
-                foreach (var v in MainOvt)
+                foreach (RomOVT v in MainOvt)
                 {
                     er.WritePadding(0x200, 0xFF);
                     Fat[v.FileId].FileTop = (uint)er.BaseStream.Position;
@@ -229,9 +229,9 @@ public class Rom
                 //Sub Ovt
                 Header.SubOvtOffset = (uint)er.BaseStream.Position;
                 Header.SubOvtSize = (uint)SubOvt.Length * 0x20;
-                foreach (var v in SubOvt)
+                foreach (RomOVT v in SubOvt)
                     v.Write(er);
-                foreach (var v in SubOvt)
+                foreach (RomOVT v in SubOvt)
                 {
                     er.WritePadding(0x200, 0xFF);
                     Fat[v.FileId].FileTop = (uint)er.BaseStream.Position;
@@ -321,7 +321,7 @@ public class Rom
 
             //Fat
             er.BaseStream.Position = Header.FatOffset;
-            foreach (var v in Fat)
+            foreach (FatEntry v in Fat)
                 v.Write(er);
             //Header
             er.BaseStream.Position = 0;
@@ -684,8 +684,8 @@ public class Rom
 
         public RomBanner(EndianBinaryReaderEx er)
         {
-            Header = new BannerHeader(er);
-            Banner = new BannerV1(er);
+            Header = new(er);
+            Banner = new(er);
         }
 
         public void Write(EndianBinaryWriterEx er)
@@ -697,7 +697,6 @@ public class Rom
 
         public BannerHeader Header { get; set; }
 
-        [Serializable]
         public class BannerHeader
         {
             public BannerHeader() { }
@@ -724,7 +723,6 @@ public class Rom
 
         public BannerV1 Banner { get; set; }
 
-        [Serializable]
         public class BannerV1
         {
             public BannerV1() { }

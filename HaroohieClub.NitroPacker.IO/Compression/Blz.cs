@@ -20,12 +20,12 @@ public class Blz
     {
         if (fileLength < 8)
             //TODO: better exception type(s) throughout this function.
-            throw new Exception("Bad File Length!");
+            throw new("Bad File Length!");
 
         byte[] packedBytes = new byte[fileLength];
         if (stream.Read(packedBytes) < fileLength)
         {
-            throw new Exception("Unexpected end of file!");
+            throw new("Unexpected end of file!");
         }
 
         var memoryStream = new MemoryStream(packedBytes);
@@ -71,7 +71,7 @@ public class Blz
             {
                 if (bytesRead >= encodedLength)
                 {
-                    throw new Exception("Unexpected end of data while reading flag byte!");
+                    throw new("Unexpected end of data while reading flag byte!");
                 }
                 flags = packedReader.ReadByte();
                 bytesRead++;
@@ -82,13 +82,13 @@ public class Blz
             {
                 if (bytesRead + 1 >= encodedLength)
                 {
-                    throw new Exception("Unexpected end of data while reading decompression token!");
+                    throw new("Unexpected end of data while reading decompression token!");
                 }
 
                 ushort info = (ushort)((packedReader.ReadByte() << 8) | packedReader.ReadByte());
                 bytesRead += 2;
 
-                var length = (info >> 12) + 3;
+                int length = (info >> 12) + 3;
                 if (bytesWritten + length > bytesToWrite)
                 {
                     if (printWarnings)
@@ -97,7 +97,7 @@ public class Blz
                     }
                     length = bytesToWrite - bytesWritten;
                 }
-                var displacement = (info & 0xFFF) + 3;
+                int displacement = (info & 0xFFF) + 3;
                 Buffer.BlockCopy(decompressedData, bytesWritten - displacement, decompressedData, bytesWritten, length);
                 bytesWritten += length;
             }
@@ -105,7 +105,7 @@ public class Blz
             {
                 if (bytesRead == encodedLength)
                 {
-                    throw new Exception("Unexpected end of data while reading literal byte!");
+                    throw new("Unexpected end of data while reading literal byte!");
                 }
 
                 byte b = packedReader.ReadByte();

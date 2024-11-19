@@ -92,7 +92,7 @@ public class EndianBinaryReader : IDisposable
 
     public string ReadString(Encoding encoding, int count)
     {
-        return new string(ReadChars(encoding, count));
+        return new(ReadChars(encoding, count));
     }
 
     public unsafe T Read<T>() where T : unmanaged

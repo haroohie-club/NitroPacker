@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Xml.Serialization;
+using HaroohieClub.NitroPacker.IO;
 using HaroohieClub.NitroPacker.IO.Archive;
 using HaroohieClub.NitroPacker.IO.Compression;
 using HaroohieClub.NitroPacker.Nitro.Card;
@@ -44,6 +45,7 @@ public class NdsProjectFile
         /// <summary>
         /// The banner of the ROM
         /// </summary>
+        [JsonIgnore]
         public Rom.RomBanner Banner { get; set; }
         /// <summary>
         /// The ROM's RSA signature
@@ -152,6 +154,9 @@ public class NdsProjectFile
         File.WriteAllBytes(Path.Combine(outPath, "arm9.bin"),
             decompressArm9 ? Blz.Decompress(ndsFile.MainRom) : ndsFile.MainRom);
         File.WriteAllBytes(Path.Combine(outPath, "arm7.bin"), ndsFile.SubRom);
+        using FileStream bannerStream = File.OpenWrite(Path.Combine(outPath, "banner.bin"));
+        using EndianBinaryWriterEx bw = new(bannerStream);
+        ndsFile.Banner.Write(bw);
 
         projectFile.RomInfo = new(ndsFile);
         if (includeFileOrder)
@@ -180,6 +185,11 @@ public class NdsProjectFile
     /// <remarks>Note that if your project file includes a file name table, no new files will be added and any removed files will cause errors</remarks>
     public void Build(string projectDir, Archive fsRoot, Stream outputStream, bool compressArm9 = false)
     {
+        // Read banner from file first to initialize that
+        using FileStream bannerStream = File.OpenRead(Path.Combine(projectDir, "banner.bin"));
+        EndianBinaryReaderEx br = new(bannerStream);
+        RomInfo.Banner = br.ReadObject<Rom.RomBanner>();
+        
         Rom n = new()
         {
             Header = RomInfo.Header,

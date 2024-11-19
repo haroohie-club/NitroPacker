@@ -27,14 +27,14 @@ public class DiskArchive : Archive
         path = path.Replace(PathSeparator, Path.DirectorySeparatorChar);
 
         if (!string.IsNullOrEmpty(Path.GetPathRoot(path)))
-            throw new Exception("Invalid path specified");
+            throw new("Invalid path specified");
 
         path = Path.Combine(RootDiskPath, path);
 
         // check that the path does not accidentally go up past the root of the archive
         string relPath = Path.GetRelativePath(RootDiskPath, path);
         if (relPath.StartsWith(".."))
-            throw new Exception("Invalid path specified");
+            throw new("Invalid path specified");
 
         return path;
     }
@@ -62,9 +62,9 @@ public class DiskArchive : Archive
 
     public override void DeleteDirectory(string path)
     {
-        var diskPath = CreateDiskPath(path);
+        string diskPath = CreateDiskPath(path);
         if (Path.GetRelativePath(RootDiskPath, diskPath) == ".")
-            throw new Exception("Can't delete root directory");
+            throw new("Can't delete root directory");
 
         Directory.Delete(diskPath, true);
     }

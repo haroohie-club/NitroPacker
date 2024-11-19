@@ -28,7 +28,7 @@ public static class SerializationUtil
         if (type == typeof(long))
             return PropertyType.S64;
 
-        throw new Exception("Unexpected primitive field type " + type.Name);
+        throw new("Unexpected primitive field type " + type.Name);
     }
 
     public static Type FieldTypeToType(PropertyType type) => type switch
@@ -79,7 +79,7 @@ public static class SerializationUtil
         if (!property.PropertyType.IsArray)
             return false;
 
-        var type = property.PropertyType.GetElementType();
+        Type type = property.PropertyType.GetElementType();
 
         return type.IsPrimitive ||
                property.GetCustomAttribute<TypeAttribute>() != null ||
@@ -94,8 +94,8 @@ public static class SerializationUtil
         bool hasFieldType = property.GetCustomAttribute<TypeAttribute>() != null;
         int count = (isFx32 ? 1 : 0) + (isFx16 ? 1 : 0) + (hasFieldType ? 1 : 0);
         if (count > 1)
-            throw new Exception("More than one property type specified for property " + property.Name + " in type " +
-                                property.DeclaringType?.Name);
+            throw new("More than one property type specified for property " + property.Name + " in type " +
+                      property.DeclaringType?.Name);
 
         if (isFx32)
             return PropertyType.Fx32;
@@ -105,7 +105,7 @@ public static class SerializationUtil
             return property.GetCustomAttribute<TypeAttribute>().Type;
         if (property.PropertyType.IsArray)
         {
-            var elemType = property.PropertyType.GetElementType();
+            Type elemType = property.PropertyType.GetElementType();
             if (elemType.IsEnum)
                 return TypeToFieldType(elemType.GetEnumUnderlyingType());
             return TypeToFieldType(elemType);
@@ -124,8 +124,8 @@ public static class SerializationUtil
         bool hasFieldType = field.GetCustomAttribute<TypeAttribute>() != null;
         int count = (isFx32 ? 1 : 0) + (isFx16 ? 1 : 0) + (hasFieldType ? 1 : 0);
         if (count > 1)
-            throw new Exception("More than one field type specified for field " + field.Name + " in type " +
-                                field.DeclaringType?.Name);
+            throw new("More than one field type specified for field " + field.Name + " in type " +
+                      field.DeclaringType?.Name);
 
         if (isFx32)
             return PropertyType.Fx32;
@@ -160,16 +160,16 @@ public static class SerializationUtil
 
     public static object Cast(object data, Type type)
     {
-        var inType = data.GetType();
+        Type inType = data.GetType();
 
         if (inType == type)
             return data;
 
-        if (CastCache.TryGetValue((inType, type), out var func))
+        if (CastCache.TryGetValue((inType, type), out Delegate func))
             return func.DynamicInvoke(data);
 
-        var dataParam = Expression.Parameter(data.GetType());
-        var run = Expression.Lambda(Expression.Convert(dataParam, type), dataParam).Compile();
+        ParameterExpression dataParam = Expression.Parameter(data.GetType());
+        Delegate run = Expression.Lambda(Expression.Convert(dataParam, type), dataParam).Compile();
 
         CastCache.TryAdd((inType, type), run);
 

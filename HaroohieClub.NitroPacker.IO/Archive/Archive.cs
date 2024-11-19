@@ -40,7 +40,7 @@ public abstract class Archive : IReadOnlyArchive
     public static string NormalizePath(string path)
     {
         path = path.Trim(PathSeparator);
-        var parts = path.Split(PathSeparator);
+        string[] parts = path.Split(PathSeparator);
 
         var newPath = new Stack<string>();
         foreach (string part in parts)
@@ -51,7 +51,7 @@ public abstract class Archive : IReadOnlyArchive
             if (part == "..")
             {
                 if (newPath.Count == 0)
-                    throw new Exception("Invalid path specified");
+                    throw new("Invalid path specified");
                 newPath.Pop();
                 continue;
             }

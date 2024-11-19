@@ -11,11 +11,11 @@ internal static class NitroFsArchiveExtensions
 
     private static void ExtractDirectories(NitroFsArchive dir, string dirPath, string outPath, bool unpackArc = false)
     {
-        var path = outPath + dirPath;
+        string path = outPath + dirPath;
 
         Directory.CreateDirectory(path);
 
-        foreach (var f in dir.EnumerateFiles(dirPath, true))
+        foreach (string f in dir.EnumerateFiles(dirPath, true))
         {
             File.WriteAllBytes(outPath + f, dir.GetFileData(f));
         }

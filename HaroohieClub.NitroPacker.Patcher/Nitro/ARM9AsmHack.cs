@@ -102,7 +102,7 @@ public class ARM9AsmHack
                         replace |= relativeDestinationOffset;
                         if (!arm9.WriteU32LE(replaceOffset, replace))
                         {
-                            throw new Exception(
+                            throw new(
                                 $"The offset of function {lines[3]} is invalid. Maybe your code is inside an overlay or you wrote the wrong offset."
                             );
                         }
@@ -119,7 +119,7 @@ public class ARM9AsmHack
                         replace |= relativeDestinationOffset;
                         if (!arm9.WriteU32LE(replaceOffset, replace))
                         {
-                            throw new Exception(
+                            throw new(
                                 $"The offset of function {lines[3]} is invalid. Maybe your code is inside an overlay or you wrote the wrong offset."
                             );
                         }
@@ -139,7 +139,7 @@ public class ARM9AsmHack
                         replace2 |= (ushort)((relativeDestinationOffset >> 0) & 0x7FE);
                         if (!arm9.WriteU16LE(replaceOffset, replace1)) 
                         {
-                            throw new Exception(
+                            throw new(
                                 $"The offset of function {lines[3]} is invalid. Maybe your code is inside an overlay or you wrote the wrong offset.\r\nIf your code is inside an overlay, this is an action replay code to let your asm hack still work:\r\n1 {replaceOffset:X7} 0000{replace1:X4}\r\n1{replaceOffset + 2:X7} 0000{replace2:X4})"
                             );
                         }

@@ -40,7 +40,7 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
     {
         if (chunkPointer != null)
             WriteChunkPointer(chunkPointer);
-        _chunks.Push(new Chunk() { StartAddress = BaseStream.Position, HasSize = false });
+        _chunks.Push(new() { StartAddress = BaseStream.Position, HasSize = false });
     }
 
     public void BeginChunk(int sizeOffset, ChunkSizeType sizeType = ChunkSizeType.U32)
@@ -50,7 +50,7 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
     {
         if (chunkPointer != null)
             WriteChunkPointer(chunkPointer);
-        _chunks.Push(new Chunk
+        _chunks.Push(new()
         {
             StartAddress = BaseStream.Position,
             HasSize = true,
@@ -62,7 +62,7 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
 
     public void EndChunk()
     {
-        var s = _chunks.Pop();
+        Chunk s = _chunks.Pop();
         if (s.HasSize)
         {
             ulong length = (ulong)(BaseStream.Position - s.StartAddress + s.SizeDelta);
@@ -126,7 +126,7 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
         }
 
         Write(0);
-        return new ChunkPointer() { PointerAddress = address, PointerBase = ptrBase };
+        return new() { PointerAddress = address, PointerBase = ptrBase };
     }
 
     public void WriteChunkSize(ChunkSizeType sizeType = ChunkSizeType.U32)
@@ -150,7 +150,7 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
 
         if (_chunks.Count == 0)
             return;
-        var curChunk = _chunks.Peek();
+        Chunk curChunk = _chunks.Peek();
         curChunk.HasSize = true;
         curChunk.SizeOffset = (int)(curPos - curChunk.StartAddress);
         curChunk.SizeType = sizeType;
@@ -302,8 +302,8 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
 
     private void WritePrimitive<T>(T obj, PropertyInfo property, PropertyAlignment alignment)
     {
-        var fieldType = SerializationUtil.GetPropertyPrimitiveType(property);
-        var trueType = SerializationUtil.FieldTypeToType(fieldType);
+        PropertyType fieldType = SerializationUtil.GetPropertyPrimitiveType(property);
+        Type trueType = SerializationUtil.FieldTypeToType(fieldType);
 
         AlignForProperty(property, alignment, fieldType);
 
@@ -319,7 +319,7 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
         var chunkSizeAttr = property.GetCustomAttribute<ChunkSizeAttribute>();
         if (chunkSizeAttr != null && _chunks.Count > 0)
         {
-            var chunkSizeType = fieldType switch
+            ChunkSizeType chunkSizeType = fieldType switch
             {
                 PropertyType.U8 => ChunkSizeType.U8,
                 PropertyType.U16 => ChunkSizeType.U16,
@@ -328,7 +328,7 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
                 _ => throw new ArgumentOutOfRangeException("Invalid type for chunk size")
             };
 
-            var chunk = _chunks.Peek();
+            Chunk chunk = _chunks.Peek();
             chunk.HasSize = true;
             chunk.SizeOffset = (int)GetCurposRelative();
             chunk.SizeType = chunkSizeType;
@@ -348,7 +348,7 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
         int size = -1;
         if (arrSizeAttr.SizeField != null)
         {
-            var sizeField = typeof(T).GetField(arrSizeAttr.SizeField);
+            FieldInfo sizeField = typeof(T).GetField(arrSizeAttr.SizeField);
             if (sizeField == null)
                 throw new SerializationException(
                     $"Array size field \"{arrSizeAttr.SizeField}\" not found in \"{typeof(T).Name}\"");
@@ -360,7 +360,7 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
         if (size < 0)
             throw new SerializationException("Array size invalid");
 
-        var elementType = property.PropertyType.GetElementType();
+        Type elementType = property.PropertyType.GetElementType();
 
         var value = property.GetValue(obj) as Array;
 
@@ -383,7 +383,7 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
         //else 
         if (SerializationUtil.HasPrimitiveArrayType(property))
         {
-            var type = SerializationUtil.GetPropertyPrimitiveType(property);
+            PropertyType type = SerializationUtil.GetPropertyPrimitiveType(property);
 
             //align if this is not a reference field
             if (property.GetCustomAttribute<ReferenceAttribute>() == null)
@@ -399,7 +399,7 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
         else
         {
             AlignForProperty(property, alignment, PropertyType.U8);
-            var writeMethod = elementType.GetMethod("Write", new[] { typeof(EndianBinaryWriter) });
+            MethodInfo writeMethod = elementType.GetMethod("Write", new[] { typeof(EndianBinaryWriter) });
             if (writeMethod == null)
                 writeMethod = elementType.GetMethod("Write", new[] { typeof(EndianBinaryWriterEx) });
             if (writeMethod != null)
@@ -455,8 +455,8 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
     {
         var fields = SerializationUtil.GetPropertiesInOrder<T>();
 
-        var alignment = SerializationUtil.GetFieldAlignment<T>();
-        foreach (var field in fields)
+        PropertyAlignment alignment = SerializationUtil.GetFieldAlignment<T>();
+        foreach (PropertyInfo field in fields)
         {
             var refAttrib = field.GetCustomAttribute<ReferenceAttribute>();
             if (refAttrib != null)
@@ -475,7 +475,7 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
                         refAttrib));
                 }
 
-                var fieldType = SerializationUtil.FieldTypeToType(refAttrib.PointerPropertyType);
+                Type fieldType = SerializationUtil.FieldTypeToType(refAttrib.PointerPropertyType);
                 WriteFieldTypeDirect(refAttrib.PointerPropertyType, Convert.ChangeType(0, fieldType));
                 continue;
             }
@@ -495,11 +495,11 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
                 WriteArray(obj, field, alignment);
             else
             {
-                var value = field.GetValue(obj);
+                object value = field.GetValue(obj);
                 if (value == null)
                     throw new SerializationException("Field value is null");
 
-                var writeMethod = field.PropertyType.GetMethod("Write", new[] { typeof(EndianBinaryWriter) });
+                MethodInfo writeMethod = field.PropertyType.GetMethod("Write", new[] { typeof(EndianBinaryWriter) });
                 if (writeMethod == null)
                     writeMethod = field.PropertyType.GetMethod("Write", new[] { typeof(EndianBinaryWriterEx) });
                 if (writeMethod != null)
@@ -522,11 +522,11 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
         foreach (var reference in _references)
         {
             if (!_refObjAddresses.ContainsKey(reference.Key))
-                throw new Exception("Referenced object has not been written");
+                throw new("Referenced object has not been written");
 
             long address = _refObjAddresses[reference.Key];
 
-            foreach (var pointer in reference.Value)
+            foreach ((long address, Chunk chunk, ReferenceAttribute refInfo) pointer in reference.Value)
             {
                 long ptr = pointer.refInfo.Type switch
                 {
@@ -536,7 +536,7 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
                     _ => throw new ArgumentOutOfRangeException()
                 };
 
-                var fieldType = SerializationUtil.FieldTypeToType(pointer.refInfo.PointerPropertyType);
+                Type fieldType = SerializationUtil.FieldTypeToType(pointer.refInfo.PointerPropertyType);
                 BaseStream.Position = pointer.address;
                 WriteFieldTypeDirect(pointer.refInfo.PointerPropertyType, Convert.ChangeType(ptr, fieldType));
             }

@@ -18,13 +18,13 @@ public class MemoryArchive : Archive
     {
         foreach (string dir in sourceArchive.EnumerateDirectories(path, false))
         {
-            var arcDir = directory.CreateDirectory(dir);
+            ArcDirectory arcDir = directory.CreateDirectory(dir);
             FillDirectory(sourceArchive, arcDir, JoinPath(path, dir), copyData);
         }
 
         foreach (string file in sourceArchive.EnumerateFiles(path, false))
         {
-            var data = sourceArchive.GetFileData(JoinPath(path, file));
+            byte[] data = sourceArchive.GetFileData(JoinPath(path, file));
             if (copyData)
             {
                 var copy = new byte[data.Length];
@@ -38,7 +38,7 @@ public class MemoryArchive : Archive
 
     public MemoryArchive(Archive sourceArchive, bool copyData = false)
     {
-        Root = new ArcDirectory();
+        Root = new();
         FillDirectory(sourceArchive, Root, RootPath, copyData);
     }
 
@@ -47,12 +47,12 @@ public class MemoryArchive : Archive
     private ArcDirectory GetDirectoryByPath(string path)
     {
         path = NormalizePath(path).Trim(PathSeparator);
-        var parts = path.Split(PathSeparator);
+        string[] parts = path.Split(PathSeparator);
 
         if (parts.Length == 0 || parts[0].Length == 0)
             return Root;
 
-        var cur = Root;
+        ArcDirectory cur = Root;
         foreach (string part in parts)
         {
             if (part == ".")
@@ -61,12 +61,12 @@ public class MemoryArchive : Archive
             {
                 cur = cur.Parent;
                 if (cur == null)
-                    throw new Exception("Invalid path specified");
+                    throw new("Invalid path specified");
                 continue;
             }
 
             if (!cur.ContainsDirectory(part))
-                throw new Exception("Invalid path specified");
+                throw new("Invalid path specified");
 
             cur = cur.GetDirectory(part);
         }
@@ -92,15 +92,15 @@ public class MemoryArchive : Archive
 
     public override void DeleteFile(string path)
     {
-        var file = GetFileByPath(path);
+        ArcFile file = GetFileByPath(path);
         file.Parent.DeleteFile(file);
     }
 
     public override void DeleteDirectory(string path)
     {
-        var dir = GetDirectoryByPath(path);
+        ArcDirectory dir = GetDirectoryByPath(path);
         if (dir == Root)
-            throw new Exception("Can't delete root directory");
+            throw new("Can't delete root directory");
         dir.Parent.DeleteDirectory(dir);
     }
 
@@ -133,9 +133,9 @@ public class MemoryArchive : Archive
     public override void CreateDirectory(string path)
     {
         path = path.Trim(PathSeparator);
-        var parts = path.Split(PathSeparator);
+        string[] parts = path.Split(PathSeparator);
 
-        var cur = Root;
+        ArcDirectory cur = Root;
         foreach (string part in parts)
         {
             if (part == ".")
@@ -144,7 +144,7 @@ public class MemoryArchive : Archive
             {
                 cur = cur.Parent;
                 if (cur == null)
-                    throw new Exception("Invalid path specified");
+                    throw new("Invalid path specified");
                 continue;
             }
 
@@ -164,7 +164,7 @@ public class MemoryArchive : Archive
     public override void SetFileData(string path, byte[] data)
     {
         int val = path.Trim(PathSeparator).LastIndexOf(PathSeparator);
-        var dir = val >= 0 ? GetDirectoryByPath(path.Substring(0, val)) : Root;
+        ArcDirectory dir = val >= 0 ? GetDirectoryByPath(path.Substring(0, val)) : Root;
         string name = val >= 0 ? path.Substring(val + 1) : path;
         if (dir.ContainsFile(name))
             dir.GetFile(name).Data = data;

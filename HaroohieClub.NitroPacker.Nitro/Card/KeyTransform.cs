@@ -20,7 +20,7 @@ public static class KeyTransform
         for (int i = 0; i < Blowfish.KeyTableLength; i += 8)
         {
             //update table
-            bf = new Blowfish(keyTable);
+            bf = new(keyTable);
             bf.Encrypt(scratch);
             Array.Copy(scratch, 4, keyTable, i, 4);
             Array.Copy(scratch, 0, keyTable, i + 4, 4);
@@ -29,7 +29,7 @@ public static class KeyTransform
 
     public static byte[] TransformTable(uint idCode, int level, int modulo, ReadOnlySpan<byte> keyTable)
     {
-        var newTable = keyTable[..Blowfish.KeyTableLength].ToArray();
+        byte[] newTable = keyTable[..Blowfish.KeyTableLength].ToArray();
 
         var keyCode = new byte[12];
         IOUtil.WriteU32Le(keyCode, 0, idCode);

@@ -9,7 +9,7 @@ public abstract class ArcEntry
         Name = name;
         Parent = parent;
         if (Parent != null && Parent.ExistsName(Name))
-            throw new Exception("Name already exists");
+            throw new("Name already exists");
     }
 
     public string Name { get; private set; }

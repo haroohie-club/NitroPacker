@@ -43,15 +43,15 @@ public class ARM9
 
         _ramAddress = ramAddress;
         _start_ModuleParamsOffset = moduleParamsOffset;
-        _start_ModuleParams = new CRT0.ModuleParams(data, moduleParamsOffset);
+        _start_ModuleParams = new(data, moduleParamsOffset);
         if (_start_ModuleParams.CompressedStaticEnd != 0)
         {
-            _start_ModuleParams = new CRT0.ModuleParams(data, moduleParamsOffset);
+            _start_ModuleParams = new(data, moduleParamsOffset);
         }
 
         _staticData = data.Take((int)(_start_ModuleParams.AutoLoadStart - ramAddress)).ToList();
 
-        _autoLoadList = new List<CRT0.AutoLoadEntry>();
+        _autoLoadList = new();
         uint nr = (_start_ModuleParams.AutoLoadListEnd - _start_ModuleParams.AutoLoadListOffset) / 0xC;
         uint offset = _start_ModuleParams.AutoLoadStart - ramAddress;
         for (int i = 0; i < nr; i++)
@@ -72,12 +72,12 @@ public class ARM9
         List<byte> bytes = new();
         bytes.AddRange(_staticData);
         _start_ModuleParams.AutoLoadStart = (uint)bytes.Count + _ramAddress;
-        foreach (var autoLoad in _autoLoadList)
+        foreach (CRT0.AutoLoadEntry autoLoad in _autoLoadList)
         {
             bytes.AddRange(autoLoad.Data);
         }
         _start_ModuleParams.AutoLoadListOffset = (uint)bytes.Count + _ramAddress;
-        foreach (var autoLoad in _autoLoadList)
+        foreach (CRT0.AutoLoadEntry autoLoad in _autoLoadList)
         {
             bytes.AddRange(autoLoad.GetEntryBytes());
         }
@@ -90,7 +90,7 @@ public class ARM9
 
     internal void AddAutoLoadEntry(uint address, byte[] data)
     {
-        _autoLoadList.Add(new CRT0.AutoLoadEntry(address, data));
+        _autoLoadList.Add(new(address, data));
     }
 
     internal void WriteBytes(uint address, IEnumerable<byte> bytes)
@@ -107,7 +107,7 @@ public class ARM9
             _staticData.InsertRange((int)(address - _ramAddress), BitConverter.GetBytes(value));
             return true;
         }
-        foreach (var v in _autoLoadList)
+        foreach (CRT0.AutoLoadEntry v in _autoLoadList)
         {
             if (address > v.Address && address < (v.Address + v.Size))
             {
@@ -125,7 +125,7 @@ public class ARM9
         {
             return BitConverter.ToUInt32(_staticData.ToArray(), (int)(address - _ramAddress));
         }
-        foreach (var v in _autoLoadList)
+        foreach (CRT0.AutoLoadEntry v in _autoLoadList)
         {
             if (address > v.Address && address < (v.Address + v.Size))
             {
@@ -143,7 +143,7 @@ public class ARM9
             _staticData.InsertRange((int)(address - _ramAddress), BitConverter.GetBytes(value));
             return true;
         }
-        foreach (var v in _autoLoadList)
+        foreach (CRT0.AutoLoadEntry v in _autoLoadList)
         {
             if (address > v.Address && address < (v.Address + v.Size))
             {

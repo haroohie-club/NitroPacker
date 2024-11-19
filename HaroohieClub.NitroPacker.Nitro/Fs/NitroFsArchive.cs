@@ -128,7 +128,7 @@ public class NitroFsArchive : Archive
     private int FindDirectory(string path)
     {
         path = NormalizePath(path).Trim(PathSeparator);
-        var parts = path.Split(PathSeparator);
+        string[] parts = path.Split(PathSeparator);
 
         if (parts.Length == 0 || parts[0].Length == 0)
             return 0;
@@ -137,7 +137,7 @@ public class NitroFsArchive : Archive
         int dir = 0;
         while (partIdx < parts.Length)
         {
-            foreach (var entry in NameTable[dir])
+            foreach (NameTableEntry entry in NameTable[dir])
             {
                 if (entry.Type == NameTableEntryType.EndOfDirectory)
                     throw new DataException("Invalid path specified");
@@ -157,7 +157,7 @@ public class NitroFsArchive : Archive
             }
         }
 
-        throw new Exception("Invalid path specified");
+        throw new("Invalid path specified");
     }
 
     public override IEnumerable<string> EnumerateFiles(string path, bool fullPath)
@@ -167,7 +167,7 @@ public class NitroFsArchive : Archive
 
         for (int i = 0; i < NameTable[dir].Length; i++)
         {
-            var entry = NameTable[dir][i];
+            NameTableEntry entry = NameTable[dir][i];
 
             if (entry.Type == NameTableEntryType.EndOfDirectory)
                 break;
@@ -189,7 +189,7 @@ public class NitroFsArchive : Archive
 
         for (int i = 0; i < NameTable[dir].Length; i++)
         {
-            var entry = NameTable[dir][i];
+            NameTableEntry entry = NameTable[dir][i];
 
             if (entry.Type == NameTableEntryType.EndOfDirectory)
                 break;
@@ -219,7 +219,7 @@ public class NitroFsArchive : Archive
 
         for (int i = 0; i < NameTable[dir].Length; i++)
         {
-            var entry = NameTable[dir][i];
+            NameTableEntry entry = NameTable[dir][i];
 
             if (entry.Type == NameTableEntryType.EndOfDirectory)
                 break;
@@ -247,7 +247,7 @@ public class NitroFsArchive : Archive
     public override byte[] GetFileData(string path)
     {
         if (path.EndsWith(PathSeparator))
-            throw new Exception("Invalid path specified");
+            throw new("Invalid path specified");
 
         string normPath = NormalizePath(path).Trim(PathSeparator);
 

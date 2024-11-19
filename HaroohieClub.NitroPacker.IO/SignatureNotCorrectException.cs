@@ -3,7 +3,6 @@ using System.Text;
 
 namespace HaroohieClub.NitroPacker.IO;
 
-[Serializable]
 public class SignatureNotCorrectException : Exception
 {
     public string Signature { get; }

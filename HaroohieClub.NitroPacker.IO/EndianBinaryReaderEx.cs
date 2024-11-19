@@ -22,7 +22,7 @@ public class EndianBinaryReaderEx : EndianBinaryReader
         BaseStream.Position += alignment - BaseStream.Position % alignment;
     }
 
-    private Stack<long> Chunks = new Stack<long>();
+    private Stack<long> Chunks = new();
 
     public void BeginChunk()
     {
@@ -123,7 +123,7 @@ public class EndianBinaryReaderEx : EndianBinaryReader
 
     private void ReadPrimitive<T>(T target, PropertyInfo property, PropertyAlignment alignment)
     {
-        var type = SerializationUtil.GetPropertyPrimitiveType(property);
+        PropertyType type = SerializationUtil.GetPropertyPrimitiveType(property);
 
         //align if this is not a reference field
         if (property.GetCustomAttribute<ReferenceAttribute>() == null)
@@ -163,7 +163,7 @@ public class EndianBinaryReaderEx : EndianBinaryReader
         int size = -1;
         if (arrSizeAttr.SizeField != null)
         {
-            var sizeField = typeof(T).GetField(arrSizeAttr.SizeField);
+            FieldInfo sizeField = typeof(T).GetField(arrSizeAttr.SizeField);
             if (sizeField == null)
                 throw new SerializationException(
                     $"Array size field \"{arrSizeAttr.SizeField}\" not found in \"{typeof(T).Name}\"");
@@ -172,7 +172,7 @@ public class EndianBinaryReaderEx : EndianBinaryReader
         else
             size = arrSizeAttr.FixedSize;
 
-        var elementType = property.PropertyType.GetElementType();
+        Type elementType = property.PropertyType.GetElementType();
 
         Array value;
 
@@ -192,7 +192,7 @@ public class EndianBinaryReaderEx : EndianBinaryReader
         //else 
         if (SerializationUtil.HasPrimitiveArrayType(property))
         {
-            var type = SerializationUtil.GetPropertyPrimitiveType(property);
+            PropertyType type = SerializationUtil.GetPropertyPrimitiveType(property);
 
             //align if this is not a reference field
             if (property.GetCustomAttribute<ReferenceAttribute>() == null)
@@ -207,7 +207,7 @@ public class EndianBinaryReaderEx : EndianBinaryReader
             throw new SerializationException();
         else
         {
-            var readerConstructor = elementType.GetConstructor(new[] { typeof(EndianBinaryReader) });
+            ConstructorInfo readerConstructor = elementType.GetConstructor(new[] { typeof(EndianBinaryReader) });
             if (readerConstructor == null)
                 readerConstructor = elementType.GetConstructor(new[] { typeof(EndianBinaryReaderEx) });
             if (readerConstructor != null)
@@ -275,15 +275,15 @@ public class EndianBinaryReaderEx : EndianBinaryReader
     {
         var properties = SerializationUtil.GetPropertiesInOrder<T>();
 
-        var alignment = SerializationUtil.GetFieldAlignment<T>();
-        foreach (var property in properties)
+        PropertyAlignment alignment = SerializationUtil.GetFieldAlignment<T>();
+        foreach (PropertyInfo property in properties)
         {
             long curPos = BaseStream.Position;
             var refAttrib = property.GetCustomAttribute<ReferenceAttribute>();
             if (refAttrib != null)
             {
                 if (SerializationUtil.HasPrimitiveType(property))
-                    throw new Exception("Reference field cannot be a primitive type");
+                    throw new("Reference field cannot be a primitive type");
 
                 AlignForProperty(property, alignment, refAttrib.PointerPropertyType);
                 long address = BaseStream.Position;
@@ -324,12 +324,12 @@ public class EndianBinaryReaderEx : EndianBinaryReader
             else
             {
                 AlignForProperty(property, alignment, PropertyType.U8);
-                var readerConstructor = property.PropertyType.GetConstructor(new[] { typeof(EndianBinaryReader) });
+                ConstructorInfo readerConstructor = property.PropertyType.GetConstructor(new[] { typeof(EndianBinaryReader) });
                 if (readerConstructor == null)
                     readerConstructor = property.PropertyType.GetConstructor(new[] { typeof(EndianBinaryReaderEx) });
                 if (readerConstructor != null)
                 {
-                    var obj = readerConstructor.Invoke(new object[] { this });
+                    object obj = readerConstructor.Invoke(new object[] { this });
                     property.SetValue(target, obj);
                 }
                 else

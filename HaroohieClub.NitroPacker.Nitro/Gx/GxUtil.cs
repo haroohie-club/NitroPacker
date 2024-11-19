@@ -115,7 +115,7 @@ public static class GxUtil
             }
         }
 
-        return new Rgba8Bitmap(width, height, GfxUtil.Detile(bmpdata, 8, width, height));
+        return new(width, height, GfxUtil.Detile(bmpdata, 8, width, height));
     }
 
     public static Rgba8Bitmap DecodeChar(ReadOnlySpan<byte> data, ReadOnlySpan<byte> palette,
@@ -163,7 +163,7 @@ public static class GxUtil
 
         uint[] bmpdata = DecodeRaw(data, palette, imageFormat, firstTransparent);
 
-        return new Rgba8Bitmap(width, height, GfxUtil.Detile(bmpdata, 8, width, height));
+        return new(width, height, GfxUtil.Detile(bmpdata, 8, width, height));
     }
 
     public static Rgba8Bitmap DecodeBmp(ReadOnlySpan<byte> data, ImageFormat imageFormat, int width, int height,
@@ -223,7 +223,7 @@ public static class GxUtil
         if (imageFormat == ImageFormat.Comp4x4)
             bmpdata = GfxUtil.Detile(bmpdata, 4, width, height);
 
-        return new Rgba8Bitmap(width, height, bmpdata);
+        return new(width, height, bmpdata);
     }
 
     private static uint[] DecodeRaw(ReadOnlySpan<byte> pixelData, ReadOnlySpan<uint> palette,
@@ -232,7 +232,7 @@ public static class GxUtil
         switch (imageFormat)
         {
             case ImageFormat.None:
-                throw new Exception("Invalid pixel format");
+                throw new("Invalid pixel format");
 
             case ImageFormat.A3I5:
             {

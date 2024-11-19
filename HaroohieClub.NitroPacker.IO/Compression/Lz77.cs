@@ -22,7 +22,7 @@ public static class Lz77
             for (int i = 0; i < 8; i++)
             {
                 header <<= 1;
-                var (pos, len) = context.FindRun();
+                (uint pos, int len) = context.FindRun();
                 if (len > 0)
                 {
                     header |= 1;

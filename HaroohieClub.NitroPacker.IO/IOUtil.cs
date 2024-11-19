@@ -21,7 +21,7 @@ public static class IOUtil
 
     public static short[] ReadS16Le(ReadOnlySpan<byte> data, int count)
     {
-        var res = MemoryMarshal.Cast<byte, short>(data.Slice(0, count * 2)).ToArray();
+        short[] res = MemoryMarshal.Cast<byte, short>(data.Slice(0, count * 2)).ToArray();
         if (!BitConverter.IsLittleEndian)
         {
             for (int i = 0; i < count; i++)
@@ -68,7 +68,7 @@ public static class IOUtil
 
     public static ushort[] ReadU16Le(ReadOnlySpan<byte> data, int count)
     {
-        var res = MemoryMarshal.Cast<byte, ushort>(data.Slice(0, count * 2)).ToArray();
+        ushort[] res = MemoryMarshal.Cast<byte, ushort>(data.Slice(0, count * 2)).ToArray();
         if (!BitConverter.IsLittleEndian)
         {
             for (int i = 0; i < count; i++)
@@ -147,7 +147,7 @@ public static class IOUtil
 
     public static uint[] ReadU32Le(ReadOnlySpan<byte> data, int count)
     {
-        var res = MemoryMarshal.Cast<byte, uint>(data.Slice(0, count * 4)).ToArray();
+        uint[] res = MemoryMarshal.Cast<byte, uint>(data.Slice(0, count * 4)).ToArray();
         if (!BitConverter.IsLittleEndian)
         {
             for (int i = 0; i < count; i++)
