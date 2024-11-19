@@ -41,36 +41,36 @@ public class Rom
                 KeyPadding2 = er.Read<byte>(0x400);
             }
 
-            er.BaseStream.Position = Header.MainRomOffset;
-            MainRom = er.Read<byte>((int)Header.MainSize);
+            er.BaseStream.Position = Header.Arm9RomOffset;
+            MainRom = er.Read<byte>((int)Header.Arm9Size);
             if (er.Read<uint>() == 0xDEC00621) //Nitro Footer
             {
                 er.BaseStream.Position -= 4;
                 StaticFooter = new(er);
             }
 
-            er.BaseStream.Position = Header.SubRomOffset;
-            SubRom = er.Read<byte>((int)Header.SubSize);
+            er.BaseStream.Position = Header.Arm7RomOffset;
+            SubRom = er.Read<byte>((int)Header.Arm7Size);
 
             er.BaseStream.Position = Header.FntOffset;
             Fnt = new(er);
 
-            er.BaseStream.Position = Header.MainOvtOffset;
-            MainOvt = new RomOVT[Header.MainOvtSize / 32];
-            for (int i = 0; i < Header.MainOvtSize / 32; i++) MainOvt[i] = new(er);
+            er.BaseStream.Position = Header.Arm9OvtOffset;
+            MainOvt = new RomOVT[Header.Arm9OvtSize / 32];
+            for (int i = 0; i < Header.Arm9OvtSize / 32; i++) MainOvt[i] = new(er);
 
-            er.BaseStream.Position = Header.SubOvtOffset;
-            SubOvt = new RomOVT[Header.SubOvtSize / 32];
-            for (int i = 0; i < Header.SubOvtSize / 32; i++) SubOvt[i] = new(er);
+            er.BaseStream.Position = Header.Arm7OvtOffset;
+            SubOvt = new RomOVT[Header.Arm7OvtSize / 32];
+            for (int i = 0; i < Header.Arm7OvtSize / 32; i++) SubOvt[i] = new(er);
 
             er.BaseStream.Position = Header.FatOffset;
             Fat = new FatEntry[Header.FatSize / 8];
             for (int i = 0; i < Header.FatSize / 8; i++)
                 Fat[i] = new(er);
 
-            if (Header.BannerOffset != 0)
+            if (Header.IconTitleOffset != 0)
             {
-                er.BaseStream.Position = Header.BannerOffset;
+                er.BaseStream.Position = Header.IconTitleOffset;
                 Banner = new(er);
             }
 
@@ -84,9 +84,9 @@ public class Rom
             FileData = fileData.Select(t => new NameFatWithData(t)).ToArray();
 
             //RSA Signature
-            if (Header.RomSize + 0x88 <= er.BaseStream.Length)
+            if (Header.RomSizeExcludingDSiArea + 0x88 <= er.BaseStream.Length)
             {
-                er.BaseStream.Position = Header.RomSize;
+                er.BaseStream.Position = Header.RomSizeExcludingDSiArea;
                 byte[] rsaSig = er.Read<byte>(0x88);
                 if (rsaSig[0] == 'a' && rsaSig[1] == 'c')
                     RSASignature = rsaSig;
@@ -106,34 +106,34 @@ public class Rom
 
     public void Write(Stream stream, bool trimmed = true)
     {
-        using (var er = new EndianBinaryWriterEx(stream, Endianness.LittleEndian))
+        using (var ew = new EndianBinaryWriterEx(stream, Endianness.LittleEndian))
         {
             //Header
-            //skip the header, and write it afterwards
+            //skip the header, and write it afterward
             if (PTable != null && SBoxes != null && PTable.Any(p => p != 0))
             {
-                er.BaseStream.Position = 0x1000;
+                ew.BaseStream.Position = 0x1000;
                 if (KeyPadding0 != null)
                 {
                     if (KeyPadding0.Length != 0x600)
                         throw new();
-                    er.Write(KeyPadding0);
+                    ew.Write(KeyPadding0);
                 }
                 else
-                    er.BaseStream.Position += 0x600;
+                    ew.BaseStream.Position += 0x600;
 
                 if (PTable.Length != Blowfish.PTableEntryCount)
                     throw new();
-                er.Write(PTable);
+                ew.Write(PTable);
 
                 if (KeyPadding1 != null)
                 {
                     if (KeyPadding1.Length != 0x5B8)
                         throw new();
-                    er.Write(KeyPadding1);
+                    ew.Write(KeyPadding1);
                 }
                 else
-                    er.BaseStream.Position += 0x5B8;
+                    ew.BaseStream.Position += 0x5B8;
 
                 if (SBoxes.Length != Blowfish.SBoxCount)
                     throw new();
@@ -142,158 +142,158 @@ public class Rom
                 {
                     if (SBoxes[i] == null || SBoxes[i].Length != Blowfish.SBoxEntryCount)
                         throw new();
-                    er.Write(SBoxes[i]);
+                    ew.Write(SBoxes[i]);
                 }
 
                 if (KeyPadding2 != null)
                 {
                     if (KeyPadding2.Length != 0x400)
                         throw new();
-                    er.Write(KeyPadding2);
+                    ew.Write(KeyPadding2);
                 }
                 else
-                    er.BaseStream.Position += 0x400;
+                    ew.BaseStream.Position += 0x400;
 
                 // test patterns
-                er.Write(new byte[] { 0xFF, 0x00, 0xFF, 0x00, 0xAA, 0x55, 0xAA, 0x55 });
+                ew.Write(new byte[] { 0xFF, 0x00, 0xFF, 0x00, 0xAA, 0x55, 0xAA, 0x55 });
 
                 for (int i = 8; i < 0x200; i++)
-                    er.Write((byte)(i & 0xFF));
+                    ew.Write((byte)(i & 0xFF));
 
                 for (int i = 0; i < 0x200; i++)
-                    er.Write((byte)(0xFF - (i & 0xFF)));
+                    ew.Write((byte)(0xFF - (i & 0xFF)));
 
                 for (int i = 0; i < 0x200; i++)
-                    er.Write((byte)0);
+                    ew.Write((byte)0);
 
                 for (int i = 0; i < 0x200; i++)
-                    er.Write((byte)0xFF);
+                    ew.Write((byte)0xFF);
 
                 for (int i = 0; i < 0x200; i++)
-                    er.Write((byte)0x0F);
+                    ew.Write((byte)0x0F);
 
                 for (int i = 0; i < 0x200; i++)
-                    er.Write((byte)0xF0);
+                    ew.Write((byte)0xF0);
 
                 for (int i = 0; i < 0x200; i++)
-                    er.Write((byte)0x55);
+                    ew.Write((byte)0x55);
 
                 for (int i = 0; i < 0x1FF; i++)
-                    er.Write((byte)0xAA);
+                    ew.Write((byte)0xAA);
 
-                er.Write((byte)0);
+                ew.Write((byte)0);
             }
 
-            er.BaseStream.Position = 0x4000;
-            Header.HeaderSize = (uint)er.BaseStream.Position;
+            ew.BaseStream.Position = 0x4000;
+            Header.HeaderSize = (uint)ew.BaseStream.Position;
             //MainRom
-            Header.MainRomOffset = (uint)er.BaseStream.Position;
-            Header.MainSize = (uint)MainRom.Length;
-            er.Write(MainRom, 0, MainRom.Length);
+            Header.Arm9RomOffset = (uint)ew.BaseStream.Position;
+            Header.Arm9Size = (uint)MainRom.Length;
+            ew.Write(MainRom, 0, MainRom.Length);
             //Static Footer
-            StaticFooter?.Write(er);
+            StaticFooter?.Write(ew);
             if (MainOvt.Length != 0)
             {
-                er.WritePadding(0x200, 0xFF);
+                ew.WritePadding(0x200, 0xFF);
                 //Main Ovt
-                Header.MainOvtOffset = (uint)er.BaseStream.Position;
-                Header.MainOvtSize = (uint)MainOvt.Length * 0x20;
+                Header.Arm9OvtOffset = (uint)ew.BaseStream.Position;
+                Header.Arm9OvtSize = (uint)MainOvt.Length * 0x20;
                 foreach (RomOVT v in MainOvt)
                 {
                     v.Compressed = (uint)FileData[v.FileId].Data.Length;
-                    v.Write(er);
+                    v.Write(ew);
                 }
                 foreach (RomOVT v in MainOvt)
                 {
-                    er.WritePadding(0x200, 0xFF);
-                    Fat[v.FileId].FileTop = (uint)er.BaseStream.Position;
-                    Fat[v.FileId].FileBottom = (uint)er.BaseStream.Position + (uint)FileData[v.FileId].Data.Length;
-                    er.Write(FileData[v.FileId].Data, 0, FileData[v.FileId].Data.Length);
+                    ew.WritePadding(0x200, 0xFF);
+                    Fat[v.FileId].FileTop = (uint)ew.BaseStream.Position;
+                    Fat[v.FileId].FileBottom = (uint)ew.BaseStream.Position + (uint)FileData[v.FileId].Data.Length;
+                    ew.Write(FileData[v.FileId].Data, 0, FileData[v.FileId].Data.Length);
                 }
             }
             else
             {
-                Header.MainOvtOffset = 0;
-                Header.MainOvtSize = 0;
+                Header.Arm9OvtOffset = 0;
+                Header.Arm9OvtSize = 0;
             }
 
-            er.WritePadding(0x200, 0xFF);
+            ew.WritePadding(0x200, 0xFF);
             //SubRom
-            Header.SubRomOffset = (uint)er.BaseStream.Position;
-            Header.SubSize = (uint)SubRom.Length;
-            er.Write(SubRom, 0, SubRom.Length);
+            Header.Arm7RomOffset = (uint)ew.BaseStream.Position;
+            Header.Arm7Size = (uint)SubRom.Length;
+            ew.Write(SubRom, 0, SubRom.Length);
             //I assume this works the same as the main ovt?
             if (SubOvt.Length != 0)
             {
-                er.WritePadding(0x200, 0xFF);
+                ew.WritePadding(0x200, 0xFF);
                 //Sub Ovt
-                Header.SubOvtOffset = (uint)er.BaseStream.Position;
-                Header.SubOvtSize = (uint)SubOvt.Length * 0x20;
+                Header.Arm7OvtOffset = (uint)ew.BaseStream.Position;
+                Header.Arm7OvtSize = (uint)SubOvt.Length * 0x20;
                 foreach (RomOVT v in SubOvt)
-                    v.Write(er);
+                    v.Write(ew);
                 foreach (RomOVT v in SubOvt)
                 {
-                    er.WritePadding(0x200, 0xFF);
-                    Fat[v.FileId].FileTop = (uint)er.BaseStream.Position;
-                    Fat[v.FileId].FileBottom = (uint)er.BaseStream.Position + (uint)FileData[v.FileId].Data.Length;
-                    er.Write(FileData[v.FileId].Data, 0, FileData[v.FileId].Data.Length);
+                    ew.WritePadding(0x200, 0xFF);
+                    Fat[v.FileId].FileTop = (uint)ew.BaseStream.Position;
+                    Fat[v.FileId].FileBottom = (uint)ew.BaseStream.Position + (uint)FileData[v.FileId].Data.Length;
+                    ew.Write(FileData[v.FileId].Data, 0, FileData[v.FileId].Data.Length);
                 }
             }
             else
             {
-                Header.SubOvtOffset = 0;
-                Header.SubOvtSize = 0;
+                Header.Arm7OvtOffset = 0;
+                Header.Arm7OvtSize = 0;
             }
 
-            er.WritePadding(0x200, 0xFF);
+            ew.WritePadding(0x200, 0xFF);
             //FNT
-            Header.FntOffset = (uint)er.BaseStream.Position;
-            Fnt.Write(er);
-            Header.FntSize = (uint)er.BaseStream.Position - Header.FntOffset;
-            er.WritePadding(0x200, 0xFF);
+            Header.FntOffset = (uint)ew.BaseStream.Position;
+            Fnt.Write(ew);
+            Header.FntSize = (uint)ew.BaseStream.Position - Header.FntOffset;
+            ew.WritePadding(0x200, 0xFF);
             //FAT
-            Header.FatOffset = (uint)er.BaseStream.Position;
+            Header.FatOffset = (uint)ew.BaseStream.Position;
             Header.FatSize = (uint)Fat.Length * 8;
             //Skip the fat, and write it after writing the data itself
-            er.BaseStream.Position += Header.FatSize;
+            ew.BaseStream.Position += Header.FatSize;
             //Banner
             if (Banner != null)
             {
-                er.WritePadding(0x200, 0xFF);
-                Header.BannerOffset = (uint)er.BaseStream.Position;
-                Banner.Write(er);
+                ew.WritePadding(0x200, 0xFF);
+                Header.IconTitleOffset = (uint)ew.BaseStream.Position;
+                Banner.Write(ew);
             }
             else
-                Header.BannerOffset = 0;
+                Header.IconTitleOffset = 0;
 
             //Files
             if (FileData.All(f => f.NameFat is null))
             {
-                for (int i = (int)(Header.MainOvtSize / 32 + Header.SubOvtSize / 32); i < FileData.Length; i++)
+                for (int i = (int)(Header.Arm9OvtSize / 32 + Header.Arm7OvtSize / 32); i < FileData.Length; i++)
                 {
-                    er.WritePadding(0x200, 0xFF);
-                    Fat[i].FileTop = (uint)er.BaseStream.Position;
-                    Fat[i].FileBottom = (uint)er.BaseStream.Position + (uint)FileData[i].Data.Length;
-                    er.Write(FileData[i].Data, 0, FileData[i].Data.Length);
+                    ew.WritePadding(0x200, 0xFF);
+                    Fat[i].FileTop = (uint)ew.BaseStream.Position;
+                    Fat[i].FileBottom = (uint)ew.BaseStream.Position + (uint)FileData[i].Data.Length;
+                    ew.Write(FileData[i].Data, 0, FileData[i].Data.Length);
                 }
             }
             else
             {
-                foreach ((int i, byte[] data) in FileData.Skip((int)(Header.MainOvtSize / 32 + Header.SubOvtSize / 32))
+                foreach ((int i, byte[] data) in FileData.Skip((int)(Header.Arm9OvtSize / 32 + Header.Arm7OvtSize / 32))
                              .Select((f, i) => (f, i))
                              .OrderBy(t => t.f.NameFat?.FatOffset ?? 0).Select(t => (t.i, t.f.Data)))
                 {
-                    int idx = i + (int)(Header.MainOvtSize / 32 + Header.SubOvtSize / 32);
-                    er.WritePadding(0x200, 0xFF);
-                    Fat[idx].FileTop = (uint)er.BaseStream.Position;
-                    Fat[idx].FileBottom = (uint)er.BaseStream.Position + (uint)data.Length;
-                    er.Write(data, 0, data.Length);
+                    int idx = i + (int)(Header.Arm9OvtSize / 32 + Header.Arm7OvtSize / 32);
+                    ew.WritePadding(0x200, 0xFF);
+                    Fat[idx].FileTop = (uint)ew.BaseStream.Position;
+                    Fat[idx].FileBottom = (uint)ew.BaseStream.Position + (uint)data.Length;
+                    ew.Write(data, 0, data.Length);
                 }
             }
 
-            er.WritePadding(4);
-            Header.RomSize = (uint)er.BaseStream.Position;
-            uint capacitySize = Header.RomSize;
+            ew.WritePadding(4);
+            Header.RomSizeExcludingDSiArea = (uint)ew.BaseStream.Position;
+            uint capacitySize = Header.RomSizeExcludingDSiArea;
             capacitySize |= capacitySize >> 16;
             capacitySize |= capacitySize >> 8;
             capacitySize |= capacitySize >> 4;
@@ -310,22 +310,22 @@ public class Rom
                 capacity++;
             }
 
-            Header.DeviceSize = (byte)(capacity < 0 ? 0 : capacity);
+            Header.DeviceCapacity = (byte)(capacity < 0 ? 0 : capacity);
             //RSA
             if (RSASignature != null)
-                er.Write(RSASignature, 0, 0x88);
+                ew.Write(RSASignature, 0, 0x88);
 
             //if writing untrimmed write padding up to the power of 2 size of the rom
             if (!trimmed)
-                er.WritePadding((int)capacitySize, 0xFF);
+                ew.WritePadding((int)capacitySize, 0xFF);
 
             //Fat
-            er.BaseStream.Position = Header.FatOffset;
+            ew.BaseStream.Position = Header.FatOffset;
             foreach (FatEntry v in Fat)
-                v.Write(er);
+                v.Write(ew);
             //Header
-            er.BaseStream.Position = 0;
-            Header.Write(er);
+            ew.BaseStream.Position = 0;
+            Header.Write(ew);
         }
     }
 

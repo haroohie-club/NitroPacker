@@ -10,6 +10,7 @@
 	<Company>Haroohie Translation Club</Company>
 	<Description>The Nitro library for NitroPacker.</Description>
 	<PackageId>NitroPacker.Nitro</PackageId>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

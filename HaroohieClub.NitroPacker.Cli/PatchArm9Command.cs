@@ -48,7 +48,7 @@ public class PatchArm9Command : Command
         else if (_ramAddress == 0)
         {
             NdsProjectFile project = JsonSerializer.Deserialize<NdsProjectFile>(_projectFilePath);
-            _ramAddress = project.RomInfo.Header.MainRamAddress;
+            _ramAddress = project.RomInfo.Header.Arm9RamAddress;
         }
 
         if (string.IsNullOrEmpty(_inputDir))
