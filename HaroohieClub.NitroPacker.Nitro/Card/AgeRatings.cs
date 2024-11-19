@@ -1,5 +1,3 @@
-using System;
-
 namespace HaroohieClub.NitroPacker.Nitro.Card;
 
 /// <summary>

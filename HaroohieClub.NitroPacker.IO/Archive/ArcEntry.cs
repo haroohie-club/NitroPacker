@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace HaroohieClub.NitroPacker.IO.Archive;
+﻿namespace HaroohieClub.NitroPacker.IO.Archive;
 
 public abstract class ArcEntry
 {

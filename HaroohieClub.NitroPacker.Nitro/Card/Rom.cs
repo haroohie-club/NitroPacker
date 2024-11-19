@@ -1,15 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Xml.Serialization;
 using HaroohieClub.NitroPacker.IO;
 using HaroohieClub.NitroPacker.IO.Archive;
-using HaroohieClub.NitroPacker.IO.Serialization;
 using HaroohieClub.NitroPacker.Nitro.Fs;
-using HaroohieClub.NitroPacker.Nitro.Gx;
 
 namespace HaroohieClub.NitroPacker.Nitro.Card;
 
