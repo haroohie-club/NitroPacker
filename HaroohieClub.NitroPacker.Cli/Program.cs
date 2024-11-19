@@ -12,6 +12,7 @@ public class Program
             new PackCommand(),
             new PatchArm9Command(),
             new PatchOverlaysCommand(),
+            new MigrateProjectCommand(),
         };
         commands.Run(args);
     }

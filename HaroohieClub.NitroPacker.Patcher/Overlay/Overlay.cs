@@ -45,7 +45,7 @@ public class Overlay
         _data.AddRange(new byte[4]);
         
         NdsProjectFile project = JsonSerializer.Deserialize<NdsProjectFile>(File.ReadAllText(projectPath));
-        Rom.RomOVT overlay = project.RomInfo.ARM9Ovt.First(o => o.Id == Id);
+        RomOVT overlay = project.RomInfo.ARM9Ovt.First(o => o.Id == Id);
         Address = overlay.RamAddress;
     }
 

@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Xml.Linq;
 using System.Xml.Serialization;
 using HaroohieClub.NitroPacker.IO;
 using HaroohieClub.NitroPacker.IO.Archive;
@@ -29,24 +30,24 @@ public class NdsProjectFile
         /// <summary>
         /// The ROM header of the ROM, containing all the ROM metadata
         /// </summary>
-        public Rom.RomHeader Header { get; set; }
+        public RomHeader Header { get; set; }
         /// <summary>
         /// The Nitro footer
         /// </summary>
-        public Rom.NitroFooter NitroFooter { get; set; }
+        public NitroFooter NitroFooter { get; set; }
         /// <summary>
         /// Data representation of the ARM9 overlay table
         /// </summary>
-        public Rom.RomOVT[] ARM9Ovt { get; set; }
+        public RomOVT[] ARM9Ovt { get; set; }
         /// <summary>
         /// Data representation of the ARM7 overlay table
         /// </summary>
-        public Rom.RomOVT[] ARM7Ovt { get; set; }
+        public RomOVT[] ARM7Ovt { get; set; }
         /// <summary>
         /// The banner of the ROM
         /// </summary>
         [JsonIgnore]
-        public Rom.RomBanner Banner { get; set; }
+        public RomBanner Banner { get; set; }
         /// <summary>
         /// The ROM's RSA signature
         /// </summary>
@@ -136,17 +137,17 @@ public class NdsProjectFile
         fs.Export(dir.CreateSubdirectory("data").FullName, unpackArc);
 
         dir.CreateSubdirectory("overlay");
-        foreach (Rom.RomOVT vv in ndsFile.MainOvt)
+        foreach (RomOVT vv in ndsFile.MainOvt)
         {
             File.WriteAllBytes(Path.Combine(outPath, "overlay", $"main_{vv.Id:X4}.bin"),
-                vv.Flag.HasFlag(Rom.RomOVT.OVTFlag.Compressed)
+                vv.Flag.HasFlag(RomOVT.OVTFlag.Compressed)
                     ? Blz.Decompress(ndsFile.FileData[vv.FileId].Data)
                     : ndsFile.FileData[vv.FileId].Data);
         }
-        foreach (Rom.RomOVT vv in ndsFile.SubOvt)
+        foreach (RomOVT vv in ndsFile.SubOvt)
         {
             File.WriteAllBytes(Path.Combine(outPath, "overlay", $"sub_{vv.Id:X4}.bin"),
-                vv.Flag.HasFlag(Rom.RomOVT.OVTFlag.Compressed)
+                vv.Flag.HasFlag(RomOVT.OVTFlag.Compressed)
                     ? Blz.Decompress(ndsFile.FileData[vv.FileId].Data)
                     : ndsFile.FileData[vv.FileId].Data);
         }
@@ -188,7 +189,7 @@ public class NdsProjectFile
         // Read banner from file first to initialize that
         using FileStream bannerStream = File.OpenRead(Path.Combine(projectDir, "banner.bin"));
         EndianBinaryReaderEx br = new(bannerStream);
-        RomInfo.Banner = br.ReadObject<Rom.RomBanner>();
+        RomInfo.Banner = br.ReadObject<RomBanner>();
         
         Rom n = new()
         {
@@ -204,11 +205,11 @@ public class NdsProjectFile
         n.Fat = new FatEntry[n.MainOvt.Length + n.SubOvt.Length];
         byte[][] fileData = new byte[n.MainOvt.Length + n.SubOvt.Length][];
         uint fid = 0;
-        foreach (Rom.RomOVT vv in n.MainOvt)
+        foreach (RomOVT vv in n.MainOvt)
         {
             vv.FileId = fid;
             n.Fat[fid] = new(0, 0);
-            if (vv.Flag.HasFlag(Rom.RomOVT.OVTFlag.Compressed))
+            if (vv.Flag.HasFlag(RomOVT.OVTFlag.Compressed))
             {
                 Blz blz = new();
                 fileData[fid] = blz.BLZ_Encode(File.ReadAllBytes(Path.Combine(projectDir, "overlay", $"main_{vv.Id:X4}.bin")), false);
@@ -219,11 +220,11 @@ public class NdsProjectFile
             }
             fid++;
         }
-        foreach (Rom.RomOVT vv in n.SubOvt)
+        foreach (RomOVT vv in n.SubOvt)
         {
             vv.FileId = fid;
             n.Fat[fid] = new(0, 0);
-            if (vv.Flag.HasFlag(Rom.RomOVT.OVTFlag.Compressed))
+            if (vv.Flag.HasFlag(RomOVT.OVTFlag.Compressed))
             {
                 Blz blz = new();
                 fileData[fid] = blz.BLZ_Encode(File.ReadAllBytes(Path.Combine(projectDir, "overlay", $"sub_{vv.Id:X4}.bin")), false);
@@ -258,5 +259,8 @@ public class NdsProjectFile
             .Deserialize(oldProjectStream);
         File.WriteAllText(Path.Combine(Path.GetDirectoryName(oldXmlProject), $"{Path.GetFileNameWithoutExtension(oldXmlProject)}.json"),
             JsonSerializer.Serialize(project));
+        using FileStream bannerStream = File.OpenWrite(Path.Combine(Path.GetDirectoryName(oldXmlProject), "banner.bin"));
+        using EndianBinaryWriterEx bw = new(bannerStream);
+        project.RomInfo.Banner.Write(bw);
     }
 }
