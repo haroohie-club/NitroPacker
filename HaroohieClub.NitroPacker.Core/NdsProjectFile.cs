@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System.IO;
+using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Xml.Serialization;
 using HaroohieClub.NitroPacker.IO.Archive;
 using HaroohieClub.NitroPacker.IO.Compression;
 using HaroohieClub.NitroPacker.Nitro.Card;
 using HaroohieClub.NitroPacker.Nitro.Fs;
-using System.IO;
-using System.Linq;
-using System.Text.Json;
 
 namespace HaroohieClub.NitroPacker.Core;
 
@@ -234,5 +235,18 @@ public class NdsProjectFile
         n.FromArchive(fsRoot, RomInfo.NameEntryWithFatEntries);
 
         n.Write(outputStream);
+    }
+
+    /// <summary>
+    /// Converts a NitroPacker 2.x style XML project to a NitroPacker 3.x+ style JSON project
+    /// </summary>
+    /// <param name="oldXmlProject">Path to the old XML project</param>
+    public static void ConvertProjectFile(string oldXmlProject)
+    {
+        using FileStream oldProjectStream = File.OpenRead(oldXmlProject);
+        NdsProjectFile project = (NdsProjectFile)new XmlSerializer(typeof(NdsProjectFile))
+            .Deserialize(oldProjectStream);
+        File.WriteAllText(Path.Combine(Path.GetDirectoryName(oldXmlProject), $"{Path.GetFileNameWithoutExtension(oldXmlProject)}.json"),
+            JsonSerializer.Serialize(project));
     }
 }

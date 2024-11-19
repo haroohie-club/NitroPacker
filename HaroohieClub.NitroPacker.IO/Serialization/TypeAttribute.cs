@@ -2,7 +2,7 @@
 
 namespace HaroohieClub.NitroPacker.IO.Serialization;
 
-public enum FieldType
+public enum PropertyType
 {
     U8,
     S8,
@@ -21,9 +21,9 @@ public enum FieldType
 [AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = false)]
 public class TypeAttribute : Attribute
 {
-    public FieldType Type { get; }
+    public PropertyType Type { get; }
 
-    public TypeAttribute(FieldType type)
+    public TypeAttribute(PropertyType type)
     {
         Type = type;
     }

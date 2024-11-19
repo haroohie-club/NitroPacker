@@ -2,7 +2,7 @@
 
 namespace HaroohieClub.NitroPacker.IO.Serialization;
 
-public enum FieldAlignment
+public enum PropertyAlignment
 {
     Packed,
     FieldSize
@@ -11,9 +11,9 @@ public enum FieldAlignment
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = true, AllowMultiple = false)]
 public sealed class FieldAlignmentAttribute : Attribute
 {
-    public FieldAlignment Alignment { get; }
+    public PropertyAlignment Alignment { get; }
 
-    public FieldAlignmentAttribute(FieldAlignment alignment)
+    public FieldAlignmentAttribute(PropertyAlignment alignment)
     {
         Alignment = alignment;
     }

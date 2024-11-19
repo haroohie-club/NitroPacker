@@ -1,6 +1,6 @@
-﻿using HaroohieClub.NitroPacker.Core;
+﻿using System.Collections.Generic;
+using HaroohieClub.NitroPacker.Core;
 using Mono.Options;
-using System.Collections.Generic;
 
 namespace HaroohieClub.NitroPacker.Cli;
 
@@ -8,7 +8,7 @@ public class PackCommand : Command
 {
     private string _projectJson, _outputRom;
     private bool _compressArm9 = false;
-    public PackCommand() : base("pack", "Packs a ROM given a project XML file")
+    public PackCommand() : base("pack", "Packs a ROM given a project JSON file")
     {
         Options = new()
         {
@@ -24,7 +24,7 @@ public class PackCommand : Command
 
         if (string.IsNullOrEmpty(_projectJson))
         {
-            CommandSet.Out.WriteLine($"Must provide path to project XML.");
+            CommandSet.Out.WriteLine($"Must provide path to project JSON file.");
             Options.WriteOptionDescriptions(CommandSet.Out);
             return 1;
         }

@@ -1,9 +1,9 @@
-﻿using HaroohieClub.NitroPacker.IO.Serialization;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Serialization;
+using HaroohieClub.NitroPacker.IO.Serialization;
 
 namespace HaroohieClub.NitroPacker.IO;
 
@@ -198,53 +198,53 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
         return curPos;
     }
 
-    private void AlignForField(FieldInfo field, FieldAlignment alignment, FieldType type)
+    private void AlignForProperty(PropertyInfo field, PropertyAlignment alignment, PropertyType type)
     {
         var alignAttribute = field.GetCustomAttribute<AlignAttribute>();
         if (alignAttribute != null)
             WritePadding(alignAttribute.Alignment);
-        else if (alignment == FieldAlignment.FieldSize)
+        else if (alignment == PropertyAlignment.FieldSize)
             WritePadding(SerializationUtil.GetTypeSize(type));
     }
 
-    private void WriteFieldTypeDirect(FieldType type, object value)
+    private void WriteFieldTypeDirect(PropertyType type, object value)
     {
         switch (type)
         {
-            case FieldType.U8:
+            case PropertyType.U8:
                 Write((byte)value);
                 break;
-            case FieldType.S8:
+            case PropertyType.S8:
                 Write((sbyte)value);
                 break;
-            case FieldType.U16:
+            case PropertyType.U16:
                 Write((ushort)value);
                 break;
-            case FieldType.S16:
+            case PropertyType.S16:
                 Write((short)value);
                 break;
-            case FieldType.U32:
+            case PropertyType.U32:
                 Write((uint)value);
                 break;
-            case FieldType.S32:
+            case PropertyType.S32:
                 Write((int)value);
                 break;
-            case FieldType.U64:
+            case PropertyType.U64:
                 Write((ulong)value);
                 break;
-            case FieldType.S64:
+            case PropertyType.S64:
                 Write((long)value);
                 break;
-            case FieldType.Fx16:
+            case PropertyType.Fx16:
                 WriteFx16((double)value);
                 break;
-            case FieldType.Fx32:
+            case PropertyType.Fx32:
                 WriteFx32((double)value);
                 break;
-            case FieldType.Float:
+            case PropertyType.Float:
                 Write((float)value);
                 break;
-            case FieldType.Double:
+            case PropertyType.Double:
                 Write((double)value);
                 break;
             default:
@@ -252,44 +252,44 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
         }
     }
 
-    private void WriteFieldTypeArrayDirect(FieldType type, Array value)
+    private void WriteFieldTypeArrayDirect(PropertyType type, Array value)
     {
         switch (type)
         {
-            case FieldType.U8:
+            case PropertyType.U8:
                 Write((byte[])value);
                 break;
-            case FieldType.S8:
+            case PropertyType.S8:
                 Write((sbyte[])value);
                 break;
-            case FieldType.U16:
+            case PropertyType.U16:
                 Write((ushort[])value);
                 break;
-            case FieldType.S16:
+            case PropertyType.S16:
                 Write((short[])value);
                 break;
-            case FieldType.U32:
+            case PropertyType.U32:
                 Write((uint[])value);
                 break;
-            case FieldType.S32:
+            case PropertyType.S32:
                 Write((int[])value);
                 break;
-            case FieldType.U64:
+            case PropertyType.U64:
                 Write((ulong[])value);
                 break;
-            case FieldType.S64:
+            case PropertyType.S64:
                 Write((long[])value);
                 break;
-            case FieldType.Fx16:
+            case PropertyType.Fx16:
                 WriteFx16s((double[])value);
                 break;
-            case FieldType.Fx32:
+            case PropertyType.Fx32:
                 WriteFx32s((double[])value);
                 break;
-            case FieldType.Float:
+            case PropertyType.Float:
                 Write((float[])value);
                 break;
-            case FieldType.Double:
+            case PropertyType.Double:
                 Write((double[])value);
                 break;
             default:
@@ -300,31 +300,31 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
     private Dictionary<object, List<(long address, Chunk chunk, ReferenceAttribute refInfo)>> _references = new();
     private Dictionary<object, long> _refObjAddresses = new();
 
-    private void WritePrimitive<T>(T obj, FieldInfo field, FieldAlignment alignment)
+    private void WritePrimitive<T>(T obj, PropertyInfo property, PropertyAlignment alignment)
     {
-        var fieldType = SerializationUtil.GetFieldPrimitiveType(field);
+        var fieldType = SerializationUtil.GetPropertyPrimitiveType(property);
         var trueType = SerializationUtil.FieldTypeToType(fieldType);
 
-        AlignForField(field, alignment, fieldType);
+        AlignForProperty(property, alignment, fieldType);
 
-        var constAttrib = field.GetCustomAttribute<ConstantAttribute>();
-        object fieldValue = constAttrib != null ? constAttrib.Value : field.GetValue(obj);
+        var constAttrib = property.GetCustomAttribute<ConstantAttribute>();
+        object fieldValue = constAttrib != null ? constAttrib.Value : property.GetValue(obj);
 
         object finalValue;
-        if (field.FieldType == typeof(bool))
+        if (property.PropertyType == typeof(bool))
             finalValue = SerializationUtil.Cast((bool)fieldValue ? 1 : 0, trueType);
         else
             finalValue = SerializationUtil.Cast(fieldValue, trueType);
 
-        var chunkSizeAttr = field.GetCustomAttribute<ChunkSizeAttribute>();
+        var chunkSizeAttr = property.GetCustomAttribute<ChunkSizeAttribute>();
         if (chunkSizeAttr != null && _chunks.Count > 0)
         {
             var chunkSizeType = fieldType switch
             {
-                FieldType.U8 => ChunkSizeType.U8,
-                FieldType.U16 => ChunkSizeType.U16,
-                FieldType.U32 => ChunkSizeType.U32,
-                FieldType.U64 => ChunkSizeType.U64,
+                PropertyType.U8 => ChunkSizeType.U8,
+                PropertyType.U16 => ChunkSizeType.U16,
+                PropertyType.U32 => ChunkSizeType.U32,
+                PropertyType.U64 => ChunkSizeType.U64,
                 _ => throw new ArgumentOutOfRangeException("Invalid type for chunk size")
             };
 
@@ -339,12 +339,12 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
         WriteFieldTypeDirect(fieldType, finalValue);
     }
 
-    private void WriteArray<T>(T obj, FieldInfo field, FieldAlignment alignment)
+    private void WriteArray<T>(T obj, PropertyInfo property, PropertyAlignment alignment)
     {
-        var arrSizeAttr = field.GetCustomAttribute<ArraySizeAttribute>();
+        var arrSizeAttr = property.GetCustomAttribute<ArraySizeAttribute>();
         if (arrSizeAttr == null)
             throw new SerializationException(
-                $"No array size attribute found for field \"{field.Name}\" in \"{typeof(T).Name}\"");
+                $"No array size attribute found for field \"{property.Name}\" in \"{typeof(T).Name}\"");
         int size = -1;
         if (arrSizeAttr.SizeField != null)
         {
@@ -360,9 +360,9 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
         if (size < 0)
             throw new SerializationException("Array size invalid");
 
-        var elementType = field.FieldType.GetElementType();
+        var elementType = property.PropertyType.GetElementType();
 
-        var value = field.GetValue(obj) as Array;
+        var value = property.GetValue(obj) as Array;
 
         if (value == null)
             throw new SerializationException("Field value is null");
@@ -381,13 +381,13 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
         //        WriteVector3dDirect(field, (Vector3d)value.GetValue(i));
         //}
         //else 
-        if (SerializationUtil.HasPrimitiveArrayType(field))
+        if (SerializationUtil.HasPrimitiveArrayType(property))
         {
-            var type = SerializationUtil.GetFieldPrimitiveType(field);
+            var type = SerializationUtil.GetPropertyPrimitiveType(property);
 
             //align if this is not a reference field
-            if (field.GetCustomAttribute<ReferenceAttribute>() == null)
-                AlignForField(field, alignment, type);
+            if (property.GetCustomAttribute<ReferenceAttribute>() == null)
+                AlignForProperty(property, alignment, type);
 
             if (SerializationUtil.FieldTypeToType(type) != elementType)
                 throw new SerializationException("Conversion of array data not supported yet");
@@ -398,7 +398,7 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
             throw new SerializationException();
         else
         {
-            AlignForField(field, alignment, FieldType.U8);
+            AlignForProperty(property, alignment, PropertyType.U8);
             var writeMethod = elementType.GetMethod("Write", new[] { typeof(EndianBinaryWriter) });
             if (writeMethod == null)
                 writeMethod = elementType.GetMethod("Write", new[] { typeof(EndianBinaryWriterEx) });
@@ -453,7 +453,7 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
 
     public void WriteObject<T>(T obj)
     {
-        var fields = SerializationUtil.GetFieldsInOrder<T>();
+        var fields = SerializationUtil.GetPropertiesInOrder<T>();
 
         var alignment = SerializationUtil.GetFieldAlignment<T>();
         foreach (var field in fields)
@@ -464,7 +464,7 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
                 if (SerializationUtil.HasPrimitiveType(field))
                     throw new SerializationException("Reference field cannot be a primitive type");
 
-                AlignForField(field, alignment, refAttrib.PointerFieldType);
+                AlignForProperty(field, alignment, refAttrib.PointerPropertyType);
 
                 object refValue = field.GetValue(obj);
                 if (refValue != null)
@@ -475,8 +475,8 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
                         refAttrib));
                 }
 
-                var fieldType = SerializationUtil.FieldTypeToType(refAttrib.PointerFieldType);
-                WriteFieldTypeDirect(refAttrib.PointerFieldType, Convert.ChangeType(0, fieldType));
+                var fieldType = SerializationUtil.FieldTypeToType(refAttrib.PointerPropertyType);
+                WriteFieldTypeDirect(refAttrib.PointerPropertyType, Convert.ChangeType(0, fieldType));
                 continue;
             }
 
@@ -487,11 +487,11 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
             //else 
             if (SerializationUtil.HasPrimitiveType(field))
                 WritePrimitive(obj, field, alignment);
-            else if (field.FieldType == typeof(string))
+            else if (field.PropertyType == typeof(string))
             {
                 throw new SerializationException();
             }
-            else if (field.FieldType.IsArray)
+            else if (field.PropertyType.IsArray)
                 WriteArray(obj, field, alignment);
             else
             {
@@ -499,9 +499,9 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
                 if (value == null)
                     throw new SerializationException("Field value is null");
 
-                var writeMethod = field.FieldType.GetMethod("Write", new[] { typeof(EndianBinaryWriter) });
+                var writeMethod = field.PropertyType.GetMethod("Write", new[] { typeof(EndianBinaryWriter) });
                 if (writeMethod == null)
-                    writeMethod = field.FieldType.GetMethod("Write", new[] { typeof(EndianBinaryWriterEx) });
+                    writeMethod = field.PropertyType.GetMethod("Write", new[] { typeof(EndianBinaryWriterEx) });
                 if (writeMethod != null)
                     writeMethod.Invoke(value, new object[] { this });
                 else
@@ -536,9 +536,9 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
                     _ => throw new ArgumentOutOfRangeException()
                 };
 
-                var fieldType = SerializationUtil.FieldTypeToType(pointer.refInfo.PointerFieldType);
+                var fieldType = SerializationUtil.FieldTypeToType(pointer.refInfo.PointerPropertyType);
                 BaseStream.Position = pointer.address;
-                WriteFieldTypeDirect(pointer.refInfo.PointerFieldType, Convert.ChangeType(ptr, fieldType));
+                WriteFieldTypeDirect(pointer.refInfo.PointerPropertyType, Convert.ChangeType(ptr, fieldType));
             }
         }
 

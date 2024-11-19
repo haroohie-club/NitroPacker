@@ -13,13 +13,13 @@ public enum ReferenceType
 public sealed class ReferenceAttribute : Attribute
 {
     public ReferenceType Type { get; }
-    public FieldType PointerFieldType { get; }
+    public PropertyType PointerPropertyType { get; }
     public int Offset { get; }
 
-    public ReferenceAttribute(ReferenceType type, FieldType pointerFieldType = FieldType.U32, int offset = 0)
+    public ReferenceAttribute(ReferenceType type, PropertyType pointerPropertyType = PropertyType.U32, int offset = 0)
     {
         Type = type;
-        PointerFieldType = pointerFieldType;
+        PointerPropertyType = pointerPropertyType;
         Offset = offset;
     }
 }

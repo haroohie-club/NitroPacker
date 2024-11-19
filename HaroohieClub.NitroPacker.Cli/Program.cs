@@ -1,6 +1,4 @@
-﻿using HaroohieClub.NitroPacker.Core;
-using Mono.Options;
-using System.IO;
+﻿using Mono.Options;
 
 namespace HaroohieClub.NitroPacker.Cli;
 

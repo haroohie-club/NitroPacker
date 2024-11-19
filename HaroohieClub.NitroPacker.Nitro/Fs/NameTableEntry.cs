@@ -1,7 +1,7 @@
-﻿using HaroohieClub.NitroPacker.IO;
-using System;
+﻿using System;
 using System.Data;
 using System.Text;
+using HaroohieClub.NitroPacker.IO;
 
 namespace HaroohieClub.NitroPacker.Nitro.Fs;
 

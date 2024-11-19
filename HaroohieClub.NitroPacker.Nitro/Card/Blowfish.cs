@@ -1,5 +1,5 @@
-﻿using HaroohieClub.NitroPacker.IO;
-using System;
+﻿using System;
+using HaroohieClub.NitroPacker.IO;
 
 namespace HaroohieClub.NitroPacker.Nitro.Card;
 

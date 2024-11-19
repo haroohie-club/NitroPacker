@@ -1,14 +1,15 @@
-﻿using HaroohieClub.NitroPacker.IO;
-using HaroohieClub.NitroPacker.IO.Archive;
-using HaroohieClub.NitroPacker.IO.Serialization;
-using HaroohieClub.NitroPacker.Nitro.Fs;
-using HaroohieClub.NitroPacker.Nitro.Gx;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Xml.Serialization;
+using HaroohieClub.NitroPacker.IO;
+using HaroohieClub.NitroPacker.IO.Archive;
+using HaroohieClub.NitroPacker.IO.Serialization;
+using HaroohieClub.NitroPacker.Nitro.Fs;
+using HaroohieClub.NitroPacker.Nitro.Gx;
 
 namespace HaroohieClub.NitroPacker.Nitro.Card;
 
@@ -328,9 +329,8 @@ public class Rom
         }
     }
 
-    public RomHeader Header;
+    public RomHeader Header { get; set; }
 
-    [Serializable]
     public class RomHeader
     {
         public RomHeader() { }
@@ -449,107 +449,106 @@ public class Rom
             er.Write(HeaderCRC);
         }
 
-        public string GameName;  //12
-        public string GameCode;  //4
-        public string MakerCode; //2
-        public byte ProductId;
-        public byte DeviceType;
-        public byte DeviceSize;
+        public string GameName { get; set; }  //12
+        public string GameCode { get; set; }  //4
+        public string MakerCode { get; set; } //2
+        public byte ProductId { get; set; }
+        public byte DeviceType { get; set; }
+        public byte DeviceSize { get; set; }
 
         [ArraySize(9)]
-        public byte[] ReservedA;
+        public byte[] ReservedA { get; set; }
 
-        public byte GameVersion;
-        public byte Property;
+        public byte GameVersion { get; set; }
+        public byte Property { get; set; }
 
-        [XmlIgnore]
-        public uint MainRomOffset;
+        [JsonIgnore]
+        public uint MainRomOffset { get; set; }
 
-        public uint MainEntryAddress;
-        public uint MainRamAddress;
+        public uint MainEntryAddress { get; set; }
+        public uint MainRamAddress { get; set; }
 
-        [XmlIgnore]
-        public uint MainSize;
+        [JsonIgnore]
+        public uint MainSize { get; set; }
 
-        [XmlIgnore]
-        public uint SubRomOffset;
+        [JsonIgnore]
+        public uint SubRomOffset { get; set; }
 
-        public uint SubEntryAddress;
-        public uint SubRamAddress;
+        public uint SubEntryAddress { get; set; }
+        public uint SubRamAddress { get; set; }
 
-        [XmlIgnore]
-        public uint SubSize;
+        [JsonIgnore]
+        public uint SubSize { get; set; }
 
-        [XmlIgnore]
-        public uint FntOffset;
+        [JsonIgnore]
+        public uint FntOffset { get; set; }
 
-        [XmlIgnore]
-        public uint FntSize;
+        [JsonIgnore]
+        public uint FntSize { get; set; }
 
-        [XmlIgnore]
-        public uint FatOffset;
+        [JsonIgnore]
+        public uint FatOffset { get; set; }
 
-        [XmlIgnore]
-        public uint FatSize;
+        [JsonIgnore]
+        public uint FatSize { get; set; }
 
-        [XmlIgnore]
-        public uint MainOvtOffset;
+        [JsonIgnore]
+        public uint MainOvtOffset { get; set; }
 
-        [XmlIgnore]
-        public uint MainOvtSize;
+        [JsonIgnore]
+        public uint MainOvtSize { get; set; }
 
-        [XmlIgnore]
-        public uint SubOvtOffset;
+        [JsonIgnore]
+        public uint SubOvtOffset { get; set; }
 
-        [XmlIgnore]
-        public uint SubOvtSize;
+        [JsonIgnore]
+        public uint SubOvtSize { get; set; }
 
         [ArraySize(8)]
-        public byte[] RomParamA;
+        public byte[] RomParamA { get; set; }
 
-        [XmlIgnore]
-        public uint BannerOffset;
+        [JsonIgnore]
+        public uint BannerOffset { get; set; }
 
-        public ushort SecureCRC;
+        public ushort SecureCRC { get; set; }
 
         [ArraySize(2)]
-        public byte[] RomParamB;
+        public byte[] RomParamB { get; set; }
 
-        public uint MainAutoloadDone;
-        public uint SubAutoloadDone;
+        public uint MainAutoloadDone { get; set; }
+        public uint SubAutoloadDone { get; set; }
 
         [ArraySize(8)]
-        public byte[] RomParamC; //8
+        public byte[] RomParamC { get; set; } //8
 
-        [XmlIgnore]
-        public uint RomSize;
+        [JsonIgnore]
+        public uint RomSize { get; set; }
 
-        [XmlIgnore]
-        public uint HeaderSize;
-
+        [JsonIgnore]
+        public uint HeaderSize { get; set; }
+        
         [ArraySize(0x38)]
-        public byte[] ReservedB;
+        public byte[] ReservedB { get; set; }
 
         [ArraySize(0x9C)]
-        public byte[] LogoData;
+        public byte[] LogoData { get; set; }
 
-        [XmlIgnore]
-        public ushort LogoCRC;
+        [JsonIgnore]
+        public ushort LogoCRC { get; set; }
 
-        [XmlIgnore]
-        public ushort HeaderCRC;
+        [JsonIgnore]
+        public ushort HeaderCRC { get; set; }
     }
 
-    public byte[] KeyPadding0;
-    public uint[] PTable;
-    public byte[] KeyPadding1;
-    public uint[][] SBoxes;
-    public byte[] KeyPadding2;
+    public byte[] KeyPadding0 { get; set; }
+    public uint[] PTable { get; set; }
+    public byte[] KeyPadding1 { get; set; }
+    public uint[][] SBoxes { get; set; }
+    public byte[] KeyPadding2 { get; set; }
 
-    public byte[] MainRom;
-    public NitroFooter StaticFooter;
+    public byte[] MainRom { get; set; }
+    public NitroFooter StaticFooter { get; set; }
 
-    [Serializable]
     public class NitroFooter
     {
         public NitroFooter() { }
@@ -557,14 +556,14 @@ public class Rom
         public NitroFooter(EndianBinaryReaderEx er) => er.ReadObject(this);
         public void Write(EndianBinaryWriterEx er) => er.WriteObject(this);
 
-        public uint NitroCode;
-        public uint _start_ModuleParamsOffset;
-        public uint Unknown;
+        public uint NitroCode { get; set; }
+        public uint _start_ModuleParamsOffset { get; set; }
+        public uint Unknown { get; set; }
     }
 
 
-    public byte[] SubRom;
-    public RomFNT Fnt;
+    public byte[] SubRom { get; set; }
+    public RomFNT Fnt { get; set; }
 
     public class RomFNT
     {
@@ -626,14 +625,13 @@ public class Rom
             er.EndChunk();
         }
 
-        public DirectoryTableEntry[] DirectoryTable;
-        public NameTableEntry[][] NameTable;
+        public DirectoryTableEntry[] DirectoryTable { get; set; }
+        public NameTableEntry[][] NameTable { get; set; }
     }
 
-    public RomOVT[] MainOvt;
-    public RomOVT[] SubOvt;
+    public RomOVT[] MainOvt { get; set; }
+    public RomOVT[] SubOvt { get; set; }
 
-    [Serializable]
     public class RomOVT
     {
         [Flags]
@@ -659,30 +657,27 @@ public class Rom
             er.Write(((uint)Flag & 0xFF) << 24 | Compressed & 0xFFFFFF);
         }
 
-        [XmlAttribute]
-        public uint Id;
+        public uint Id { get; set; }
 
-        public uint RamAddress;
-        public uint RamSize;
-        public uint BssSize;
-        public uint SinitInit;
-        public uint SinitInitEnd;
+        public uint RamAddress { get; set; }
+        public uint RamSize { get; set; }
+        public uint BssSize { get; set; }
+        public uint SinitInit { get; set; }
+        public uint SinitInitEnd { get; set; }
 
-        [XmlIgnore]
-        public uint FileId;
+        [JsonIgnore]
+        public uint FileId { get; set; }
 
         [Ignore]
-        public uint Compressed; //:24;
+        public uint Compressed { get; set; } //:24;
 
-        [XmlAttribute]
         [Ignore]
-        public OVTFlag Flag; // :8;
+        public OVTFlag Flag { get; set; } // :8;
     }
 
-    public FatEntry[] Fat;
-    public RomBanner Banner;
+    public FatEntry[] Fat { get; set; }
+    public RomBanner Banner { get; set; }
 
-    [Serializable]
     public class RomBanner
     {
         public RomBanner() { }
@@ -700,7 +695,7 @@ public class Rom
             Banner.Write(er);
         }
 
-        public BannerHeader Header;
+        public BannerHeader Header { get; set; }
 
         [Serializable]
         public class BannerHeader
@@ -717,17 +712,17 @@ public class Rom
                 er.WriteObject(this);
             }
 
-            public byte Version;
-            public byte ReservedA;
+            public byte Version { get; set; }
+            public byte ReservedA { get; set; }
 
-            [XmlIgnore]
-            public ushort CRC16_v1;
+            [JsonIgnore]
+            public ushort CRC16_v1 { get; set; }
 
             [ArraySize(28)]
-            public byte[] ReservedB;
+            public byte[] ReservedB { get; set; }
         }
 
-        public BannerV1 Banner;
+        public BannerV1 Banner { get; set; }
 
         [Serializable]
         public class BannerV1
@@ -755,15 +750,15 @@ public class Rom
             }
 
             [ArraySize(32 * 32 / 2)]
-            public byte[] Image;
+            public byte[] Image { get; set; }
 
             [ArraySize(16 * 2)]
-            public byte[] Pltt;
+            public byte[] Pltt { get; set; }
 
-            [XmlIgnore]
-            public string[] GameName; //6, 128 chars (UTF16-LE)
+            [JsonIgnore]
+            public string[] GameName { get; set; } //6, 128 chars (UTF16-LE)
 
-            [XmlElement("GameName")]
+            [JsonPropertyName("GameName")]
             public string[] Base64GameName
             {
                 get
@@ -804,9 +799,9 @@ public class Rom
         }
     }
 
-    public NameFatWithData[] FileData;
+    public NameFatWithData[] FileData { get; set; }
 
-    public byte[] RSASignature;
+    public byte[] RSASignature { get; set; }
 
     public NitroFsArchive ToArchive()
     {

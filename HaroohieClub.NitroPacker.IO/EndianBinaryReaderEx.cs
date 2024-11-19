@@ -1,9 +1,9 @@
-﻿using HaroohieClub.NitroPacker.IO.Serialization;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Serialization;
+using HaroohieClub.NitroPacker.IO.Serialization;
 
 namespace HaroohieClub.NitroPacker.IO;
 
@@ -77,89 +77,89 @@ public class EndianBinaryReaderEx : EndianBinaryReader
         return result;
     }
 
-    private object ReadFieldTypeDirect(FieldType type) => type switch
+    private object ReadFieldTypeDirect(PropertyType type) => type switch
     {
         //The object cast is needed once to ensure the switch doesn't cast to double
-        FieldType.U8 => Read<byte>(),
-        FieldType.S8 => Read<sbyte>(),
-        FieldType.U16 => Read<ushort>(),
-        FieldType.S16 => Read<short>(),
-        FieldType.U32 => Read<uint>(),
-        FieldType.S32 => Read<int>(),
-        FieldType.U64 => Read<ulong>(),
-        FieldType.S64 => Read<long>(),
-        FieldType.Fx16 => ReadFx16(),
-        FieldType.Fx32 => ReadFx32(),
-        FieldType.Float => Read<float>(),
-        FieldType.Double => Read<double>(),
+        PropertyType.U8 => Read<byte>(),
+        PropertyType.S8 => Read<sbyte>(),
+        PropertyType.U16 => Read<ushort>(),
+        PropertyType.S16 => Read<short>(),
+        PropertyType.U32 => Read<uint>(),
+        PropertyType.S32 => Read<int>(),
+        PropertyType.U64 => Read<ulong>(),
+        PropertyType.S64 => Read<long>(),
+        PropertyType.Fx16 => ReadFx16(),
+        PropertyType.Fx32 => ReadFx32(),
+        PropertyType.Float => Read<float>(),
+        PropertyType.Double => Read<double>(),
         _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
     };
 
-    private Array ReadFieldTypeArrayDirect(FieldType type, int count) => type switch
+    private Array ReadFieldTypeArrayDirect(PropertyType type, int count) => type switch
     {
-        FieldType.U8 => Read<byte>(count),
-        FieldType.S8 => Read<sbyte>(count),
-        FieldType.U16 => Read<ushort>(count),
-        FieldType.S16 => Read<short>(count),
-        FieldType.U32 => Read<uint>(count),
-        FieldType.S32 => Read<int>(count),
-        FieldType.U64 => Read<ulong>(count),
-        FieldType.S64 => Read<long>(count),
-        FieldType.Fx16 => ReadFx16s(count),
-        FieldType.Fx32 => ReadFx32s(count),
-        FieldType.Float => Read<float>(count),
-        FieldType.Double => Read<double>(count),
+        PropertyType.U8 => Read<byte>(count),
+        PropertyType.S8 => Read<sbyte>(count),
+        PropertyType.U16 => Read<ushort>(count),
+        PropertyType.S16 => Read<short>(count),
+        PropertyType.U32 => Read<uint>(count),
+        PropertyType.S32 => Read<int>(count),
+        PropertyType.U64 => Read<ulong>(count),
+        PropertyType.S64 => Read<long>(count),
+        PropertyType.Fx16 => ReadFx16s(count),
+        PropertyType.Fx32 => ReadFx32s(count),
+        PropertyType.Float => Read<float>(count),
+        PropertyType.Double => Read<double>(count),
         _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
     };
 
-    private void AlignForField(FieldInfo field, FieldAlignment alignment, FieldType type)
+    private void AlignForProperty(PropertyInfo property, PropertyAlignment alignment, PropertyType type)
     {
-        var alignAttribute = field.GetCustomAttribute<AlignAttribute>();
+        var alignAttribute = property.GetCustomAttribute<AlignAttribute>();
         if (alignAttribute != null)
             ReadPadding(alignAttribute.Alignment);
-        else if (alignment == FieldAlignment.FieldSize)
+        else if (alignment == PropertyAlignment.FieldSize)
             ReadPadding(SerializationUtil.GetTypeSize(type));
     }
 
-    private void ReadPrimitive<T>(T target, FieldInfo field, FieldAlignment alignment)
+    private void ReadPrimitive<T>(T target, PropertyInfo property, PropertyAlignment alignment)
     {
-        var type = SerializationUtil.GetFieldPrimitiveType(field);
+        var type = SerializationUtil.GetPropertyPrimitiveType(property);
 
         //align if this is not a reference field
-        if (field.GetCustomAttribute<ReferenceAttribute>() == null)
-            AlignForField(field, alignment, type);
+        if (property.GetCustomAttribute<ReferenceAttribute>() == null)
+            AlignForProperty(property, alignment, type);
 
         long address = BaseStream.Position;
 
         object value = ReadFieldTypeDirect(type);
         object finalValue;
-        if (field.FieldType == typeof(bool))
+        if (property.PropertyType == typeof(bool))
             finalValue = Convert.ChangeType(value, typeof(bool));
         else
-            finalValue = SerializationUtil.Cast(value, field.FieldType);
+            finalValue = SerializationUtil.Cast(value, property.PropertyType);
 
-        field.SetValue(target, finalValue);
+        property.SetValue(target, finalValue);
 
-        var constAttrib = field.GetCustomAttribute<ConstantAttribute>();
+        var constAttrib = property.GetCustomAttribute<ConstantAttribute>();
         if (constAttrib != null && !constAttrib.Value.Equals(finalValue))
             throw new InvalidDataException(
-                $"Const field \"{field.Name}\" in \"{typeof(T).Name}\" at address 0x{address:X} has an invalid value. Got: {finalValue:X}, expected: {constAttrib.Value:X}");
+                $"Const field \"{property.Name}\" in \"{typeof(T).Name}\" at address 0x{address:X} has an invalid value. Got: {finalValue:X}, expected: {constAttrib.Value:X}");
     }
 
-    private void ReadArray<T>(T target, FieldInfo field, FieldAlignment alignment)
+    private void ReadArray<T>(T target, PropertyInfo property, PropertyAlignment alignment)
     {
         //align if this is not a reference field
-        if (field.GetCustomAttribute<ReferenceAttribute>() == null)
+        if (property.GetCustomAttribute<ReferenceAttribute>() == null)
         {
-            var alignAttr = field.GetCustomAttribute<AlignAttribute>();
+            var alignAttr = property.GetCustomAttribute<AlignAttribute>();
             if (alignAttr != null)
                 ReadPadding(alignAttr.Alignment);
         }
 
-        var arrSizeAttr = field.GetCustomAttribute<ArraySizeAttribute>();
+        var arrSizeAttr = property.GetCustomAttribute<ArraySizeAttribute>();
         if (arrSizeAttr == null)
             throw new SerializationException(
-                $"No array size attribute found for field \"{field.Name}\" in \"{typeof(T).Name}\"");
+                $"No array size attribute found for field \"{property.Name}\" in \"{typeof(T).Name}\"");
         int size = -1;
         if (arrSizeAttr.SizeField != null)
         {
@@ -172,7 +172,7 @@ public class EndianBinaryReaderEx : EndianBinaryReader
         else
             size = arrSizeAttr.FixedSize;
 
-        var elementType = field.FieldType.GetElementType();
+        var elementType = property.PropertyType.GetElementType();
 
         Array value;
 
@@ -190,13 +190,13 @@ public class EndianBinaryReaderEx : EndianBinaryReader
         //        value.SetValue(ReadVector3dDirect(field), i);
         //}
         //else 
-        if (SerializationUtil.HasPrimitiveArrayType(field))
+        if (SerializationUtil.HasPrimitiveArrayType(property))
         {
-            var type = SerializationUtil.GetFieldPrimitiveType(field);
+            var type = SerializationUtil.GetPropertyPrimitiveType(property);
 
             //align if this is not a reference field
-            if (field.GetCustomAttribute<ReferenceAttribute>() == null)
-                AlignForField(field, alignment, type);
+            if (property.GetCustomAttribute<ReferenceAttribute>() == null)
+                AlignForProperty(property, alignment, type);
 
             value = ReadFieldTypeArrayDirect(type, size);
 
@@ -220,7 +220,7 @@ public class EndianBinaryReaderEx : EndianBinaryReader
                 throw new SerializationException();
         }
 
-        field.SetValue(target, value);
+        property.SetValue(target, value);
     }
 
     //private Vector2d ReadVector2dDirect(FieldInfo field)
@@ -273,21 +273,21 @@ public class EndianBinaryReaderEx : EndianBinaryReader
 
     public void ReadObject<T>(T target)
     {
-        var fields = SerializationUtil.GetFieldsInOrder<T>();
+        var properties = SerializationUtil.GetPropertiesInOrder<T>();
 
         var alignment = SerializationUtil.GetFieldAlignment<T>();
-        foreach (var field in fields)
+        foreach (var property in properties)
         {
             long curPos = BaseStream.Position;
-            var refAttrib = field.GetCustomAttribute<ReferenceAttribute>();
+            var refAttrib = property.GetCustomAttribute<ReferenceAttribute>();
             if (refAttrib != null)
             {
-                if (SerializationUtil.HasPrimitiveType(field))
+                if (SerializationUtil.HasPrimitiveType(property))
                     throw new Exception("Reference field cannot be a primitive type");
 
-                AlignForField(field, alignment, refAttrib.PointerFieldType);
+                AlignForProperty(property, alignment, refAttrib.PointerPropertyType);
                 long address = BaseStream.Position;
-                object val = ReadFieldTypeDirect(refAttrib.PointerFieldType);
+                object val = ReadFieldTypeDirect(refAttrib.PointerPropertyType);
                 curPos = BaseStream.Position;
                 long ptr = (long)Convert.ChangeType(val, typeof(long));
                 switch (refAttrib.Type)
@@ -313,24 +313,24 @@ public class EndianBinaryReaderEx : EndianBinaryReader
             //else if (field.FieldType == typeof(Vector3d))
             //    ReadVector3(target, field, alignment);
             //else 
-            if (SerializationUtil.HasPrimitiveType(field))
-                ReadPrimitive(target, field, alignment);
-            else if (field.FieldType == typeof(string))
+            if (SerializationUtil.HasPrimitiveType(property))
+                ReadPrimitive(target, property, alignment);
+            else if (property.PropertyType == typeof(string))
             {
                 throw new SerializationException();
             }
-            else if (field.FieldType.IsArray)
-                ReadArray(target, field, alignment);
+            else if (property.PropertyType.IsArray)
+                ReadArray(target, property, alignment);
             else
             {
-                AlignForField(field, alignment, FieldType.U8);
-                var readerConstructor = field.FieldType.GetConstructor(new[] { typeof(EndianBinaryReader) });
+                AlignForProperty(property, alignment, PropertyType.U8);
+                var readerConstructor = property.PropertyType.GetConstructor(new[] { typeof(EndianBinaryReader) });
                 if (readerConstructor == null)
-                    readerConstructor = field.FieldType.GetConstructor(new[] { typeof(EndianBinaryReaderEx) });
+                    readerConstructor = property.PropertyType.GetConstructor(new[] { typeof(EndianBinaryReaderEx) });
                 if (readerConstructor != null)
                 {
                     var obj = readerConstructor.Invoke(new object[] { this });
-                    field.SetValue(target, obj);
+                    property.SetValue(target, obj);
                 }
                 else
                     throw new SerializationException();

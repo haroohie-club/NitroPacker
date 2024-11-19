@@ -1,6 +1,6 @@
-﻿using HaroohieClub.NitroPacker.IO;
-using System;
+﻿using System;
 using System.Drawing;
+using HaroohieClub.NitroPacker.IO;
 
 namespace HaroohieClub.NitroPacker.Nitro.Gx;
 

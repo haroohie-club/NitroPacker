@@ -1,12 +1,10 @@
-﻿using HaroohieClub.NitroPacker.Patcher.Overlay;
-using Mono.Options;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using HaroohieClub.NitroPacker.Patcher.Overlay;
+using Mono.Options;
 
 namespace HaroohieClub.NitroPacker.Cli;
 
@@ -24,7 +22,7 @@ public class PatchOverlaysCommand : Command
             { "i|input-overlays=", "Directory containing unpatched overlays", i => _inputOverlaysDirectory = i },
             { "o|output-overlays=", "Directory where patched overlays will be written", o => _outputOverlaysDirectory = o },
             { "s|source-dir=", "Directory where overlay source code lives", s => _overlaySourceDir = s },
-            { "r|rom-info=", "rominfo.xml file containing the overlay table", r => _romInfoPath = r },
+            { "r|project=", "Project JSON file containing the overlay table", r => _romInfoPath = r },
             { "d|docker-tag=", "(Optional) Indicates docker should be used and provides a docker tag of the devkitpro/devkitarm image to use", d => _dockerTag = d },
             { "devkitarm=", "(Optional) Location of the devkitARM installation; defaults to the DEVKITARM environment variable", dev => _devkitArm = dev },
             { "override-suffix=", "(Optional) A file extension suffix to indicate that a general file should be overridden, good for using with e.g. locales", o => _overrideSuffix = o },

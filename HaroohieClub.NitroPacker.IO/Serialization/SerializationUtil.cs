@@ -9,115 +9,115 @@ namespace HaroohieClub.NitroPacker.IO.Serialization;
 
 public static class SerializationUtil
 {
-    public static FieldType TypeToFieldType(Type type)
+    public static PropertyType TypeToFieldType(Type type)
     {
         if (type == typeof(byte))
-            return FieldType.U8;
+            return PropertyType.U8;
         if (type == typeof(sbyte))
-            return FieldType.S8;
+            return PropertyType.S8;
         if (type == typeof(ushort))
-            return FieldType.U16;
+            return PropertyType.U16;
         if (type == typeof(short))
-            return FieldType.S16;
+            return PropertyType.S16;
         if (type == typeof(uint))
-            return FieldType.U32;
+            return PropertyType.U32;
         if (type == typeof(int))
-            return FieldType.S32;
+            return PropertyType.S32;
         if (type == typeof(ulong))
-            return FieldType.U64;
+            return PropertyType.U64;
         if (type == typeof(long))
-            return FieldType.S64;
+            return PropertyType.S64;
 
         throw new Exception("Unexpected primitive field type " + type.Name);
     }
 
-    public static Type FieldTypeToType(FieldType type) => type switch
+    public static Type FieldTypeToType(PropertyType type) => type switch
     {
-        FieldType.U8 => typeof(byte),
-        FieldType.S8 => typeof(sbyte),
-        FieldType.U16 => typeof(ushort),
-        FieldType.S16 => typeof(short),
-        FieldType.U32 => typeof(uint),
-        FieldType.S32 => typeof(int),
-        FieldType.U64 => typeof(ulong),
-        FieldType.S64 => typeof(long),
-        FieldType.Fx16 => typeof(double),
-        FieldType.Fx32 => typeof(double),
-        FieldType.Float => typeof(float),
-        FieldType.Double => typeof(double),
+        PropertyType.U8 => typeof(byte),
+        PropertyType.S8 => typeof(sbyte),
+        PropertyType.U16 => typeof(ushort),
+        PropertyType.S16 => typeof(short),
+        PropertyType.U32 => typeof(uint),
+        PropertyType.S32 => typeof(int),
+        PropertyType.U64 => typeof(ulong),
+        PropertyType.S64 => typeof(long),
+        PropertyType.Fx16 => typeof(double),
+        PropertyType.Fx32 => typeof(double),
+        PropertyType.Float => typeof(float),
+        PropertyType.Double => typeof(double),
         _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
     };
 
-    public static int GetTypeSize(FieldType type) => type switch
+    public static int GetTypeSize(PropertyType type) => type switch
     {
-        FieldType.U8 => 1,
-        FieldType.S8 => 1,
-        FieldType.U16 => 2,
-        FieldType.S16 => 2,
-        FieldType.U32 => 4,
-        FieldType.S32 => 4,
-        FieldType.U64 => 8,
-        FieldType.S64 => 8,
-        FieldType.Fx16 => 2,
-        FieldType.Fx32 => 4,
-        FieldType.Float => 4,
-        FieldType.Double => 8,
+        PropertyType.U8 => 1,
+        PropertyType.S8 => 1,
+        PropertyType.U16 => 2,
+        PropertyType.S16 => 2,
+        PropertyType.U32 => 4,
+        PropertyType.S32 => 4,
+        PropertyType.U64 => 8,
+        PropertyType.S64 => 8,
+        PropertyType.Fx16 => 2,
+        PropertyType.Fx32 => 4,
+        PropertyType.Float => 4,
+        PropertyType.Double => 8,
         _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
     };
 
-    public static bool HasPrimitiveType(FieldInfo field)
+    public static bool HasPrimitiveType(PropertyInfo property)
     {
-        return field.FieldType.IsPrimitive ||
-               field.FieldType.IsEnum ||
-               field.GetCustomAttribute<TypeAttribute>() != null ||
-               field.GetCustomAttribute<Fx32Attribute>() != null ||
-               field.GetCustomAttribute<Fx16Attribute>() != null;
+        return property.PropertyType.IsPrimitive ||
+               property.PropertyType.IsEnum ||
+               property.GetCustomAttribute<TypeAttribute>() != null ||
+               property.GetCustomAttribute<Fx32Attribute>() != null ||
+               property.GetCustomAttribute<Fx16Attribute>() != null;
     }
 
-    public static bool HasPrimitiveArrayType(FieldInfo field)
+    public static bool HasPrimitiveArrayType(PropertyInfo property)
     {
-        if (!field.FieldType.IsArray)
+        if (!property.PropertyType.IsArray)
             return false;
 
-        var type = field.FieldType.GetElementType();
+        var type = property.PropertyType.GetElementType();
 
         return type.IsPrimitive ||
-               field.GetCustomAttribute<TypeAttribute>() != null ||
-               field.GetCustomAttribute<Fx32Attribute>() != null ||
-               field.GetCustomAttribute<Fx16Attribute>() != null;
+               property.GetCustomAttribute<TypeAttribute>() != null ||
+               property.GetCustomAttribute<Fx32Attribute>() != null ||
+               property.GetCustomAttribute<Fx16Attribute>() != null;
     }
 
-    public static FieldType GetFieldPrimitiveType(FieldInfo field)
+    public static PropertyType GetPropertyPrimitiveType(PropertyInfo property)
     {
-        bool isFx32 = field.GetCustomAttribute<Fx32Attribute>() != null;
-        bool isFx16 = field.GetCustomAttribute<Fx16Attribute>() != null;
-        bool hasFieldType = field.GetCustomAttribute<TypeAttribute>() != null;
+        bool isFx32 = property.GetCustomAttribute<Fx32Attribute>() != null;
+        bool isFx16 = property.GetCustomAttribute<Fx16Attribute>() != null;
+        bool hasFieldType = property.GetCustomAttribute<TypeAttribute>() != null;
         int count = (isFx32 ? 1 : 0) + (isFx16 ? 1 : 0) + (hasFieldType ? 1 : 0);
         if (count > 1)
-            throw new Exception("More than one field type specified for field " + field.Name + " in type " +
-                                field.DeclaringType?.Name);
+            throw new Exception("More than one property type specified for property " + property.Name + " in type " +
+                                property.DeclaringType?.Name);
 
         if (isFx32)
-            return FieldType.Fx32;
+            return PropertyType.Fx32;
         if (isFx16)
-            return FieldType.Fx16;
+            return PropertyType.Fx16;
         if (hasFieldType)
-            return field.GetCustomAttribute<TypeAttribute>().Type;
-        if (field.FieldType.IsArray)
+            return property.GetCustomAttribute<TypeAttribute>().Type;
+        if (property.PropertyType.IsArray)
         {
-            var elemType = field.FieldType.GetElementType();
+            var elemType = property.PropertyType.GetElementType();
             if (elemType.IsEnum)
                 return TypeToFieldType(elemType.GetEnumUnderlyingType());
             return TypeToFieldType(elemType);
         }
 
-        if (field.FieldType.IsEnum)
-            return TypeToFieldType(field.FieldType.GetEnumUnderlyingType());
+        if (property.PropertyType.IsEnum)
+            return TypeToFieldType(property.PropertyType.GetEnumUnderlyingType());
 
-        return TypeToFieldType(field.FieldType);
+        return TypeToFieldType(property.PropertyType);
     }
 
-    public static FieldType GetVectorPrimitiveType(FieldInfo field)
+    public static PropertyType GetVectorPrimitiveType(PropertyInfo field)
     {
         bool isFx32 = field.GetCustomAttribute<Fx32Attribute>() != null;
         bool isFx16 = field.GetCustomAttribute<Fx16Attribute>() != null;
@@ -128,30 +128,30 @@ public static class SerializationUtil
                                 field.DeclaringType?.Name);
 
         if (isFx32)
-            return FieldType.Fx32;
+            return PropertyType.Fx32;
         if (isFx16)
-            return FieldType.Fx16;
+            return PropertyType.Fx16;
         if (hasFieldType)
             return field.GetCustomAttribute<TypeAttribute>().Type;
-        return FieldType.Float;
+        return PropertyType.Float;
     }
 
-    public static IEnumerable<FieldInfo> GetFieldsInOrder<T>()
-        => GetFieldsInOrder(typeof(T));
+    public static IEnumerable<PropertyInfo> GetPropertiesInOrder<T>()
+        => GetPropertiesInOrder(typeof(T));
 
-    public static IEnumerable<FieldInfo> GetFieldsInOrder(Type type)
+    public static IEnumerable<PropertyInfo> GetPropertiesInOrder(Type type)
     {
-        //Sorting by MetadataToken works, but may not be future proof
-        return type.GetFields()
-            .Where(f => !f.IsStatic && !f.IsLiteral && f.GetCustomAttribute<IgnoreAttribute>() == null)
+        //Sorting by MetadataToken works, but may not be future-proof
+        return type.GetProperties()
+            .Where(f => f.GetCustomAttribute<IgnoreAttribute>() == null)
             .OrderBy(f => f.MetadataToken);
     }
 
-    public static FieldAlignment GetFieldAlignment<T>()
+    public static PropertyAlignment GetFieldAlignment<T>()
         => GetFieldAlignment(typeof(T));
 
-    public static FieldAlignment GetFieldAlignment(Type type)
-        => type.GetCustomAttribute<FieldAlignmentAttribute>()?.Alignment ?? FieldAlignment.Packed;
+    public static PropertyAlignment GetFieldAlignment(Type type)
+        => type.GetCustomAttribute<FieldAlignmentAttribute>()?.Alignment ?? PropertyAlignment.Packed;
 
     private static readonly ConcurrentDictionary<(Type, Type), Delegate> CastCache = new();
 

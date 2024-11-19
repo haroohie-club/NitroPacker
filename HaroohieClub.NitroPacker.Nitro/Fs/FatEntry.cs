@@ -1,4 +1,5 @@
 ﻿using HaroohieClub.NitroPacker.IO;
+using HaroohieClub.NitroPacker.IO.Serialization;
 
 namespace HaroohieClub.NitroPacker.Nitro.Fs;
 
@@ -20,8 +21,9 @@ public class FatEntry
     public void Write(EndianBinaryWriterEx er)
         => er.WriteObject(this);
 
-    public uint FileTop;
-    public uint FileBottom;
+    public uint FileTop { get; set; }
+    public uint FileBottom { get; set; }
 
+    [Ignore]
     public uint FileSize => FileBottom - FileTop;
 }

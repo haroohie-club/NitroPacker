@@ -12,7 +12,7 @@ public class DirectoryTableEntry
     public void Write(EndianBinaryWriterEx er)
         => er.WriteObject(this);
 
-    public uint EntryStart;
-    public ushort EntryFileId;
-    public ushort ParentId;
+    public uint EntryStart { get; set; }
+    public ushort EntryFileId { get; set; }
+    public ushort ParentId { get; set; }
 }

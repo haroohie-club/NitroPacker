@@ -1,6 +1,6 @@
-﻿using HaroohieClub.NitroPacker.Nitro.Fs;
-using System.IO;
+﻿using System.IO;
 using System.Threading.Tasks;
+using HaroohieClub.NitroPacker.Nitro.Fs;
 
 namespace HaroohieClub.NitroPacker.Core;
 
