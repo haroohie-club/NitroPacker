@@ -38,11 +38,11 @@ public class NdsProjectFile
         /// <summary>
         /// Data representation of the ARM9 overlay table
         /// </summary>
-        public RomOVT[] ARM9Ovt { get; set; }
+        public RomOverlayTable[] ARM9Ovt { get; set; }
         /// <summary>
         /// Data representation of the ARM7 overlay table
         /// </summary>
-        public RomOVT[] ARM7Ovt { get; set; }
+        public RomOverlayTable[] ARM7Ovt { get; set; }
         /// <summary>
         /// The banner of the ROM
         /// </summary>
@@ -79,7 +79,7 @@ public class NdsProjectFile
             ARM9Ovt = Rom.Arm9OverlayTable;
             ARM7Ovt = Rom.Arm7OverlayTable;
             Banner = Rom.Banner;
-            RSASignature = Rom.RSASignature;
+            RSASignature = Rom.RsaSignature;
         }
     }
 
@@ -137,17 +137,17 @@ public class NdsProjectFile
         fs.Export(dir.CreateSubdirectory("data").FullName, unpackArc);
 
         dir.CreateSubdirectory("overlay");
-        foreach (RomOVT vv in ndsFile.Arm9OverlayTable)
+        foreach (RomOverlayTable vv in ndsFile.Arm9OverlayTable)
         {
             File.WriteAllBytes(Path.Combine(outPath, "overlay", $"main_{vv.Id:X4}.bin"),
-                vv.Flag.HasFlag(RomOVT.OVTFlag.Compressed)
+                vv.Flag.HasFlag(RomOverlayTable.OverlayTableFlag.Compressed)
                     ? Blz.Decompress(ndsFile.FileData[vv.FileId].Data)
                     : ndsFile.FileData[vv.FileId].Data);
         }
-        foreach (RomOVT vv in ndsFile.Arm7OverlayTable)
+        foreach (RomOverlayTable vv in ndsFile.Arm7OverlayTable)
         {
             File.WriteAllBytes(Path.Combine(outPath, "overlay", $"sub_{vv.Id:X4}.bin"),
-                vv.Flag.HasFlag(RomOVT.OVTFlag.Compressed)
+                vv.Flag.HasFlag(RomOverlayTable.OverlayTableFlag.Compressed)
                     ? Blz.Decompress(ndsFile.FileData[vv.FileId].Data)
                     : ndsFile.FileData[vv.FileId].Data);
         }
@@ -164,10 +164,10 @@ public class NdsProjectFile
         {
             projectFile.RomInfo.NameEntryWithFatEntries =
             [
-                .. ndsFile.Fnt.NameTable.SelectMany((t, i) => t.Where(e => e.Type == NameTableEntryType.File).Select(e => (i, e)))
+                .. ndsFile.FileNameTable.NameTable.SelectMany((t, i) => t.Where(e => e.Type == NameTableEntryType.File).Select(e => (i, e)))
                     .Zip(ndsFile.Fat.Skip(ndsFile.Arm9OverlayTable.Length + ndsFile.Arm7OverlayTable.Length)).Select(n => new NameEntryWithFatEntry
                     {
-                        Path = NitroFsArchive.JoinPath(NitroFsArchive.GetPathFromDir(n.First.i, "/", ndsFile.Fnt), n.First.e.Name),
+                        Path = NitroFsArchive.JoinPath(NitroFsArchive.GetPathFromDir(n.First.i, "/", ndsFile.FileNameTable), n.First.e.Name),
                         FatOffset = n.Second.FileTop,
                     }),
             ];
@@ -198,18 +198,18 @@ public class NdsProjectFile
             Arm9OverlayTable = RomInfo.ARM9Ovt,
             Arm7OverlayTable = RomInfo.ARM7Ovt,
             Banner = RomInfo.Banner,
-            RSASignature = RomInfo.RSASignature,
-            Fnt = new(),
+            RsaSignature = RomInfo.RSASignature,
+            FileNameTable = new(),
         };
 
         n.Fat = new FatEntry[n.Arm9OverlayTable.Length + n.Arm7OverlayTable.Length];
         byte[][] fileData = new byte[n.Arm9OverlayTable.Length + n.Arm7OverlayTable.Length][];
         uint fid = 0;
-        foreach (RomOVT vv in n.Arm9OverlayTable)
+        foreach (RomOverlayTable vv in n.Arm9OverlayTable)
         {
             vv.FileId = fid;
             n.Fat[fid] = new(0, 0);
-            if (vv.Flag.HasFlag(RomOVT.OVTFlag.Compressed))
+            if (vv.Flag.HasFlag(RomOverlayTable.OverlayTableFlag.Compressed))
             {
                 Blz blz = new();
                 fileData[fid] = blz.BLZ_Encode(File.ReadAllBytes(Path.Combine(projectDir, "overlay", $"main_{vv.Id:X4}.bin")), false);
@@ -220,11 +220,11 @@ public class NdsProjectFile
             }
             fid++;
         }
-        foreach (RomOVT vv in n.Arm7OverlayTable)
+        foreach (RomOverlayTable vv in n.Arm7OverlayTable)
         {
             vv.FileId = fid;
             n.Fat[fid] = new(0, 0);
-            if (vv.Flag.HasFlag(RomOVT.OVTFlag.Compressed))
+            if (vv.Flag.HasFlag(RomOverlayTable.OverlayTableFlag.Compressed))
             {
                 Blz blz = new();
                 fileData[fid] = blz.BLZ_Encode(File.ReadAllBytes(Path.Combine(projectDir, "overlay", $"sub_{vv.Id:X4}.bin")), false);

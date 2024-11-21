@@ -143,10 +143,26 @@ public class RomHeader
     /// </summary>
     public uint FatSize { get; set; }
 
-    public uint Arm9OvtOffset { get; set; }
-    public uint Arm9OvtSize { get; set; }
-    public uint Arm7OvtOffset { get; set; }
-    public uint Arm7OvtSize { get; set; }
+    /// <summary>
+    /// The offset of the ARM9 overlay table in the ROM
+    /// </summary>
+    [XmlAttribute("Arm9OvtOffset")]
+    public uint Arm9OverlayTableOffset { get; set; }
+    /// <summary>
+    /// The size of the ARM9 overlay table in bytes
+    /// </summary>
+    [XmlAttribute("Arm9OvtSize")]
+    public uint Arm9OverlayTableSize { get; set; }
+    /// <summary>
+    /// The offset of the ARM7 overlay table in the ROM
+    /// </summary>
+    [XmlAttribute("Arm7OvtOffset")]
+    public uint Arm7OverlayTableOffset { get; set; }
+    /// <summary>
+    /// The size of the ARM7 overlay table in bytes
+    /// </summary>
+    [XmlAttribute("Arm7OvtSize")]
+    public uint Arm7OverlayTableSize { get; set; }
 
     /// <summary>
     /// Deprecated property for unknown values that are now known to be <see cref="NormalCommandSettings"/> and <see cref="Key1CommandSettings"/>
@@ -176,6 +192,9 @@ public class RomHeader
     [XmlIgnore]
     public uint Key1CommandSettings { get; set; }
     
+    /// <summary>
+    /// The offset of the icon/title/banner
+    /// </summary>
     public uint IconTitleOffset { get; set; }
 
     /// <summary>
@@ -215,8 +234,14 @@ public class RomHeader
     [XmlAttribute("RomParamC")]
     public byte[] SecureAreaDisable { get; set; } //8
 
+    /// <summary>
+    /// The size of the ROM (excluding the DSi area) in bytes
+    /// </summary>
     public uint RomSizeExcludingDSiArea { get; set; }
 
+    /// <summary>
+    /// The size of the header
+    /// </summary>
     public uint HeaderSize { get; set; }
     
     /// <summary>
@@ -269,9 +294,15 @@ public class RomHeader
     [XmlAttribute("LogoData")]
     public byte[] NintendoLogoData { get; set; }
     
+    /// <summary>
+    /// CRC16 hash of the <see cref="NintendoLogoData"/>
+    /// </summary>
     [JsonIgnore]
     public ushort LogoCRC { get; set; }
 
+    /// <summary>
+    /// CRC16 hash of the entire Nitro (NDS) header
+    /// </summary>
     [JsonIgnore]
     public ushort NTRHeaderCRC { get; set; }
 
@@ -318,11 +349,11 @@ public class RomHeader
         FatOffset = er.Read<uint>();                                        // 0x48
         FatSize = er.Read<uint>();                                          // 0x4C
 
-        Arm9OvtOffset = er.Read<uint>();                                    // 0x50
-        Arm9OvtSize = er.Read<uint>();                                      // 0x54
+        Arm9OverlayTableOffset = er.Read<uint>();                                    // 0x50
+        Arm9OverlayTableSize = er.Read<uint>();                                      // 0x54
         
-        Arm7OvtOffset = er.Read<uint>();                                    // 0x58
-        Arm7OvtSize = er.Read<uint>();                                      // 0x5C
+        Arm7OverlayTableOffset = er.Read<uint>();                                    // 0x58
+        Arm7OverlayTableSize = er.Read<uint>();                                      // 0x5C
 
         NormalCommandSettings = er.Read<uint>();                            // 0x60
         Key1CommandSettings = er.Read<uint>();                              // 0x64
@@ -439,7 +470,7 @@ public class RomHeader
     {
         var m = new MemoryStream();
         byte[] header;
-        using (var noCrcEw = new EndianBinaryWriter(m, Endianness.LittleEndian))
+        using (var noCrcEw = new EndianBinaryWriter(m))
         {
             noCrcEw.Write(GameName.PadRight(12, '\0')[..12], Encoding.ASCII, false);
             noCrcEw.Write(GameCode.PadRight(4, '\0')[..4], Encoding.ASCII, false);
@@ -468,11 +499,11 @@ public class RomHeader
             noCrcEw.Write(FatOffset);
             noCrcEw.Write(FatSize);
 
-            noCrcEw.Write(Arm9OvtOffset);
-            noCrcEw.Write(Arm9OvtSize);
+            noCrcEw.Write(Arm9OverlayTableOffset);
+            noCrcEw.Write(Arm9OverlayTableSize);
 
-            noCrcEw.Write(Arm7OvtOffset);
-            noCrcEw.Write(Arm7OvtSize);
+            noCrcEw.Write(Arm7OverlayTableOffset);
+            noCrcEw.Write(Arm7OverlayTableSize);
 
             noCrcEw.Write(NormalCommandSettings);
             noCrcEw.Write(Key1CommandSettings);

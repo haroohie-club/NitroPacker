@@ -7,40 +7,56 @@ using HaroohieClub.NitroPacker.IO.Serialization;
 
 namespace HaroohieClub.NitroPacker.IO;
 
+/// <summary>
+/// An extended version of the <see cref="EndianBinaryReader"/> class
+/// </summary>
 public class EndianBinaryReaderEx : EndianBinaryReader
 {
+    /// <summary>
+    /// Constructs an EndianBinaryReaderEx with an underlying base stream
+    /// </summary>
+    /// <param name="baseStream">The stream to read</param>
     public EndianBinaryReaderEx(Stream baseStream)
         : base(baseStream) { }
 
+    /// <summary>
+    /// Constructs an EndianBinaryReaderEx with an underlying base stream of a given endianness
+    /// </summary>
+    /// <param name="baseStream">The stream to read</param>
+    /// <param name="endianness">The endianness of that stream</param>
     public EndianBinaryReaderEx(Stream baseStream, Endianness endianness)
         : base(baseStream, endianness) { }
 
-    public void ReadPadding(int alignment)
+    /// <summary>
+    /// Seeks the stream until aligned with a specified alignment
+    /// </summary>
+    /// <param name="alignment">The byte alignment to match up to</param>
+    public void SeekPastPadding(int alignment)
     {
         if (BaseStream.Position % alignment == 0)
             return;
         BaseStream.Position += alignment - BaseStream.Position % alignment;
     }
 
-    private Stack<long> Chunks = new();
+    private Stack<long> _chunks = new();
 
-    public void BeginChunk()
+    internal void BeginChunk()
     {
-        Chunks.Push(BaseStream.Position);
+        _chunks.Push(BaseStream.Position);
     }
 
-    public void EndChunk()
+    internal void EndChunk()
     {
-        Chunks.Pop();
+        _chunks.Pop();
     }
 
-    public void EndChunk(long sectionSize)
+    internal void EndChunk(long sectionSize)
     {
         JumpRelative(sectionSize);
-        Chunks.Pop();
+        _chunks.Pop();
     }
 
-    public long JumpRelative(long offset)
+    internal long JumpRelative(long offset)
     {
         long curPos = BaseStream.Position;
         BaseStream.Position = GetChunkRelativePointer(offset);
@@ -49,20 +65,20 @@ public class EndianBinaryReaderEx : EndianBinaryReader
 
     private long GetChunkRelativePointer(long offset)
     {
-        if (Chunks.Count == 0)
+        if (_chunks.Count == 0)
             return offset;
-        return Chunks.Peek() + offset;
+        return _chunks.Peek() + offset;
     }
 
-    public long GetRelativeOffset()
+    internal long GetRelativeOffset()
     {
-        if (Chunks.Count == 0)
+        if (_chunks.Count == 0)
             return BaseStream.Position;
 
-        return BaseStream.Position - Chunks.Peek();
+        return BaseStream.Position - _chunks.Peek();
     }
 
-    public uint ReadSignature(uint expected)
+    internal uint ReadSignature(uint expected)
     {
         uint signature = Read<uint>();
         if (signature != expected)
@@ -70,6 +86,11 @@ public class EndianBinaryReaderEx : EndianBinaryReader
         return signature;
     }
 
+    /// <summary>
+    /// Reads an object from the stream
+    /// </summary>
+    /// <typeparam name="T">A type with a blank constructor</typeparam>
+    /// <returns>An object of the specified type</returns>
     public T ReadObject<T>() where T : new()
     {
         T result = new T();
@@ -116,9 +137,9 @@ public class EndianBinaryReaderEx : EndianBinaryReader
     {
         var alignAttribute = property.GetCustomAttribute<AlignAttribute>();
         if (alignAttribute != null)
-            ReadPadding(alignAttribute.Alignment);
+            SeekPastPadding(alignAttribute.Alignment);
         else if (alignment == PropertyAlignment.FieldSize)
-            ReadPadding(SerializationUtil.GetTypeSize(type));
+            SeekPastPadding(SerializationUtil.GetTypeSize(type));
     }
 
     private void ReadPrimitive<T>(T target, PropertyInfo property, PropertyAlignment alignment)
@@ -153,24 +174,14 @@ public class EndianBinaryReaderEx : EndianBinaryReader
         {
             var alignAttr = property.GetCustomAttribute<AlignAttribute>();
             if (alignAttr != null)
-                ReadPadding(alignAttr.Alignment);
+                SeekPastPadding(alignAttr.Alignment);
         }
 
         var arrSizeAttr = property.GetCustomAttribute<ArraySizeAttribute>();
         if (arrSizeAttr == null)
             throw new SerializationException(
                 $"No array size attribute found for field \"{property.Name}\" in \"{typeof(T).Name}\"");
-        int size = -1;
-        if (arrSizeAttr.SizeField != null)
-        {
-            FieldInfo sizeField = typeof(T).GetField(arrSizeAttr.SizeField);
-            if (sizeField == null)
-                throw new SerializationException(
-                    $"Array size field \"{arrSizeAttr.SizeField}\" not found in \"{typeof(T).Name}\"");
-            size = (int)Convert.ChangeType(sizeField.GetValue(target), typeof(int));
-        }
-        else
-            size = arrSizeAttr.FixedSize;
+        int size = arrSizeAttr.FixedSize;
 
         Type elementType = property.PropertyType.GetElementType();
 
@@ -271,6 +282,14 @@ public class EndianBinaryReaderEx : EndianBinaryReader
     //    field.SetValue(target, ReadVector3dDirect(field));
     //}
 
+    /// <summary>
+    /// Reads the properties of an object from the stream and assigns them to a specified target object
+    /// </summary>
+    /// <param name="target">The target object to assign the properties to</param>
+    /// <typeparam name="T">The type to read from the stream</typeparam>
+    /// <exception cref="Exception">Thrown if a property marked with a reference attribute is actually a primitive</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown if a reference type is not absolute, chunk relative, or field relative</exception>
+    /// <exception cref="SerializationException">Thrown for various serialization errors</exception>
     public void ReadObject<T>(T target)
     {
         var properties = SerializationUtil.GetPropertiesInOrder<T>();
@@ -297,7 +316,7 @@ public class EndianBinaryReaderEx : EndianBinaryReader
                     case ReferenceType.ChunkRelative:
                         ptr = GetChunkRelativePointer(ptr);
                         break;
-                    case ReferenceType.FieldRelative:
+                    case ReferenceType.PropertyRelative:
                         ptr += address;
                         break;
                     default:

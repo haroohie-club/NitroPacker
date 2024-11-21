@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using HaroohieClub.NitroPacker;
 using HaroohieClub.NitroPacker.Nitro.Card;
 
 namespace HaroohieClub.NitroPacker.Patcher.Overlay;
@@ -35,7 +34,7 @@ public class Overlay
     /// Creates an overlay
     /// </summary>
     /// <param name="file">The file to load the overlay from</param>
-    /// <param name="romProjectPath">The path to the JSON project file produced by NitroPacker on unpack</param>
+    /// <param name="projectPath">The path to the JSON project file produced by NitroPacker on unpack</param>
     public Overlay(string file, string projectPath)
     {
         Name = Path.GetFileNameWithoutExtension(file);
@@ -45,7 +44,7 @@ public class Overlay
         _data.AddRange(new byte[4]);
         
         NdsProjectFile project = JsonSerializer.Deserialize<NdsProjectFile>(File.ReadAllText(projectPath));
-        RomOVT overlay = project.RomInfo.ARM9Ovt.First(o => o.Id == Id);
+        RomOverlayTable overlay = project.RomInfo.ARM9Ovt.First(o => o.Id == Id);
         Address = overlay.RamAddress;
     }
 

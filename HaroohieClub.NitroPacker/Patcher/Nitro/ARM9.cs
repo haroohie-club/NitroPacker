@@ -93,9 +93,9 @@ public class ARM9
         _autoLoadList.Add(new(address, data));
     }
 
-    internal void WriteBytes(uint address, IEnumerable<byte> bytes)
+    internal void WriteBytes(uint address, byte[] bytes)
     {
-        _staticData.RemoveRange((int)(address - _ramAddress), bytes.Count());
+        _staticData.RemoveRange((int)(address - _ramAddress), bytes.Length);
         _staticData.InsertRange((int)(address - _ramAddress), bytes);
     }
 

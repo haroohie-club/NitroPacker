@@ -2,7 +2,7 @@
 
 namespace HaroohieClub.NitroPacker.Nitro;
 
-public class BinaryBlockHeader
+internal class BinaryBlockHeader
 {
     public BinaryBlockHeader(uint signature)
     {

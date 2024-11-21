@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using HaroohieClub.NitroPacker;
 using Mono.Options;
 
 namespace HaroohieClub.NitroPacker.Cli;

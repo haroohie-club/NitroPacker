@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace HaroohieClub.NitroPacker.IO.Serialization;
 
-public static class SerializationUtil
+internal static class SerializationUtil
 {
     public static PropertyType TypeToPropertyType(Type type)
     {

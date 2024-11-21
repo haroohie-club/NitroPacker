@@ -7,20 +7,47 @@ using HaroohieClub.NitroPacker.IO.Serialization;
 
 namespace HaroohieClub.NitroPacker.IO;
 
+/// <summary>
+/// An extended version of the <see cref="EndianBinaryWriter"/>
+/// </summary>
 public class EndianBinaryWriterEx : EndianBinaryWriter
 {
+    /// <summary>
+    /// Constructs an EndianBinaryWriterEx with an underlying stream
+    /// </summary>
+    /// <param name="baseStream">The stream to write to</param>
     public EndianBinaryWriterEx(Stream baseStream)
         : base(baseStream) { }
 
+    /// <summary>
+    /// Constructs an EndianBinaryWriterEx with a stream and a given endianness
+    /// </summary>
+    /// <param name="baseStream">The stream to write to</param>
+    /// <param name="endianness">The endianness of that stream</param>
     public EndianBinaryWriterEx(Stream baseStream, Endianness endianness)
         : base(baseStream, endianness) { }
 
+    /// <summary>
+    /// Enum specifying chunk size
+    /// </summary>
     public enum ChunkSizeType
     {
+        /// <summary>
+        /// 8-bit unsigned integer chunks
+        /// </summary>
         U8,
+        /// <summary>
+        /// 16-bit unsigned integer chunks
+        /// </summary>
         U16,
+        /// <summary>
+        /// 32-bit unsigned integer chunks
+        /// </summary>
         U32,
-        U64
+        /// <summary>
+        /// 64-bit unsigned integer chunks
+        /// </summary>
+        U64,
     }
 
     private class Chunk
@@ -34,19 +61,19 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
 
     private readonly Stack<Chunk> _chunks = new();
 
-    public void BeginChunk() => BeginChunk(null);
+    internal void BeginChunk() => BeginChunk(null);
 
-    public void BeginChunk(ChunkPointer chunkPointer)
+    internal void BeginChunk(ChunkPointer chunkPointer)
     {
         if (chunkPointer != null)
             WriteChunkPointer(chunkPointer);
         _chunks.Push(new() { StartAddress = BaseStream.Position, HasSize = false });
     }
 
-    public void BeginChunk(int sizeOffset, ChunkSizeType sizeType = ChunkSizeType.U32)
+    internal void BeginChunk(int sizeOffset, ChunkSizeType sizeType = ChunkSizeType.U32)
         => BeginChunk(null, sizeOffset, sizeType);
 
-    public void BeginChunk(ChunkPointer chunkPointer, int sizeOffset, ChunkSizeType sizeType = ChunkSizeType.U32)
+    internal void BeginChunk(ChunkPointer chunkPointer, int sizeOffset, ChunkSizeType sizeType = ChunkSizeType.U32)
     {
         if (chunkPointer != null)
             WriteChunkPointer(chunkPointer);
@@ -60,7 +87,7 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
         });
     }
 
-    public void EndChunk()
+    internal void EndChunk()
     {
         Chunk s = _chunks.Pop();
         if (s.HasSize)
@@ -90,14 +117,14 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
         }
     }
 
-    public enum PointerType
+    internal enum PointerType
     {
         Global,
         ChunkRelative,
         FieldRelative
     }
 
-    public class ChunkPointer
+    internal class ChunkPointer
     {
         public long PointerAddress;
         public long PointerBase;
@@ -111,7 +138,7 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
         BaseStream.Position = curpos;
     }
 
-    public ChunkPointer WriteChunkPointer(PointerType type)
+    internal ChunkPointer WriteChunkPointer(PointerType type)
     {
         long address = BaseStream.Position;
         long ptrBase = 0;
@@ -129,7 +156,7 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
         return new() { PointerAddress = address, PointerBase = ptrBase };
     }
 
-    public void WriteChunkSize(ChunkSizeType sizeType = ChunkSizeType.U32)
+    internal void WriteChunkSize(ChunkSizeType sizeType = ChunkSizeType.U32)
     {
         long curPos = BaseStream.Position;
         switch (sizeType)
@@ -156,13 +183,13 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
         curChunk.SizeType = sizeType;
     }
 
-    public void WriteChunkSize16()
+    internal void WriteChunkSize16()
         => WriteChunkSize(ChunkSizeType.U16);
-
-    public long GetCurposRelative()
+    
+    internal long GetCurposRelative()
         => BaseStream.Position - _chunks.Peek().StartAddress;
 
-    public void WriteCurposRelative(int offset, int delta = 0)
+    internal void WriteCurposRelative(int offset, int delta = 0)
     {
         long curpos = JumpRelative(offset);
         if (_chunks.Count == 0)
@@ -172,7 +199,7 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
         BaseStream.Position = curpos;
     }
 
-    public void WriteCurposRelativeU16(int offset, int delta = 0)
+    internal void WriteCurposRelativeU16(int offset, int delta = 0)
     {
         long curpos = JumpRelative(offset);
         if (_chunks.Count == 0)
@@ -182,13 +209,18 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
         BaseStream.Position = curpos;
     }
 
+    /// <summary>
+    /// Writes alignment padding to the stream
+    /// </summary>
+    /// <param name="alignment">The byte alignment</param>
+    /// <param name="value">The value to fill padding with (default 0x00)</param>
     public void WritePadding(int alignment, byte value = 0)
     {
         while (BaseStream.Position % alignment != 0)
             Write(value);
     }
 
-    public long JumpRelative(long offset)
+    internal long JumpRelative(long offset)
     {
         long curPos = BaseStream.Position;
         if (_chunks.Count == 0)
@@ -316,26 +348,6 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
         else
             finalValue = SerializationUtil.Cast(fieldValue, trueType);
 
-        var chunkSizeAttr = property.GetCustomAttribute<ChunkSizeAttribute>();
-        if (chunkSizeAttr != null && _chunks.Count > 0)
-        {
-            ChunkSizeType chunkSizeType = fieldType switch
-            {
-                PropertyType.U8 => ChunkSizeType.U8,
-                PropertyType.U16 => ChunkSizeType.U16,
-                PropertyType.U32 => ChunkSizeType.U32,
-                PropertyType.U64 => ChunkSizeType.U64,
-                _ => throw new ArgumentOutOfRangeException("Invalid type for chunk size")
-            };
-
-            Chunk chunk = _chunks.Peek();
-            chunk.HasSize = true;
-            chunk.SizeOffset = (int)GetCurposRelative();
-            chunk.SizeType = chunkSizeType;
-            chunk.SizeDelta = chunkSizeAttr.Difference;
-            finalValue = SerializationUtil.Cast(0, trueType);
-        }
-
         WriteFieldTypeDirect(fieldType, finalValue);
     }
 
@@ -345,17 +357,7 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
         if (arrSizeAttr == null)
             throw new SerializationException(
                 $"No array size attribute found for field \"{property.Name}\" in \"{typeof(T).Name}\"");
-        int size = -1;
-        if (arrSizeAttr.SizeField != null)
-        {
-            FieldInfo sizeField = typeof(T).GetField(arrSizeAttr.SizeField);
-            if (sizeField == null)
-                throw new SerializationException(
-                    $"Array size field \"{arrSizeAttr.SizeField}\" not found in \"{typeof(T).Name}\"");
-            size = (int)Convert.ChangeType(sizeField.GetValue(obj), typeof(int));
-        }
-        else
-            size = arrSizeAttr.FixedSize;
+        int size = arrSizeAttr.FixedSize;
 
         if (size < 0)
             throw new SerializationException("Array size invalid");
@@ -451,6 +453,12 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
     //    WriteVector3dDirect(field, (Vector3d)field.GetValue(obj));
     //}
 
+    /// <summary>
+    /// Writes an object to the stream
+    /// </summary>
+    /// <param name="obj">The object to write</param>
+    /// <typeparam name="T">The type of the object</typeparam>
+    /// <exception cref="SerializationException">Thrown if there is an issue serializing the object to binary</exception>
     public void WriteObject<T>(T obj)
     {
         var fields = SerializationUtil.GetPropertiesInOrder<T>();
@@ -512,11 +520,20 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
         }
     }
 
+    /// <summary>
+    /// Indicates the start of a reference object
+    /// </summary>
+    /// <param name="obj"></param>
     public void StartOfRefObject(object obj)
     {
         _refObjAddresses.Add(obj, BaseStream.Position);
     }
 
+    /// <summary>
+    /// Writes all reference objects to the stream
+    /// </summary>
+    /// <exception cref="Exception">Thrown if there are no reference objects that have been written</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown if the reference types are invalid</exception>
     public void FlushReferences()
     {
         foreach (var reference in _references)
@@ -532,7 +549,7 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
                 {
                     ReferenceType.Absolute => address,
                     ReferenceType.ChunkRelative => address - (pointer.chunk?.StartAddress ?? 0),
-                    ReferenceType.FieldRelative => address - pointer.address,
+                    ReferenceType.PropertyRelative => address - pointer.address,
                     _ => throw new ArgumentOutOfRangeException()
                 };
 
@@ -545,9 +562,10 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
         _references.Clear();
     }
 
+    /// <inheritdoc />
     protected override void Dispose(bool disposing)
     {
-        if (!_disposed)
+        if (!Disposed)
             FlushReferences();
 
         base.Dispose(disposing);

@@ -27,6 +27,7 @@ public class BannerV1 : Banner
         }
     }
 
+    /// <inheritdoc />
     public override ushort[] GetCrcs()
     {
         byte[] data = new byte[0x820];

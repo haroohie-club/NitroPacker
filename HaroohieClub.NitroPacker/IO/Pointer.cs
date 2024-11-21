@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace HaroohieClub.NitroPacker.IO;
 
-public readonly struct Pointer<T> : IEquatable<Pointer<T>>
+internal readonly struct Pointer<T> : IEquatable<Pointer<T>>
 {
     public readonly T[] Array;
     public readonly int Index;

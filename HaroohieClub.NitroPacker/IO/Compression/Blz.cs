@@ -8,7 +8,7 @@ namespace HaroohieClub.NitroPacker.IO.Compression;
 // Licensed under Apache License 2.0: https://github.com/OpenKH/OpenKh/blob/master/LICENSE
 // Compression taken from https://github.com/R-YaTian/TinkeDSi/blob/main/Plugins/DSDecmp/DSDecmp/Formats/LZOvl.c
 // Licensed under GPL 3.0 https://github.com/R-YaTian/TinkeDSi/blob/main/LICENSE
-public class Blz
+internal class Blz
 {
     public static byte[] Decompress(byte[] data)
     {

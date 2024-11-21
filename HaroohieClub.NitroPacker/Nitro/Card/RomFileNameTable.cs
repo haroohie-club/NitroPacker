@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Xml.Serialization;
 using HaroohieClub.NitroPacker.IO;
 using HaroohieClub.NitroPacker.Nitro.Fs;
 
@@ -7,12 +8,13 @@ namespace HaroohieClub.NitroPacker.Nitro.Card;
 /// <summary>
 /// Representation of the file name table
 /// </summary>
-public class RomFNT
+[XmlType("RomFNT")]
+public class RomFileNameTable
 {
     /// <summary>
     /// Constructs a blank file name table (used for serialization)
     /// </summary>
-    public RomFNT()
+    public RomFileNameTable()
     {
         DirectoryTable = new[] { new DirectoryTableEntry { ParentId = 1 } };
         NameTable = new[] { new[] { NameTableEntry.EndOfDirectory() } };
@@ -22,7 +24,7 @@ public class RomFNT
     /// Constructs a file name table using an extended endian binary reader
     /// </summary>
     /// <param name="er"><see cref="EndianBinaryReaderEx"/> with an initialized stream</param>
-    public RomFNT(EndianBinaryReaderEx er)
+    public RomFileNameTable(EndianBinaryReaderEx er)
     {
         er.BeginChunk();
         {
@@ -51,32 +53,39 @@ public class RomFNT
         er.EndChunk();
     }
 
-    public void Write(EndianBinaryWriterEx er)
+    /// <summary>
+    /// Writes the file name table to a stream using an extended endian binary writer
+    /// </summary>
+    /// <param name="ew"><see cref="EndianBinaryWriterEx"/> with an initialized stream</param>
+    public void Write(EndianBinaryWriterEx ew)
     {
         DirectoryTable[0].ParentId = (ushort)DirectoryTable.Length;
-        er.BeginChunk();
+        ew.BeginChunk();
         {
-            long dirTabAddr = er.BaseStream.Position;
-            er.BaseStream.Position += DirectoryTable.Length * 8;
+            long dirTabAddr = ew.BaseStream.Position;
+            ew.BaseStream.Position += DirectoryTable.Length * 8;
             for (int i = 0; i < DirectoryTable.Length; i++)
             {
-                DirectoryTable[i].EntryStart = (uint)er.GetCurposRelative();
+                DirectoryTable[i].EntryStart = (uint)ew.GetCurposRelative();
                 foreach (NameTableEntry entry in NameTable[i])
-                    entry.Write(er);
+                    entry.Write(ew);
             }
 
-            long curPos = er.BaseStream.Position;
-            er.BaseStream.Position = dirTabAddr;
+            long curPos = ew.BaseStream.Position;
+            ew.BaseStream.Position = dirTabAddr;
             foreach (DirectoryTableEntry entry in DirectoryTable)
-                entry.Write(er);
-            er.BaseStream.Position = curPos;
+                entry.Write(ew);
+            ew.BaseStream.Position = curPos;
         }
-        er.EndChunk();
+        ew.EndChunk();
     }
 
     /// <summary>
     /// The directory table portion of the FNT
     /// </summary>
     public DirectoryTableEntry[] DirectoryTable { get; set; }
+    /// <summary>
+    /// The name table portion of the FNT
+    /// </summary>
     public NameTableEntry[][] NameTable { get; set; }
 }

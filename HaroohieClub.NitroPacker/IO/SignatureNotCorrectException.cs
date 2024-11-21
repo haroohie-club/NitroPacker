@@ -3,7 +3,7 @@ using System.Text;
 
 namespace HaroohieClub.NitroPacker.IO;
 
-public class SignatureNotCorrectException : Exception
+internal class SignatureNotCorrectException : Exception
 {
     public string Signature { get; }
     public string Expected { get; }

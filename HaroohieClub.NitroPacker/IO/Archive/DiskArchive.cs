@@ -4,10 +4,17 @@ using System.Linq;
 
 namespace HaroohieClub.NitroPacker.IO.Archive;
 
+/// <summary>
+/// An "archive" representing a particular folder on the user's computer
+/// </summary>
 public class DiskArchive : Archive
 {
+    /// <summary>
+    /// The root path of the disk
+    /// </summary>
     public string RootDiskPath { get; }
 
+    /// <inheritdoc />
     public DiskArchive(string rootPath)
     {
         RootDiskPath = rootPath;
@@ -15,6 +22,7 @@ public class DiskArchive : Archive
             throw new DirectoryNotFoundException();
     }
 
+    /// <inheritdoc />
     public override bool IsReadOnly => false;
 
     private string CreateDiskPath(string path)
@@ -38,6 +46,7 @@ public class DiskArchive : Archive
         return path;
     }
 
+    /// <inheritdoc />
     public override IEnumerable<string> EnumerateFiles(string path, bool fullPath)
     {
         var files = Directory.EnumerateFiles(CreateDiskPath(path));
@@ -47,6 +56,7 @@ public class DiskArchive : Archive
             files.Select(Path.GetFileName);
     }
 
+    /// <inheritdoc />
     public override IEnumerable<string> EnumerateDirectories(string path, bool fullPath)
     {
         var dirs = Directory.EnumerateDirectories(CreateDiskPath(path));
@@ -56,9 +66,11 @@ public class DiskArchive : Archive
             dirs.Select(d => d.Substring(Path.GetDirectoryName(d.TrimEnd(Path.DirectorySeparatorChar)).Length + 1));
     }
 
+    /// <inheritdoc />
     public override void DeleteFile(string path)
         => File.Delete(CreateDiskPath(path));
 
+    /// <inheritdoc />
     public override void DeleteDirectory(string path)
     {
         string diskPath = CreateDiskPath(path);
@@ -68,21 +80,27 @@ public class DiskArchive : Archive
         Directory.Delete(diskPath, true);
     }
 
+    /// <inheritdoc />
     public override bool ExistsFile(string path)
         => File.Exists(CreateDiskPath(path));
 
+    /// <inheritdoc />
     public override bool ExistsDirectory(string path)
         => Directory.Exists(CreateDiskPath(path));
 
+    /// <inheritdoc />
     public override void CreateDirectory(string path)
         => Directory.CreateDirectory(CreateDiskPath(path));
 
+    /// <inheritdoc />
     public override byte[] GetFileData(string path)
         => File.ReadAllBytes(CreateDiskPath(path));
 
+    /// <inheritdoc />
     public override Stream OpenFileReadStream(string path)
         => File.OpenRead(CreateDiskPath(path));
 
+    /// <inheritdoc />
     public override void SetFileData(string path, byte[] data)
         => File.WriteAllBytes(CreateDiskPath(path), data);
 }

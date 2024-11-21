@@ -3,6 +3,9 @@ using HaroohieClub.NitroPacker.IO.Serialization;
 
 namespace HaroohieClub.NitroPacker.Nitro.Fs;
 
+/// <summary>
+/// 
+/// </summary>
 public class FatEntry
 {
     public FatEntry()

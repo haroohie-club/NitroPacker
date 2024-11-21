@@ -15,7 +15,7 @@ public class RomBanner
     public RomBanner() { }
 
     /// <summary>
-    /// Constructs a banner with an extended endian binary reader
+    /// Constructs a banner using an extended endian binary reader
     /// </summary>
     /// <param name="er"><see cref="EndianBinaryReaderEx"/> with initialized stream</param>
     public RomBanner(EndianBinaryReaderEx er)
@@ -32,7 +32,7 @@ public class RomBanner
     }
 
     /// <summary>
-    /// Writes the banner with an extended endian binary writer
+    /// Writes the banner using an extended endian binary writer
     /// </summary>
     /// <param name="ew"><see cref="EndianBinaryWriterEx"/> with an initialized stream</param>
     public void Write(EndianBinaryWriterEx ew)

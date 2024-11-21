@@ -44,6 +44,7 @@ public class BannerV103 : BannerV3
         AnimationSequences = er.Read<byte>(0x80);
     }
 
+    /// <inheritdoc />
     public override void Write(EndianBinaryWriter ew)
     {
         base.Write(ew);
@@ -53,6 +54,7 @@ public class BannerV103 : BannerV3
         ew.Write(AnimationSequences);
     }
 
+    /// <inheritdoc />
     public override ushort[] GetCrcs()
     {
         ushort[] crcs = base.GetCrcs();

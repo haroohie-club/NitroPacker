@@ -3,7 +3,7 @@ using System.IO;
 
 namespace HaroohieClub.NitroPacker.IO.Compression;
 
-public class Yaz0
+internal class Yaz0
 {
     public static byte[] Compress(byte[] src)
     {

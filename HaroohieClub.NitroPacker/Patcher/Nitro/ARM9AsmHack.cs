@@ -85,7 +85,7 @@ public class ARM9AsmHack
         string currentLine;
         while ((currentLine = r.ReadLine()) != null)
         {
-            string[] lines = currentLine.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] lines = currentLine.Split([' '], StringSplitOptions.RemoveEmptyEntries);
             if (lines.Length == 4)
             {
                 if (lines[3].Length < 7) continue;
@@ -226,17 +226,18 @@ public class ARM9AsmHack
             }
         }
         Process p = new() { StartInfo = psi };
-        static void func(object sender, DataReceivedEventArgs e)
-        {
-            Console.WriteLine(e.Data);
-        }
-        p.OutputDataReceived += outputDataReceived is not null ? outputDataReceived : func;
-        p.ErrorDataReceived += errorDataReceived is not null ? errorDataReceived : func;
+        p.OutputDataReceived += outputDataReceived ?? Func;
+        p.ErrorDataReceived += errorDataReceived ?? Func;
         p.Start();
         p.BeginOutputReadLine();
         p.BeginErrorReadLine();
         p.WaitForExit();
         return p.ExitCode == 0;
+
+        static void Func(object sender, DataReceivedEventArgs e)
+        {
+            Console.WriteLine(e.Data);
+        }
     }
 
     private static bool CompileReplace(string makePath, string dockerPath, string subdir, string path, DataReceivedEventHandler outputDataReceived, DataReceivedEventHandler errorDataReceived, string dockerTag, string devkitArmPath)
@@ -287,16 +288,17 @@ public class ARM9AsmHack
             }
         }
         Process p = new() { StartInfo = psi };
-        static void func(object sender, DataReceivedEventArgs e)
-        {
-            Console.WriteLine(e.Data);
-        }
-        p.OutputDataReceived += outputDataReceived is not null ? outputDataReceived : func;
-        p.ErrorDataReceived += errorDataReceived is not null ? errorDataReceived : func;
+        p.OutputDataReceived += outputDataReceived ?? Func;
+        p.ErrorDataReceived += errorDataReceived ?? Func;
         p.Start();
         p.BeginOutputReadLine();
         p.BeginErrorReadLine();
         p.WaitForExit();
         return p.ExitCode == 0;
+
+        static void Func(object sender, DataReceivedEventArgs e)
+        {
+            Console.WriteLine(e.Data);
+        }
     }
 }

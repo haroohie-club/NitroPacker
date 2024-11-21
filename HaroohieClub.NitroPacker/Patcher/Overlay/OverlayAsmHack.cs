@@ -167,17 +167,18 @@ public class OverlayAsmHack
             }
         }
         Process p = new() { StartInfo = psi };
-        static void func(object sender, DataReceivedEventArgs e)
-        {
-            Console.WriteLine(e.Data);
-        }
-        p.OutputDataReceived += outputDataReceived is not null ? outputDataReceived : func;
-        p.ErrorDataReceived += errorDataReceived is not null ? errorDataReceived : func;
+        p.OutputDataReceived += outputDataReceived ?? Func;
+        p.ErrorDataReceived += errorDataReceived ?? Func;
         p.Start();
         p.BeginOutputReadLine();
         p.BeginErrorReadLine();
         p.WaitForExit();
         return p.ExitCode == 0;
+
+        static void Func(object sender, DataReceivedEventArgs e)
+        {
+            Console.WriteLine(e.Data);
+        }
     }
 
     private static bool CompileReplace(string makePath, string dockerPath, string subdir, string path, Overlay overlay, DataReceivedEventHandler outputDataReceived, DataReceivedEventHandler errorDataReceived, string dockerTag, string devkitArmPath)
@@ -229,16 +230,17 @@ public class OverlayAsmHack
             }
         }
         Process p = new() { StartInfo = psi };
-        static void func(object sender, DataReceivedEventArgs e)
-        {
-            Console.WriteLine(e.Data);
-        }
-        p.OutputDataReceived += outputDataReceived is not null ? outputDataReceived : func;
-        p.ErrorDataReceived += errorDataReceived is not null ? errorDataReceived : func;
+        p.OutputDataReceived += outputDataReceived ?? Func;
+        p.ErrorDataReceived += errorDataReceived ?? Func;
         p.Start();
         p.BeginOutputReadLine();
         p.BeginErrorReadLine();
         p.WaitForExit();
         return p.ExitCode == 0;
+
+        static void Func(object sender, DataReceivedEventArgs e)
+        {
+            Console.WriteLine(e.Data);
+        }
     }
 }

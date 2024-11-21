@@ -61,7 +61,7 @@ public class NitroFsArchive : Archive
         FileIdOffset = fileIdOffset;
     }
 
-    public static string GetPathFromDir(int idx, string subPath, RomFNT fnt)
+    public static string GetPathFromDir(int idx, string subPath, RomFileNameTable fnt)
     {
         if (fnt.DirectoryTable[idx].ParentId < 0xF000)
         {

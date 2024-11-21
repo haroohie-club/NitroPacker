@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 
 namespace HaroohieClub.NitroPacker.IO;
 
-public static class IOUtil
+internal static class IOUtil
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static short ReadS16Le(byte[] data, int offset)

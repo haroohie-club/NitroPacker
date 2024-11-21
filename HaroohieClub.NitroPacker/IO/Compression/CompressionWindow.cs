@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace HaroohieClub.NitroPacker.IO.Compression;
 
-public class CompressionWindow
+internal class CompressionWindow
 {
     private readonly byte[] _src;
     private readonly LinkedList<uint>[] _windowDict = new LinkedList<uint>[256];

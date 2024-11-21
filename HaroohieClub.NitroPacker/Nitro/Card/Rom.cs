@@ -63,15 +63,15 @@ public class Rom
         Arm7Binary = er.Read<byte>((int)Header.Arm7Size);
 
         er.BaseStream.Position = Header.FntOffset;
-        Fnt = new(er);
+        FileNameTable = new(er);
 
-        er.BaseStream.Position = Header.Arm9OvtOffset;
-        Arm9OverlayTable = new RomOVT[Header.Arm9OvtSize / 32];
-        for (int i = 0; i < Header.Arm9OvtSize / 32; i++) Arm9OverlayTable[i] = new(er);
+        er.BaseStream.Position = Header.Arm9OverlayTableOffset;
+        Arm9OverlayTable = new RomOverlayTable[Header.Arm9OverlayTableSize / 32];
+        for (int i = 0; i < Header.Arm9OverlayTableSize / 32; i++) Arm9OverlayTable[i] = new(er);
 
-        er.BaseStream.Position = Header.Arm7OvtOffset;
-        Arm7OverlayTable = new RomOVT[Header.Arm7OvtSize / 32];
-        for (int i = 0; i < Header.Arm7OvtSize / 32; i++) Arm7OverlayTable[i] = new(er);
+        er.BaseStream.Position = Header.Arm7OverlayTableOffset;
+        Arm7OverlayTable = new RomOverlayTable[Header.Arm7OverlayTableSize / 32];
+        for (int i = 0; i < Header.Arm7OverlayTableSize / 32; i++) Arm7OverlayTable[i] = new(er);
 
         er.BaseStream.Position = Header.FatOffset;
         Fat = new FatEntry[Header.FatSize / 8];
@@ -99,7 +99,7 @@ public class Rom
             er.BaseStream.Position = Header.RomSizeExcludingDSiArea;
             byte[] rsaSig = er.Read<byte>(0x88);
             if (rsaSig[0] == 'a' && rsaSig[1] == 'c')
-                RSASignature = rsaSig;
+                RsaSignature = rsaSig;
         }
     }
 
@@ -216,14 +216,14 @@ public class Rom
             {
                 ew.WritePadding(0x200, 0xFF);
                 //Main Ovt
-                Header.Arm9OvtOffset = (uint)ew.BaseStream.Position;
-                Header.Arm9OvtSize = (uint)Arm9OverlayTable.Length * 0x20;
-                foreach (RomOVT v in Arm9OverlayTable)
+                Header.Arm9OverlayTableOffset = (uint)ew.BaseStream.Position;
+                Header.Arm9OverlayTableSize = (uint)Arm9OverlayTable.Length * 0x20;
+                foreach (RomOverlayTable v in Arm9OverlayTable)
                 {
                     v.Compressed = (uint)FileData[v.FileId].Data.Length;
                     v.Write(ew);
                 }
-                foreach (RomOVT v in Arm9OverlayTable)
+                foreach (RomOverlayTable v in Arm9OverlayTable)
                 {
                     ew.WritePadding(0x200, 0xFF);
                     Fat[v.FileId].FileTop = (uint)ew.BaseStream.Position;
@@ -233,8 +233,8 @@ public class Rom
             }
             else
             {
-                Header.Arm9OvtOffset = 0;
-                Header.Arm9OvtSize = 0;
+                Header.Arm9OverlayTableOffset = 0;
+                Header.Arm9OverlayTableSize = 0;
             }
 
             ew.WritePadding(0x200, 0xFF);
@@ -247,11 +247,11 @@ public class Rom
             {
                 ew.WritePadding(0x200, 0xFF);
                 //Sub Ovt
-                Header.Arm7OvtOffset = (uint)ew.BaseStream.Position;
-                Header.Arm7OvtSize = (uint)Arm7OverlayTable.Length * 0x20;
-                foreach (RomOVT v in Arm7OverlayTable)
+                Header.Arm7OverlayTableOffset = (uint)ew.BaseStream.Position;
+                Header.Arm7OverlayTableSize = (uint)Arm7OverlayTable.Length * 0x20;
+                foreach (RomOverlayTable v in Arm7OverlayTable)
                     v.Write(ew);
-                foreach (RomOVT v in Arm7OverlayTable)
+                foreach (RomOverlayTable v in Arm7OverlayTable)
                 {
                     ew.WritePadding(0x200, 0xFF);
                     Fat[v.FileId].FileTop = (uint)ew.BaseStream.Position;
@@ -261,14 +261,14 @@ public class Rom
             }
             else
             {
-                Header.Arm7OvtOffset = 0;
-                Header.Arm7OvtSize = 0;
+                Header.Arm7OverlayTableOffset = 0;
+                Header.Arm7OverlayTableSize = 0;
             }
 
             ew.WritePadding(0x200, 0xFF);
             //FNT
             Header.FntOffset = (uint)ew.BaseStream.Position;
-            Fnt.Write(ew);
+            FileNameTable.Write(ew);
             Header.FntSize = (uint)ew.BaseStream.Position - Header.FntOffset;
             ew.WritePadding(0x200, 0xFF);
             //FAT
@@ -291,7 +291,7 @@ public class Rom
             //Files
             if (FileData.All(f => f.NameFat is null))
             {
-                for (int i = (int)(Header.Arm9OvtSize / 32 + Header.Arm7OvtSize / 32); i < FileData.Length; i++)
+                for (int i = (int)(Header.Arm9OverlayTableSize / 32 + Header.Arm7OverlayTableSize / 32); i < FileData.Length; i++)
                 {
                     ew.WritePadding(0x200, 0xFF);
                     Fat[i].FileTop = (uint)ew.BaseStream.Position;
@@ -301,11 +301,11 @@ public class Rom
             }
             else
             {
-                foreach ((int i, byte[] data) in FileData.Skip((int)(Header.Arm9OvtSize / 32 + Header.Arm7OvtSize / 32))
+                foreach ((int i, byte[] data) in FileData.Skip((int)(Header.Arm9OverlayTableSize / 32 + Header.Arm7OverlayTableSize / 32))
                              .Select((f, i) => (f, i))
                              .OrderBy(t => t.f.NameFat?.FatOffset ?? 0).Select(t => (t.i, t.f.Data)))
                 {
-                    int idx = i + (int)(Header.Arm9OvtSize / 32 + Header.Arm7OvtSize / 32);
+                    int idx = i + (int)(Header.Arm9OverlayTableSize / 32 + Header.Arm7OverlayTableSize / 32);
                     ew.WritePadding(0x200, 0xFF);
                     Fat[idx].FileTop = (uint)ew.BaseStream.Position;
                     Fat[idx].FileBottom = (uint)ew.BaseStream.Position + (uint)data.Length;
@@ -334,8 +334,8 @@ public class Rom
 
             Header.DeviceCapacity = (byte)(capacity < 0 ? 0 : capacity);
             //RSA
-            if (RSASignature != null)
-                ew.Write(RSASignature, 0, 0x88);
+            if (RsaSignature != null)
+                ew.Write(RsaSignature, 0, 0x88);
 
             //if writing untrimmed write padding up to the power of 2 size of the rom
             if (!trimmed)
@@ -393,16 +393,16 @@ public class Rom
     /// <summary>
     /// File name table
     /// </summary>
-    public RomFNT Fnt { get; set; }
+    public RomFileNameTable FileNameTable { get; set; }
 
     /// <summary>
     /// The ARM9 overlay table
     /// </summary>
-    public RomOVT[] Arm9OverlayTable { get; set; }
+    public RomOverlayTable[] Arm9OverlayTable { get; set; }
     /// <summary>
     /// The ARM7 overlay table
     /// </summary>
-    public RomOVT[] Arm7OverlayTable { get; set; }
+    public RomOverlayTable[] Arm7OverlayTable { get; set; }
 
     /// <summary>
     /// File allocation table
@@ -421,7 +421,7 @@ public class Rom
     /// <summary>
     /// RSA signature
     /// </summary>
-    public byte[] RSASignature { get; set; }
+    public byte[] RsaSignature { get; set; }
 
     /// <summary>
     /// Generates a Nitro filesystem archive from a ROM
@@ -429,7 +429,7 @@ public class Rom
     /// <returns>A <see cref="NitroFsArchive"/> with the contents of the ROM</returns>
     public NitroFsArchive ToArchive()
     {
-        return new(Fnt.DirectoryTable, Fnt.NameTable, FileData);
+        return new(FileNameTable.DirectoryTable, FileNameTable.NameTable, FileData);
     }
 
     /// <summary>
@@ -443,8 +443,8 @@ public class Rom
         int nrOverlays = Arm9OverlayTable.Length + Arm7OverlayTable.Length;
         
         NitroFsArchive nitroArc = new(archive, (ushort)nrOverlays, nameFat?.ToList());
-        Fnt.DirectoryTable = nitroArc.DirTable;
-        Fnt.NameTable = nitroArc.NameTable;
+        FileNameTable.DirectoryTable = nitroArc.DirTable;
+        FileNameTable.NameTable = nitroArc.NameTable;
 
         int nrFiles = nitroArc.FileData.Length;
 
