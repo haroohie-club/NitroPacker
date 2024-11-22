@@ -160,6 +160,20 @@ public class NdsProjectFile
         using EndianBinaryWriterEx bw = new(bannerStream);
         ndsFile.Banner.Write(bw);
 
+        if (ndsFile.Arm9iBinary?.Length > 0)
+        {
+            File.WriteAllBytes(Path.Combine(outPath, "arm9i.bin"), ndsFile.Arm9iBinary);
+        }
+        if (ndsFile.Arm7iBinary?.Length > 0)
+        {
+            File.WriteAllBytes(Path.Combine(outPath, "arm7i.bin"), ndsFile.Arm7iBinary);
+        }
+
+        if (ndsFile.DSiWareExtraData?.Length > 0)
+        {
+            File.WriteAllBytes(Path.Combine(outPath, "dsiware-extra.bin"), ndsFile.DSiWareExtraData);
+        }
+
         projectFile.RomInfo = new(ndsFile);
         if (includeFileOrder)
         {
@@ -257,6 +271,21 @@ public class NdsProjectFile
         n.Arm7Binary = File.ReadAllBytes(Path.Combine(projectDir, "arm7.bin"));
         n.FromArchive(fsRoot, RomInfo.NameEntryWithFatEntries);
 
+        if (File.Exists(Path.Combine(projectDir, "arm9i.bin")))
+        {
+            n.Arm9iBinary = File.ReadAllBytes(Path.Combine(projectDir, "arm9i.bin"));
+        }
+        if (File.Exists(Path.Combine(projectDir, "arm7i.bin")))
+        {
+            n.Arm7iBinary = File.ReadAllBytes(Path.Combine(projectDir, "arm7i.bin"));
+        }
+
+        if (File.Exists(Path.Combine(projectDir, "dsiware-extra.bin")))
+        {
+            n.DSiWareExtraData = File.ReadAllBytes(Path.Combine(projectDir, "dsiware-extra.bin"));
+        }
+
+        // If this is a DSi ROM, we don't want to trim it
         n.Write(outputStream);
     }
 

@@ -93,6 +93,26 @@ public class Rom
 
         FileData = fileData.Select(t => new NameFatWithData(t)).ToArray();
 
+        if (Header.DSiHeader?.Arm9iRomOffset > 0)
+        {
+            er.BaseStream.Position = Header.DSiHeader.Arm9iRomOffset;
+            Arm9iBinary = er.Read<byte>((int)Header.DSiHeader.Arm9iSize);
+        }
+
+        if (Header.DSiHeader?.Arm7iRomOffset > 0)
+        {
+            er.BaseStream.Position = Header.DSiHeader.Arm7iRomOffset;
+            Arm7iBinary = er.Read<byte>((int)Header.DSiHeader.Arm7iSize);
+        }
+
+        // Extra data for DSiWare
+        er.BaseStream.Position = 0x1000;
+        if (er.Read<byte>(0x10).Any(b => b != 0x00))
+        {
+            er.BaseStream.Position = 0x1000;
+            DSiWareExtraData = er.Read<byte>(0x3000);
+        }
+        
         //RSA Signature
         if (Header.RomSizeExcludingDSiArea + 0x88 <= er.BaseStream.Length)
         {
@@ -345,6 +365,30 @@ public class Rom
             ew.BaseStream.Position = Header.FatOffset;
             foreach (FatEntry v in Fat)
                 v.Write(ew);
+            
+            //DSi section
+            if (Arm9iBinary?.Length > 0)
+            {
+                ew.BaseStream.Position = Header.DSiHeader.DigestTWLRegionOffset;
+                Header.DSiHeader.Arm9iRomOffset = (uint)ew.BaseStream.Position;
+                Header.DSiHeader.Arm9iSize = (uint)Arm9iBinary.Length;
+                ew.Write(Arm9iBinary, 0, Arm9iBinary.Length);
+            }
+
+            if (Arm7iBinary?.Length > 0)
+            {
+                ew.WritePadding(0x200, 0xFF);
+                Header.DSiHeader.Arm7iRomOffset = (uint)ew.BaseStream.Position;
+                Header.DSiHeader.Arm7iSize = (uint)Arm7iBinary.Length;
+                ew.Write(Arm7iBinary, 0, Arm7iBinary.Length);
+            }
+
+            if (DSiWareExtraData?.Length > 0)
+            {
+                ew.BaseStream.Position = 0x1000;
+                ew.Write(DSiWareExtraData, 0, DSiWareExtraData.Length);
+            }
+            
             //Header
             ew.BaseStream.Position = 0;
             Header.Write(ew);
@@ -417,11 +461,26 @@ public class Rom
     /// NitroFS file data
     /// </summary>
     public NameFatWithData[] FileData { get; set; }
+    
+    /// <summary>
+    /// For DSi and DSi-enhanced games, the contents of the game's arm9i.bin
+    /// </summary>
+    public byte[] Arm9iBinary { get; set; }
+    
+    /// <summary>
+    /// For DSi and DSi-enhanced games, the contents of the game's arm7i.bin
+    /// </summary>
+    public byte[] Arm7iBinary { get; set; }
 
     /// <summary>
     /// RSA signature
     /// </summary>
     public byte[] RsaSignature { get; set; }
+
+    /// <summary>
+    /// DSiWare contains a confusing binary section that needs to be preserved
+    /// </summary>
+    public byte[] DSiWareExtraData { get; set; }
 
     /// <summary>
     /// Generates a Nitro filesystem archive from a ROM
