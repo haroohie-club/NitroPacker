@@ -13,6 +13,7 @@ namespace HaroohieClub.NitroPacker.Nitro.Card.Headers;
 /// <summary>
 /// Representation of the NDS (and DSi) ROM header
 /// </summary>
+[Serializable]
 public class RomHeader
 {
     /// <summary>
@@ -27,21 +28,31 @@ public class RomHeader
     /// Uppercase ASCII, "01" = Nintendo
     /// </summary>
     public string MakerCode { get; set; } //2
+
+    /// <summary>
+    /// Deprecated, please use <see cref="UnitCode"/> instead
+    /// </summary>
+    [JsonIgnore]
+    public byte ProductId
+    {
+        get => (byte)UnitCode;
+        set => UnitCode = (UnitCodes)value;
+    }
     /// <summary>
     /// Unit code indicating the system the ROM was intended to run on
     /// </summary>
-    [XmlAttribute("ProductId")]
+    [XmlIgnore]
     public UnitCodes UnitCode { get; set; }
     /// <summary>
     /// only bottom 8 bits are used, usually 0x00
     /// </summary>
-    [XmlAttribute("DeviceType")]
+    [XmlElement("DeviceType")]
     public byte EncryptionSeedSelect { get; set; }
     /// <summary>
     /// The size of the device, represented as a left bitshift value of 128 KiB
     /// e.g., a value of 7 represents 16 MiB
     /// </summary>
-    [XmlAttribute("DeviceSize")]
+    [XmlElement("DeviceSize")]
     public byte DeviceCapacity { get; set; }
 
     private byte[] _reservedA;
@@ -79,89 +90,97 @@ public class RomHeader
     /// <summary>
     /// The version of the ROM (usually 0)
     /// </summary>
-    [XmlAttribute("GameVersion")]
+    [XmlElement("GameVersion")]
     public byte RomVersion { get; set; }
     /// <summary>
     /// Auto start; if bit 2 is set, skips "Press Button" after Health and Safety and also skips boot menu
     /// </summary>
-    [XmlAttribute("Property")]
+    [XmlElement("Property")]
     public byte AutoStart { get; set; }
 
     /// <summary>
     /// The offset of ARM9 in the ROM
     /// </summary>
+    [JsonIgnore]
     public uint Arm9RomOffset { get; set; }
     /// <summary>
     /// Entry address of ARM9 in RAM (0x2000000..0x23BFE00)
     /// </summary>
-    [XmlAttribute("MainEntryAddress")]
+    [XmlElement("MainEntryAddress")]
     public uint Arm9EntryAddress { get; set; }
     /// <summary>
     /// Loading address of ARM9 in RAM (0x2000000..0x23BFE00)
     /// </summary>
-    [XmlAttribute("MainRamAddress")]
+    [XmlElement("MainRamAddress")]
     public uint Arm9RamAddress { get; set; }
     /// <summary>
     /// The size of arm9.bin
     /// </summary>
+    [JsonIgnore]
     public uint Arm9Size { get; set; }
 
     /// <summary>
     /// The offset of ARM7 in the ROM
     /// </summary>
+    [JsonIgnore]
     public uint Arm7RomOffset { get; set; }
     /// <summary>
     /// ARM7 entry address in RAM (0x2000000..0x23BFE00, or 0x37F8000..0x3807E00)
     /// </summary>
-    [XmlAttribute("SubEntryAddress")]
+    [XmlElement("SubEntryAddress")]
     public uint Arm7EntryAddress { get; set; }
     /// <summary>
     /// ARM7 loading address in RAM (0x2000000..0x23BFE00, or 0x37F8000..0x3807E00)
     /// </summary>
-    [XmlAttribute("SubRamAddress")]
+    [XmlElement("SubRamAddress")]
     public uint Arm7RamAddress { get; set; }
     /// <summary>
     /// The size of arm7.bin
     /// </summary>
+    [JsonIgnore]
     public uint Arm7Size { get; set; }
 
     /// <summary>
     /// The offset of the file name table in the ROM
     /// </summary>
+    [JsonIgnore]
     public uint FntOffset { get; set; }
     /// <summary>
     /// The size of the file name table
     /// </summary>
+    [JsonIgnore]
     public uint FntSize { get; set; }
 
     /// <summary>
     /// The offset of the file allocation table in the ROM
     /// </summary>
+    [JsonIgnore]
     public uint FatOffset { get; set; }
     /// <summary>
     /// The size of the file allocation table
     /// </summary>
+    [JsonIgnore]
     public uint FatSize { get; set; }
 
     /// <summary>
     /// The offset of the ARM9 overlay table in the ROM
     /// </summary>
-    [XmlAttribute("Arm9OvtOffset")]
+    [JsonIgnore]
     public uint Arm9OverlayTableOffset { get; set; }
     /// <summary>
     /// The size of the ARM9 overlay table in bytes
     /// </summary>
-    [XmlAttribute("Arm9OvtSize")]
+    [JsonIgnore]
     public uint Arm9OverlayTableSize { get; set; }
     /// <summary>
     /// The offset of the ARM7 overlay table in the ROM
     /// </summary>
-    [XmlAttribute("Arm7OvtOffset")]
+    [JsonIgnore]
     public uint Arm7OverlayTableOffset { get; set; }
     /// <summary>
     /// The size of the ARM7 overlay table in bytes
     /// </summary>
-    [XmlAttribute("Arm7OvtSize")]
+    [JsonIgnore]
     public uint Arm7OverlayTableSize { get; set; }
 
     /// <summary>
@@ -169,7 +188,6 @@ public class RomHeader
     /// </summary>
     [ArraySize(8)]
     [JsonIgnore]
-    [Obsolete("RomParamA is deprecated, please use NormalCommandSettings and Key1CommandSettings instead")]
     public byte[] RomParamA
     {
         get => [.. BitConverter.GetBytes(NormalCommandSettings).Concat(BitConverter.GetBytes(Key1CommandSettings))];
@@ -207,8 +225,11 @@ public class RomHeader
     /// </summary>
     [ArraySize(2)]
     [JsonIgnore]
-    [Obsolete("RomParamB is deprecated, please use SecureAreaDelay instead")]
-    public byte[] RomParamB { get; set; }
+    public byte[] RomParamB
+    {
+        get => BitConverter.GetBytes(SecureAreaDelay);
+        set => SecureAreaDelay = IOUtil.ReadU16Le(value, 0);
+    }
     
     /// <summary>
     /// Secure Area Delay (in 131kHz units) (051Eh=10ms or 0D7Eh=26ms)
@@ -219,19 +240,19 @@ public class RomHeader
     /// <summary>
     /// ARM9 Auto Load List Hook RAM Address; end address of autoload
     /// </summary>
-    [XmlAttribute("MainAutoloadDone")]
+    [XmlElement("MainAutoloadDone")]
     public uint Arm9AutoloadHookRamAddress { get; set; }
     /// <summary>
     /// ARM7 Auto Load List Hook RAM Address; functions
     /// </summary>
-    [XmlAttribute("SubAutoloadDone")]
+    [XmlElement("SubAutoloadDone")]
     public uint Arm7AutoloadHookRamAddress { get; set; }
 
     /// <summary>
     /// Secure Area Disable (by encrypted "NmMdOnly") (usually zero)
     /// </summary>
     [ArraySize(8)]
-    [XmlAttribute("RomParamC")]
+    [XmlElement("RomParamC")]
     public byte[] SecureAreaDisable { get; set; } //8
 
     /// <summary>
@@ -291,7 +312,7 @@ public class RomHeader
     /// Nintendo Logo (compressed bitmap, same as in GBA Headers)
     /// </summary>
     [ArraySize(0x9C)]
-    [XmlAttribute("LogoData")]
+    [XmlElement("LogoData")]
     public byte[] NintendoLogoData { get; set; }
     
     /// <summary>

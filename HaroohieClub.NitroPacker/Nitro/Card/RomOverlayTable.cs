@@ -58,6 +58,7 @@ public class RomOverlayTable
     /// <summary>
     /// The ID of the overlay
     /// </summary>
+    [XmlAttribute("Id")]
     public uint Id { get; set; }
     /// <summary>
     /// The address at which the game loads the overlay
@@ -74,12 +75,12 @@ public class RomOverlayTable
     /// <summary>
     /// Static initializer start address
     /// </summary>
-    [XmlAttribute("SinitInit")]
+    [XmlElement("SinitInit")]
     public uint StaticInitializerStartAddress { get; set; }
     /// <summary>
     /// Static initializer end address
     /// </summary>
-    [XmlAttribute("SinitInitEnd")]
+    [XmlElement("SinitInitEnd")]
     public uint StaticInitializerEndAddress { get; set; }
 
     /// <summary>
@@ -98,5 +99,6 @@ public class RomOverlayTable
     /// A set of flags for this overlay
     /// </summary>
     [Ignore]
+    [XmlAttribute("Flag")]
     public OverlayTableFlag Flag { get; set; } // :8;
 }

@@ -85,7 +85,7 @@ public class ARM9AsmHack
         string currentLine;
         while ((currentLine = r.ReadLine()) != null)
         {
-            string[] lines = currentLine.Split([' '], StringSplitOptions.RemoveEmptyEntries);
+            string[] lines = currentLine.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             if (lines.Length == 4)
             {
                 if (lines[3].Length < 7) continue;

@@ -31,7 +31,7 @@ public class NitroFooter
     /// <summary>
     /// The start offset for module params
     /// </summary>
-    [XmlAttribute("_start_ModuleParamsOffset")]
+    [XmlElement("_start_ModuleParamsOffset")]
     public uint StartModuleParamsOffset { get; set; }
     /// <summary>
     /// Unknown
