@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Xml.Linq;
 using System.Xml.Serialization;
 using HaroohieClub.NitroPacker.IO;
 using HaroohieClub.NitroPacker.IO.Archive;

@@ -1,4 +1,7 @@
+using System;
 using System.Data;
+using System.Text.Json.Serialization;
+using System.Xml.Serialization;
 using HaroohieClub.NitroPacker.IO;
 using HaroohieClub.NitroPacker.Nitro.Card.Banners;
 
@@ -7,6 +10,7 @@ namespace HaroohieClub.NitroPacker.Nitro.Card;
 /// <summary>
 /// Representation of the ROM's icon/title/banner
 /// </summary>
+[Serializable]
 public class RomBanner
 {
     /// <summary>
@@ -37,9 +41,16 @@ public class RomBanner
     /// <param name="ew"><see cref="EndianBinaryWriterEx"/> with an initialized stream</param>
     public void Write(EndianBinaryWriterEx ew)
     {
-        Header.Crc16s = Banner.GetCrcs();
+        Header.Crc16s = Banner is not null ? Banner.GetCrcs() : OldBanner.GetCrcs();
         Header.Write(ew);
-        Banner.Write(ew);
+        if (Banner is not null)
+        {
+            Banner.Write(ew);
+        }
+        else
+        {
+            OldBanner.Write(ew);
+        }
     }
 
     /// <summary>
@@ -50,5 +61,13 @@ public class RomBanner
     /// <summary>
     /// The actual ROM banner
     /// </summary>
+    [XmlIgnore]
     public Banner Banner { get; set; }
+    
+    /// <summary>
+    /// Property used for the old NitroPacker project file format
+    /// </summary>
+    [JsonIgnore]
+    [XmlElement("Banner")]
+    public BannerV1 OldBanner { get; set; }
 }

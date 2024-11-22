@@ -50,7 +50,7 @@ public abstract class Banner
     /// The palette for the banner's <see cref="Image"/>
     /// </summary>
     [ArraySize(16 * 2)]
-    [XmlAttribute("Pltt")]
+    [XmlElement("Pltt")]
     public byte[] Palette { get; set; }
 
     /// <summary>
