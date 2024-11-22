@@ -1,6 +1,5 @@
 using System;
 using System.Text;
-using System.Xml.Serialization;
 using HaroohieClub.NitroPacker.IO;
 using HaroohieClub.NitroPacker.Nitro.Card.Cryptography;
 

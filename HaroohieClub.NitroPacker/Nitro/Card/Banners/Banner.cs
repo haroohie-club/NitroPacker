@@ -14,6 +14,11 @@ namespace HaroohieClub.NitroPacker.Nitro.Card.Banners;
 public abstract class Banner
 {
     /// <summary>
+    /// The version of this banner (0x001, 0x002, 0x003, 0x103)
+    /// </summary>
+    public int Version { get; set; }
+    
+    /// <summary>
     /// Constructs an empty banner, used for serialization
     /// </summary>
     public Banner() { }
@@ -67,7 +72,7 @@ public abstract class Banner
     /// </summary>
     [JsonIgnore]
     [XmlIgnore]
-    public string[] GameName { get; set; }
+    public virtual string[] GameName { get; set; }
 
     /// <summary>
     /// Base 64 encoded versions of <see cref="GameName"/>

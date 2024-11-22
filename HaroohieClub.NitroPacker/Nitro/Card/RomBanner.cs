@@ -3,6 +3,7 @@ using System.Data;
 using System.Text.Json.Serialization;
 using System.Xml.Serialization;
 using HaroohieClub.NitroPacker.IO;
+using HaroohieClub.NitroPacker.IO.Serialization;
 using HaroohieClub.NitroPacker.Nitro.Card.Banners;
 
 namespace HaroohieClub.NitroPacker.Nitro.Card;
@@ -45,7 +46,21 @@ public class RomBanner
         Header.Write(ew);
         if (Banner is not null)
         {
-            Banner.Write(ew);
+            switch (Header.Version)
+            {
+                case 0x001:
+                    ((BannerV1)Banner).Write(ew);
+                    break;
+                case 0x002:
+                    ((BannerV2)Banner).Write(ew);
+                    break;
+                case 0x003:
+                    ((BannerV3)Banner).Write(ew);
+                    break;
+                case 0x103:
+                    ((BannerV103)Banner).Write(ew);
+                    break;
+            }
         }
         else
         {
@@ -61,12 +76,14 @@ public class RomBanner
     /// <summary>
     /// The actual ROM banner
     /// </summary>
+    [JsonIgnore]
     [XmlIgnore]
     public Banner Banner { get; set; }
     
     /// <summary>
     /// Property used for the old NitroPacker project file format
     /// </summary>
+    [Ignore]
     [JsonIgnore]
     [XmlElement("Banner")]
     public BannerV1 OldBanner { get; set; }

@@ -557,7 +557,7 @@ public class RomHeader
         ew.Write(NTRHeaderCRC);
         
         // TWL-only settings here
-        ew.Skip(0x48);
+        ew.Skip(0x20);
         ew.Write(DSiHeader.GlobalWramSlots);
         ew.Write(DSiHeader.Arm9WramAreas);
         ew.Write(DSiHeader.Arm7WramAreas);

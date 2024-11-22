@@ -2,12 +2,12 @@
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Xml.Linq;
 using System.Xml.Serialization;
 using HaroohieClub.NitroPacker.IO;
 using HaroohieClub.NitroPacker.IO.Archive;
 using HaroohieClub.NitroPacker.IO.Compression;
 using HaroohieClub.NitroPacker.Nitro.Card;
+using HaroohieClub.NitroPacker.Nitro.Card.Banners;
 using HaroohieClub.NitroPacker.Nitro.Card.Headers;
 using HaroohieClub.NitroPacker.Nitro.Fs;
 
@@ -190,8 +190,19 @@ public class NdsProjectFile
         // Read banner from file first to initialize that
         using FileStream bannerStream = File.OpenRead(Path.Combine(projectDir, "banner.bin"));
         EndianBinaryReaderEx br = new(bannerStream);
-        RomInfo.Banner = br.ReadObject<RomBanner>();
-        
+        RomInfo.Banner = new()
+        {
+            Header = br.ReadObject<Header>()
+        };
+        RomInfo.Banner.Banner = RomInfo.Banner.Header.Version switch
+        {
+            0x001 => new BannerV1(br),
+            0x002 => new BannerV2(br),
+            0x003 => new BannerV3(br),
+            0x103 => new BannerV103(br),
+            _ => null,
+        };
+
         Rom n = new()
         {
             Header = RomInfo.Header,
