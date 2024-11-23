@@ -270,7 +270,7 @@ public class Rom
             }
             
             //SubRom
-            ew.WritePadding(0x400, 0xFF);
+            ew.WritePadding(0x200, 0xFF);
             Header.Arm7RomOffset = (uint)ew.BaseStream.Position;
             Header.Arm7Size = (uint)Arm7Binary.Length;
             ew.Write(Arm7Binary, 0, Arm7Binary.Length);
@@ -368,7 +368,7 @@ public class Rom
                 Header.DSiHeader.DigestBlockHashtableOffset = (uint)ew.BaseStream.Position;
                 Header.DSiHeader.DigestBlockHashtableLength = (uint)DigestBlockHashtableBinary.Length;
                 ew.Write(DigestBlockHashtableBinary, 0, DigestBlockHashtableBinary.Length);
-                ew.WritePadding(0x400, 0xFF);
+                ew.WritePadding(0x200, 0xFF);
             }
             
             Header.RomSizeExcludingDSiArea = (uint)ew.BaseStream.Position;
