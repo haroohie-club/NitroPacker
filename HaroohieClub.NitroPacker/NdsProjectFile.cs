@@ -160,8 +160,23 @@ public class NdsProjectFile
         using EndianBinaryWriterEx bw = new(bannerStream);
         ndsFile.Banner.Write(bw);
 
+        if (ndsFile.DigestSectorHashtableBinary?.Length > 0)
+        {
+            File.WriteAllBytes(Path.Combine(outPath, "digest_sector_hashtable.bin"),
+                ndsFile.DigestSectorHashtableBinary);
+        }
+        if (ndsFile.DigestBlockHashtableBinary?.Length > 0)
+        {
+            File.WriteAllBytes(Path.Combine(outPath, "digest_block_hashtable.bin"),
+                ndsFile.DigestBlockHashtableBinary);
+        }
+
         if (ndsFile.Arm9iBinary?.Length > 0)
         {
+            if (ndsFile.TwlStaticHeader?.Length > 0)
+            {
+                File.WriteAllBytes(Path.Combine(outPath, "twlheader.bin"), ndsFile.TwlStaticHeader);
+            }
             File.WriteAllBytes(Path.Combine(outPath, "arm9i.bin"), ndsFile.Arm9iBinary);
         }
         if (ndsFile.Arm7iBinary?.Length > 0)
@@ -271,6 +286,19 @@ public class NdsProjectFile
         n.Arm7Binary = File.ReadAllBytes(Path.Combine(projectDir, "arm7.bin"));
         n.FromArchive(fsRoot, RomInfo.NameEntryWithFatEntries);
 
+        if (File.Exists(Path.Combine(projectDir, "digest_sector_hashtable.bin")))
+        {
+            n.DigestSectorHashtableBinary = File.ReadAllBytes(Path.Combine(projectDir, "digest_sector_hashtable.bin"));
+        }
+        if (File.Exists(Path.Combine(projectDir, "digest_block_hashtable.bin")))
+        {
+            n.DigestBlockHashtableBinary = File.ReadAllBytes(Path.Combine(projectDir, "digest_block_hashtable.bin"));
+        }
+
+        if (File.Exists(Path.Combine(projectDir, "twlheader.bin")))
+        {
+            n.TwlStaticHeader = File.ReadAllBytes(Path.Combine(projectDir, "twlheader.bin"));
+        }
         if (File.Exists(Path.Combine(projectDir, "arm9i.bin")))
         {
             n.Arm9iBinary = File.ReadAllBytes(Path.Combine(projectDir, "arm9i.bin"));

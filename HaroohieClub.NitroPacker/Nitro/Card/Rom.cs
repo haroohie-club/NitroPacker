@@ -93,9 +93,21 @@ public class Rom
 
         FileData = fileData.Select(t => new NameFatWithData(t)).ToArray();
 
+        if (Header.DSiHeader?.DigestSectorHashtableOffset > 0)
+        {
+            er.BaseStream.Position = Header.DSiHeader.DigestSectorHashtableOffset;
+            DigestSectorHashtableBinary = er.Read<byte>((int)Header.DSiHeader.DigestSectorHashtableLength);
+        }
+        if (Header.DSiHeader?.DigestBlockHashtableOffset > 0)
+        {
+            er.BaseStream.Position = Header.DSiHeader.DigestBlockHashtableOffset;
+            DigestBlockHashtableBinary = er.Read<byte>((int)Header.DSiHeader.DigestBlockHashtableLength);
+        }
+        
         if (Header.DSiHeader?.Arm9iRomOffset > 0)
         {
-            er.BaseStream.Position = Header.DSiHeader.Arm9iRomOffset;
+            er.BaseStream.Position = Header.DSiHeader.Arm9iRomOffset - 0x3000;
+            TwlStaticHeader = er.Read<byte>(0x3000);
             Arm9iBinary = er.Read<byte>((int)Header.DSiHeader.Arm9iSize);
         }
         if (Header.DSiHeader?.Arm7iRomOffset > 0)
@@ -232,12 +244,6 @@ public class Rom
             //Static Footer
             StaticFooter?.Write(ew);
             
-            //SubRom
-            ew.WritePadding(0x400, 0xFF);
-            Header.Arm7RomOffset = (uint)ew.BaseStream.Position;
-            Header.Arm7Size = (uint)Arm7Binary.Length;
-            ew.Write(Arm7Binary, 0, Arm7Binary.Length);
-            
             if (Arm9OverlayTable.Length != 0)
             {
                 ew.WritePadding(0x200, 0xFF);
@@ -262,6 +268,12 @@ public class Rom
                 Header.Arm9OverlayTableOffset = 0;
                 Header.Arm9OverlayTableSize = 0;
             }
+            
+            //SubRom
+            ew.WritePadding(0x400, 0xFF);
+            Header.Arm7RomOffset = (uint)ew.BaseStream.Position;
+            Header.Arm7Size = (uint)Arm7Binary.Length;
+            ew.Write(Arm7Binary, 0, Arm7Binary.Length);
 
             //I assume this works the same as the main ovt?
             if (Arm7OverlayTable.Length != 0)
@@ -335,8 +347,70 @@ public class Rom
             }
 
             ew.WritePadding(4);
+            
+            //RSA
+            // if (RsaSignature != null)
+            //     ew.Write(RsaSignature, 0, 0x88);
+            
+            ew.WritePadding(0x400, 0xFF);
+            if (DigestSectorHashtableBinary?.Length > 0)
+            {
+                Header.DSiHeader.DigestNTRRegionOffset = Header.Arm9RomOffset;
+                Header.DSiHeader.DigestNTRRegionLength = (uint)ew.BaseStream.Position - Header.DSiHeader.DigestNTRRegionOffset;
+                
+                Header.DSiHeader.DigestSectorHashtableOffset = (uint)ew.BaseStream.Position;
+                Header.DSiHeader.DigestSectorHashtableLength = (uint)DigestSectorHashtableBinary.Length;
+                ew.Write(DigestSectorHashtableBinary, 0, DigestSectorHashtableBinary.Length);
+                ew.WritePadding(0x400, 0xFF);
+            }
+            if (DigestBlockHashtableBinary?.Length > 0)
+            {
+                Header.DSiHeader.DigestBlockHashtableOffset = (uint)ew.BaseStream.Position;
+                Header.DSiHeader.DigestBlockHashtableLength = (uint)DigestBlockHashtableBinary.Length;
+                ew.Write(DigestBlockHashtableBinary, 0, DigestBlockHashtableBinary.Length);
+                ew.WritePadding(0x400, 0xFF);
+            }
+            
             Header.RomSizeExcludingDSiArea = (uint)ew.BaseStream.Position;
-            uint capacitySize = Header.RomSizeExcludingDSiArea;
+
+            //Fat
+            ew.BaseStream.Position = Header.FatOffset;
+            foreach (FatEntry v in Fat)
+                v.Write(ew);
+
+            ew.BaseStream.Position = Header.RomSizeExcludingDSiArea;
+            ew.WritePadding(0x3000, 0xFF);
+            byte[] padding = new byte[0x1000];
+            Array.Fill<byte>(padding, 0xFF);
+            while ($"{ew.BaseStream.Position:X8}"[^5..] != "03000")
+                ew.Write(padding);
+            
+            //TWL section
+            if (Arm9iBinary?.Length > 0)
+            {
+                if (TwlStaticHeader?.Length > 0)
+                {
+                    ew.BaseStream.Seek(-0x3000, SeekOrigin.Current);
+                    ew.Write(TwlStaticHeader);
+                }
+                Header.DSiHeader.DigestTWLRegionOffset = (uint)ew.BaseStream.Position;
+                Header.DSiHeader.Arm9iRomOffset = (uint)ew.BaseStream.Position;
+                Header.DSiHeader.Arm9iSize = (uint)Arm9iBinary.Length;
+                ew.Write(Arm9iBinary, 0, Arm9iBinary.Length);
+            }
+            
+            if (Arm7iBinary?.Length > 0)
+            {
+                ew.WritePadding(0x400, 0xFF);
+                Header.DSiHeader.Arm7iRomOffset = (uint)ew.BaseStream.Position;
+                Header.DSiHeader.Arm7iSize = (uint)Arm7iBinary.Length;
+                ew.Write(Arm7iBinary, 0, Arm7iBinary.Length);
+                ew.WritePadding(0x400, 0xFF);
+                Header.DSiHeader.DigestTWLRegionLength = (uint)ew.BaseStream.Position - Header.DSiHeader.DigestTWLRegionOffset;
+                Header.DSiHeader.TotalRomSizeIncludingDSiArea = (uint)ew.BaseStream.Position;
+            }
+
+            uint capacitySize = Header.DSiHeader?.TotalRomSizeIncludingDSiArea ?? Header.RomSizeExcludingDSiArea;
             capacitySize |= capacitySize >> 16;
             capacitySize |= capacitySize >> 8;
             capacitySize |= capacitySize >> 4;
@@ -354,43 +428,9 @@ public class Rom
             }
 
             Header.DeviceCapacity = (byte)(capacity < 0 ? 0 : capacity);
-            //RSA
-            if (RsaSignature != null)
-                ew.Write(RsaSignature, 0, 0x88);
-
             //if writing untrimmed write padding up to the power of 2 size of the rom
             if (!trimmed)
                 ew.WritePadding((int)capacitySize, 0xFF);
-
-            //Fat
-            ew.BaseStream.Position = Header.FatOffset;
-            foreach (FatEntry v in Fat)
-                v.Write(ew);
-
-            ew.BaseStream.Position = Header.RomSizeExcludingDSiArea;
-            ew.WritePadding(0x4000, 0xFF);
-            
-            //DSi section
-            if (Arm9iBinary?.Length > 0)
-            {
-                Header.DSiHeader.DigestNTRRegionOffset = Header.Arm9RomOffset;
-                Header.DSiHeader.DigestNTRRegionLength = (uint)ew.BaseStream.Position - Header.DSiHeader.DigestNTRRegionOffset;
-                Header.DSiHeader.DigestTWLRegionOffset = (uint)ew.BaseStream.Position;
-                Header.DSiHeader.Arm9iRomOffset = (uint)ew.BaseStream.Position;
-                Header.DSiHeader.Arm9iSize = (uint)Arm9iBinary.Length;
-                ew.Write(Arm9iBinary, 0, Arm9iBinary.Length);
-            }
-            
-            if (Arm7iBinary?.Length > 0)
-            {
-                ew.WritePadding(0x400, 0xFF);
-                Header.DSiHeader.Arm7iRomOffset = (uint)ew.BaseStream.Position;
-                Header.DSiHeader.Arm7iSize = (uint)Arm7iBinary.Length;
-                ew.Write(Arm7iBinary, 0, Arm7iBinary.Length);
-                ew.WritePadding(0x400, 0xFF);
-                Header.DSiHeader.DigestTWLRegionLength = (uint)ew.BaseStream.Position - Header.DSiHeader.DigestTWLRegionOffset;
-                Header.DSiHeader.TotalRomSizeIncludingDSiArea = (uint)ew.BaseStream.Position;
-            }
 
             if (DSiWareExtraData?.Length > 0)
             {
@@ -470,6 +510,22 @@ public class Rom
     /// NitroFS file data
     /// </summary>
     public NameFatWithData[] FileData { get; set; }
+    
+    /// <summary>
+    /// For DSi and DSi-enhanced games, the contents of the digest sector hashtable
+    /// </summary>
+    // TODO: Replace with actual sector hashing?
+    public byte[] DigestSectorHashtableBinary { get; set; }
+    
+    /// <summary>
+    /// For DSi and DSi-enhanced games, the contents of the digest block hashtable
+    /// </summary>
+    public byte[] DigestBlockHashtableBinary { get; set; }
+    
+    /// <summary>
+    /// For DSi and DSi-enhanced games, the contents of the 0x3000 bytes before arm9i.bin
+    /// </summary>
+    public byte[] TwlStaticHeader { get; set; }
     
     /// <summary>
     /// For DSi and DSi-enhanced games, the contents of the game's arm9i.bin
