@@ -72,7 +72,7 @@ public abstract class Banner
     /// </summary>
     [JsonIgnore]
     [XmlIgnore]
-    public virtual string[] GameName { get; set; }
+    public string[] GameName { get; set; }
 
     /// <summary>
     /// Base 64 encoded versions of <see cref="GameName"/>
