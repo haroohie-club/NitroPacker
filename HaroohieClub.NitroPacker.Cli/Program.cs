@@ -1,6 +1,4 @@
-﻿using HaroohieClub.NitroPacker.Core;
-using Mono.Options;
-using System.IO;
+﻿using Mono.Options;
 
 namespace HaroohieClub.NitroPacker.Cli;
 
@@ -14,6 +12,7 @@ public class Program
             new PackCommand(),
             new PatchArm9Command(),
             new PatchOverlaysCommand(),
+            new MigrateProjectCommand(),
         };
         commands.Run(args);
     }

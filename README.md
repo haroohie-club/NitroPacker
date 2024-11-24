@@ -35,7 +35,7 @@ Finally, it is possible some games may require that their file allocation tables
 ### Packing
 NitroPacker can only pack a directory that was previously unpacked with NitroPacker (or something structured exactly like that). To pack a ROM, run the following command:
 ```
-NitroPacker pack -p PATH/TO/PROJECT_FILE.xml -r PATH/TO/OUTPUT_ROM.nds
+NitroPacker pack -p PATH/TO/PROJECT_FILE.json -r PATH/TO/OUTPUT_ROM.nds
 ```
 
 The project file is expected to be in a directory with ARM9 and ARM7 binaries as well as the data and overlay subdirectories mentioned previously. If the ARM9 binary was decompressed previously, you will need to add `-c` in order to compress it at this stage.

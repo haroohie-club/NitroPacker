@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Version>$(NPVersion)</Version>
+    <Title>NitroPacker.Core</Title>
+    <Authors>Ermelber, Gericom, Jonko</Authors>
+    <Company>Haroohie Translation Club</Company>
+    <Description>The core library of NitroPacker, a utility for packing and unpacking Nintendo DS ROMs. Additionally can patch ARM9 and overlays.</Description>
+    <PackageId>NitroPacker.Core</PackageId>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+</Project>

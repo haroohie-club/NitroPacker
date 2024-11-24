@@ -16,6 +16,7 @@ parameters:
 variables:
 - name: Version
   value: ${{ parameters.version }}
+- group: NitroPackerSecrets
 
 stages:
 - stage: Build
@@ -78,7 +79,8 @@ stages:
         ArtifactName: '$(artifactName)'
         publishLocation: 'Container'
       displayName: Publish build artifact
-- stage: Publish
+
+- stage: Publish Packages
   dependsOn: []
   jobs:
   - job:
@@ -88,27 +90,19 @@ stages:
     steps:
     - task: NuGetAuthenticate@1
       displayName: NuGet Authenticate
-        
+
     - script: |
-        mkdir nupkgs
-
-        dotnet build $(Build.SourcesDirectory)/HaroohieClub.NitroPacker.Core/HaroohieClub.NitroPacker.Core.csproj --configuration Release
-        dotnet build $(Build.SourcesDirectory)/HaroohieClub.NitroPacker.IO/HaroohieClub.NitroPacker.IO.csproj --configuration Release
-        dotnet build $(Build.SourcesDirectory)/HaroohieClub.NitroPacker.Nitro/HaroohieClub.NitroPacker.Nitro.csproj --configuration Release
-        dotnet build $(Build.SourcesDirectory)/HaroohieClub.NitroPacker.Patcher/HaroohieClub.NitroPacker.Patcher.csproj  --configuration Release
-
-        dotnet pack $(Build.SourcesDirectory)/HaroohieClub.NitroPacker.Core/HaroohieClub.NitroPacker.Core.csproj --output $(Build.ArtifactStagingDirectory) --configuration Release
-        dotnet pack $(Build.SourcesDirectory)/HaroohieClub.NitroPacker.IO/HaroohieClub.NitroPacker.IO.csproj --output $(Build.ArtifactStagingDirectory) --configuration Release
-        dotnet pack $(Build.SourcesDirectory)/HaroohieClub.NitroPacker.Nitro/HaroohieClub.NitroPacker.Nitro.csproj --output $(Build.ArtifactStagingDirectory) --configuration Release
-        dotnet pack $(Build.SourcesDirectory)/HaroohieClub.NitroPacker.Patcher/HaroohieClub.NitroPacker.Patcher.csproj --output $(Build.ArtifactStagingDirectory) --configuration Release
+        dotnet build $(Build.SourcesDirectory)/HaroohieClub.NitroPacker.Core/HaroohieClub.NitroPacker.csproj --configuration Release
+        dotnet pack $(Build.SourcesDirectory)/HaroohieClub.NitroPacker.Core/HaroohieClub.NitroPacker.csproj --output $(Build.ArtifactStagingDirectory) --configuration Release
       displayName: Build and pack nupkgs
 
     - task: NuGetCommand@2
       displayName: NuGet push
       inputs:
         command: push
-        publishVstsFeed: '8e493568-9b6e-4515-b47e-2519d156de66/7ebb410f-5a76-445b-9193-e9e720c82d8c'
-        allowPackageConflicts: true
+        nuGetFeedType: external
+        publishFeedCredentials: $(NuGetKey)
+
 - stage: Release
   dependsOn: Build
   jobs:
