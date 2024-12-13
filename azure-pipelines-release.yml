@@ -96,7 +96,8 @@ stages:
         dotnet pack $(Build.SourcesDirectory)/HaroohieClub.NitroPacker/HaroohieClub.NitroPacker.csproj --output $(Build.ArtifactStagingDirectory) --configuration Release
       displayName: Build and pack nupkgs
 
-    - script: dotnet nuget push --api-key $(NuGetKey)
+    - script: dotnet nuget push $(Build.ArtifactStagingDirectory)/NitroPacker.$(Version).nupkg --api-key $(NuGetKey)
+      displayName: NuGet push
 
 - stage: Release
   dependsOn: Build
