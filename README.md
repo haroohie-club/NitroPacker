@@ -16,6 +16,8 @@ NitroPacker migrate -p PATH/TO/PROJECT.xml
 ```
 However, because of the host of new features available in NitroPacker 3.0, it is strongly recommended to simply unpack your projects again using the 3.0 version.
 
+For information on the breaking API changes in 3.0, please check [the migration documentation](MIGRATE.md).
+
 ## Packing and Unpacking
 The primary purpose of NitroPacker is to pack and unpack NDS ROMs.
 
