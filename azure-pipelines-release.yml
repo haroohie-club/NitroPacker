@@ -92,8 +92,8 @@ stages:
       displayName: NuGet Authenticate
 
     - script: |
-        dotnet build $(Build.SourcesDirectory)/HaroohieClub.NitroPacker.Core/HaroohieClub.NitroPacker.csproj --configuration Release
-        dotnet pack $(Build.SourcesDirectory)/HaroohieClub.NitroPacker.Core/HaroohieClub.NitroPacker.csproj --output $(Build.ArtifactStagingDirectory) --configuration Release
+        dotnet build $(Build.SourcesDirectory)/HaroohieClub.NitroPacker/HaroohieClub.NitroPacker.csproj --configuration Release
+        dotnet pack $(Build.SourcesDirectory)/HaroohieClub.NitroPacker/HaroohieClub.NitroPacker.csproj --output $(Build.ArtifactStagingDirectory) --configuration Release
       displayName: Build and pack nupkgs
 
     - task: NuGetCommand@2
