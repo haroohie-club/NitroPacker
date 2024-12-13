@@ -96,12 +96,7 @@ stages:
         dotnet pack $(Build.SourcesDirectory)/HaroohieClub.NitroPacker/HaroohieClub.NitroPacker.csproj --output $(Build.ArtifactStagingDirectory) --configuration Release
       displayName: Build and pack nupkgs
 
-    - task: NuGetCommand@2
-      displayName: NuGet push
-      inputs:
-        command: push
-        nuGetFeedType: external
-        publishFeedCredentials: $(NuGetKey)
+    - script: dotnet nuget push --api-key $(NuGetKey)
 
 - stage: Release
   dependsOn: Build
