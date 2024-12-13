@@ -1,12 +1,11 @@
-﻿using HaroohieClub.NitroPacker.Core;
-using HaroohieClub.NitroPacker.Patcher.Nitro;
-using Mono.Options;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Xml.Serialization;
+using System.Text.Json;
+using HaroohieClub.NitroPacker.Patcher.Nitro;
+using Mono.Options;
 
 namespace HaroohieClub.NitroPacker.Cli;
 
@@ -47,10 +46,8 @@ public class PatchArm9Command : Command
         }
         else if (_ramAddress == 0)
         {
-            XmlSerializer serializer = new(typeof(NdsProjectFile));
-            using FileStream fs = File.OpenRead(_projectFilePath);
-            NdsProjectFile project = (NdsProjectFile)serializer.Deserialize(fs);
-            _ramAddress = project.RomInfo.Header.MainRamAddress;
+            NdsProjectFile project = JsonSerializer.Deserialize<NdsProjectFile>(_projectFilePath);
+            _ramAddress = project.RomInfo.Header.Arm9RamAddress;
         }
 
         if (string.IsNullOrEmpty(_inputDir))
