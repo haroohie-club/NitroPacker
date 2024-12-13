@@ -80,7 +80,7 @@ stages:
         publishLocation: 'Container'
       displayName: Publish build artifact
 
-- stage: Publish Packages
+- stage: Publish_Packages
   dependsOn: []
   jobs:
   - job:
