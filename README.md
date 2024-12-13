@@ -9,6 +9,13 @@ This code was written primarily by Ermelber and Gericom. Jonko has ported it to 
   - Alternatively, one can opt to install [Docker](https://www.docker.com/) (and [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) on Windows)
     instead.
 
+## Migrating 2.x Projects to 3.x
+For versions 3.0 and 3.1 of NitroPacker, the CLI will have built-in functionality for migrating 2.x projects to 3.0. To do this, simply run:
+```
+NitroPacker migrate -p PATH/TO/PROJECT.xml
+```
+However, because of the host of new features available in NitroPacker 3.0, it is strongly recommended to simply unpack your projects again using the 3.0 version.
+
 ## Packing and Unpacking
 The primary purpose of NitroPacker is to pack and unpack NDS ROMs.
 
