@@ -4,7 +4,7 @@
 
 First off: NitroPacker will now be available on [nuget.org](https://nuget.org/)! If you were previously pulling from the Azure Artifacts feed, you should now be able to safely remove that from your NuGet.config.
 
-Furthermore, NitroPacker's package structure has been consolidated down to a single package: NitroPacker. You can replace the references to any other packages (including the .Core package) with that reference.
+Furthermore, NitroPacker's package structure has been consolidated down to a single package: HaroohieClub.NitroPacker. You can replace the references to any other packages (including the .Core package) with that reference.
 
 ## API Changes
 
