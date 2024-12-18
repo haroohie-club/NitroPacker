@@ -2,7 +2,7 @@
 
 namespace HaroohieClub.NitroPacker.IO.Archive.Tree;
 
-public interface INode
+internal interface INode
 {
     public string Name { get; set; }
     public string Path { get; set; }

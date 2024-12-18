@@ -67,7 +67,7 @@ public struct JapanRegionRating
 }
 
 /// <summary>
-/// A struct representing regional ratings for the USA & Canada
+/// A struct representing regional ratings for the USA and Canada
 /// </summary>
 public struct USCanadaRegionRating
 {

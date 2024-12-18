@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>12.0</LangVersion>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -10,7 +11,11 @@
     <AssemblyName>HaroohieClub.NitroPacker</AssemblyName>
     <Authors>Ermelber, Gericom, Jonko</Authors>
     <Company>Haroohie Translation Club</Company>
-    <Description>The core library of NitroPacker, a utility for packing and unpacking Nintendo DS ROMs. Additionally can patch ARM9 and overlays.</Description>
+    <Owners>haroohie-club</Owners>
+    <Description>A utility for packing and unpacking Nintendo DS ROMs. Additionally can patch ARM9 and overlays.</Description>
+    <PackageLicenseUrl>https://github.com/haroohie-club/NitroPacker/blob/main/LICENSE</PackageLicenseUrl>
+    <PackageLicenseExpression>GPL-3.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/haroohie-club/NitroPacker</PackageProjectUrl>
     <PackageId>HaroohieClub.NitroPacker</PackageId>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>

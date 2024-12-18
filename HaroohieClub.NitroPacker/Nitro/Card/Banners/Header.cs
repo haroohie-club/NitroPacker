@@ -50,6 +50,9 @@ public class Header
         set => Version = (ushort)((value << 8) | Version);
     }
 
+    /// <summary>
+    /// The set of CRC-16 hashes for this banner
+    /// </summary>
     [JsonIgnore]
     [ArraySize(4)]
     public ushort[] Crc16s { get; set; }

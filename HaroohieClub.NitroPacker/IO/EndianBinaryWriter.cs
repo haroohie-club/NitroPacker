@@ -47,6 +47,9 @@ public class EndianBinaryWriter : IDisposable
         Endianness = endianness;
     }
 
+    /// <summary>
+    /// Disposes of the endian binary writer
+    /// </summary>
     ~EndianBinaryWriter()
     {
         Dispose(false);
@@ -153,7 +156,7 @@ public class EndianBinaryWriter : IDisposable
     {
         int size = sizeof(T);
         CreateBuffer(size);
-        MemoryMarshal.Write(_buffer, ref value);
+        MemoryMarshal.Write(_buffer, in value);
         WriteBuffer(size, size);
     }
 

@@ -4,7 +4,7 @@ using HaroohieClub.NitroPacker.IO;
 
 namespace HaroohieClub.NitroPacker.Nitro.Gx;
 
-public static class GxUtil
+internal static class GxUtil
 {
     private static readonly int[] DataSize = { 0, 8, 2, 4, 8, 2, 8, 16 };
 
@@ -115,7 +115,7 @@ public static class GxUtil
             }
         }
 
-        return new(width, height, GfxUtil.Detile(bmpdata, 8, width, height));
+        return new(width, height, GfxUtil.Untile(bmpdata, 8, width, height));
     }
 
     public static Rgba8Bitmap DecodeChar(ReadOnlySpan<byte> data, ReadOnlySpan<byte> palette,
@@ -163,7 +163,7 @@ public static class GxUtil
 
         uint[] bmpdata = DecodeRaw(data, palette, imageFormat, firstTransparent);
 
-        return new(width, height, GfxUtil.Detile(bmpdata, 8, width, height));
+        return new(width, height, GfxUtil.Untile(bmpdata, 8, width, height));
     }
 
     public static Rgba8Bitmap DecodeBmp(ReadOnlySpan<byte> data, ImageFormat imageFormat, int width, int height,
@@ -221,7 +221,7 @@ public static class GxUtil
         uint[] bmpdata = DecodeRaw(data[..length], palette, imageFormat, firstTransparent, tex4x4Data);
 
         if (imageFormat == ImageFormat.Comp4x4)
-            bmpdata = GfxUtil.Detile(bmpdata, 4, width, height);
+            bmpdata = GfxUtil.Untile(bmpdata, 4, width, height);
 
         return new(width, height, bmpdata);
     }

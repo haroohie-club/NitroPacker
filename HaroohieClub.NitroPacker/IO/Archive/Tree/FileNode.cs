@@ -2,7 +2,7 @@
 
 namespace HaroohieClub.NitroPacker.IO.Archive.Tree;
 
-public class FileNode(string name, INode parent, ushort id, string path) : INode
+internal class FileNode(string name, INode parent, ushort id, string path) : INode
 {
     public string Name { get; set; } = name;
     public string Path { get; set; } = path;

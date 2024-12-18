@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace HaroohieClub.NitroPacker.IO.Archive.Tree;
 
-public class DirectoryNode(string name, string path, INode parent, ushort id, ushort entryFileId) : INode
+internal class DirectoryNode(string name, string path, INode parent, ushort id, ushort entryFileId) : INode
 {
     public string Name { get; set; } = name;
     public string Path { get; set; } = path;

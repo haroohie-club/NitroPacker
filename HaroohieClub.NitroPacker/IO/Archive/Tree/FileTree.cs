@@ -2,9 +2,9 @@
 
 namespace HaroohieClub.NitroPacker.IO.Archive.Tree;
 
-public class FileTree
+internal class FileTree
 {
-    public DirectoryNode Root { get; init; }
+    public DirectoryNode Root { get; private set; }
 
     public FileTree()
     {

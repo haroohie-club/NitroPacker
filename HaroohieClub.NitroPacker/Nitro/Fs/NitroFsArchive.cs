@@ -9,13 +9,35 @@ using HaroohieClub.NitroPacker.Nitro.Card;
 
 namespace HaroohieClub.NitroPacker.Nitro.Fs;
 
+/// <summary>
+/// An archive representing a NitroFS ROM
+/// </summary>
 public class NitroFsArchive : Archive
 {
+    /// <summary>
+    /// The directory table
+    /// </summary>
     public DirectoryTableEntry[] DirTable { get; }
+    /// <summary>
+    /// The name table
+    /// </summary>
     public NameTableEntry[][] NameTable { get; }
+    /// <summary>
+    /// A correlation table between names and FAT data (used in serialization)
+    /// </summary>
     public NameFatWithData[] FileData { get; }
+    /// <summary>
+    /// The offset of the file ID
+    /// </summary>
     public ushort FileIdOffset { get; }
 
+    /// <summary>
+    /// Constructs a NitroFS archive from a directory table, name table, set of file data, and optional file ID offset
+    /// </summary>
+    /// <param name="dirTable">The directory table</param>
+    /// <param name="nameTable">The name table</param>
+    /// <param name="fileData">The table of file data</param>
+    /// <param name="fileIdOffset">The file ID offset</param>
     public NitroFsArchive(DirectoryTableEntry[] dirTable, NameTableEntry[][] nameTable,
         byte[][] fileData, ushort fileIdOffset = 0)
     {
@@ -26,6 +48,13 @@ public class NitroFsArchive : Archive
     }
     
 
+    /// <summary>
+    /// Constructs a NitroFS archive from a directory table, name table, set of named file data, and optional file ID offset
+    /// </summary>
+    /// <param name="dirTable">The directory table</param>
+    /// <param name="nameTable">The name table</param>
+    /// <param name="fileData">The table of named file data</param>
+    /// <param name="fileIdOffset">The file ID offset</param>
     public NitroFsArchive(DirectoryTableEntry[] dirTable, NameTableEntry[][] nameTable,
         NameFatWithData[] fileData, ushort fileIdOffset = 0)
     {
@@ -34,7 +63,13 @@ public class NitroFsArchive : Archive
         FileData = fileData;
         FileIdOffset = fileIdOffset;
     }
-        
+    
+    /// <summary>
+    /// Constructs a NitroFS archive given a different archive, optionally with a file ID offset and named file data
+    /// </summary>
+    /// <param name="archive">The other archive to construct from</param>
+    /// <param name="fileIdOffset">The file ID offset</param>
+    /// <param name="nameFat">The named file data</param>
     public NitroFsArchive(Archive archive, ushort fileIdOffset = 0, List<NameEntryWithFatEntry> nameFat = null)
     {
         if (archive is NitroFsArchive nitroFsArc)
@@ -61,6 +96,13 @@ public class NitroFsArchive : Archive
         FileIdOffset = fileIdOffset;
     }
 
+    /// <summary>
+    /// Gets the path to a particular directory from its index
+    /// </summary>
+    /// <param name="idx">The directory index</param>
+    /// <param name="subPath">The current sub-path</param>
+    /// <param name="fnt">The file name table</param>
+    /// <returns></returns>
     public static string GetPathFromDir(int idx, string subPath, RomFileNameTable fnt)
     {
         if (fnt.DirectoryTable[idx].ParentId < 0xF000)
@@ -160,6 +202,7 @@ public class NitroFsArchive : Archive
         throw new("Invalid path specified");
     }
 
+    /// <inheritdoc />
     public override IEnumerable<string> EnumerateFiles(string path, bool fullPath)
     {
         string normPath = NormalizePath(path);
@@ -182,6 +225,7 @@ public class NitroFsArchive : Archive
         }
     }
 
+    /// <inheritdoc />
     public override IEnumerable<string> EnumerateDirectories(string path, bool fullPath)
     {
         string normPath = NormalizePath(path);
@@ -204,6 +248,7 @@ public class NitroFsArchive : Archive
         }
     }
 
+    /// <inheritdoc />
     public override bool ExistsFile(string path)
     {
         if (path.EndsWith(PathSeparator))
@@ -231,6 +276,7 @@ public class NitroFsArchive : Archive
         return false;
     }
 
+    /// <inheritdoc />
     public override bool ExistsDirectory(string path)
     {
         try
@@ -244,6 +290,7 @@ public class NitroFsArchive : Archive
         }
     }
 
+    /// <inheritdoc />
     public override byte[] GetFileData(string path)
     {
         if (path.EndsWith(PathSeparator))
@@ -276,6 +323,7 @@ public class NitroFsArchive : Archive
         throw new ArgumentException("Invalid path specified", nameof(path));
     }
 
+    /// <inheritdoc />
     public override Stream OpenFileReadStream(string path)
         => new MemoryStream(GetFileData(path), false);
 }

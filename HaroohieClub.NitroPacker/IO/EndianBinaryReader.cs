@@ -45,6 +45,9 @@ public class EndianBinaryReader : IDisposable
         Endianness = endianness;
     }
 
+    /// <summary>
+    /// Disposes of the endian binary reader
+    /// </summary>
     ~EndianBinaryReader()
     {
         Dispose(false);
@@ -64,6 +67,10 @@ public class EndianBinaryReader : IDisposable
         }
     }
 
+    /// <summary>
+    /// Skips a number of bytes in the stream
+    /// </summary>
+    /// <param name="numBytes">The number of bytes to skip</param>
     public void Skip(long numBytes)
     {
         BaseStream.Seek(numBytes, SeekOrigin.Current);
