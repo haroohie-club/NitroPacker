@@ -410,7 +410,7 @@ public class Rom
                 Header.DSiHeader.TotalRomSizeIncludingDSiArea = (uint)ew.BaseStream.Position;
             }
 
-            uint capacitySize = Header.DSiHeader?.TotalRomSizeIncludingDSiArea ?? Header.RomSizeExcludingDSiArea;
+            uint capacitySize = (Header.DSiHeader?.TotalRomSizeIncludingDSiArea ?? 0) == 0 ? Header.RomSizeExcludingDSiArea : Header.DSiHeader.TotalRomSizeIncludingDSiArea;
             capacitySize |= capacitySize >> 16;
             capacitySize |= capacitySize >> 8;
             capacitySize |= capacitySize >> 4;
