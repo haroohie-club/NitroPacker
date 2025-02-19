@@ -1,4 +1,8 @@
-# NitroPacker
+<h1 align="center">
+  <img src=".branding/logo/png/nitropacker_red.png" alt="The NitroPacker logo, a red Nintendo DS Lite in a folder" style="width: 300px"/>
+  <br/>
+  NitroPacker
+</h1>
 NitroPacker is an open source, cross-platform utility for packing and unpacking Nintendo DS ROMs. It also can apply ASM hacks to both ARM9 and overlay files.
 
 ## Authors

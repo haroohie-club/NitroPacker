@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <LangVersion>12.0</LangVersion>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
@@ -13,10 +13,25 @@
     <Company>Haroohie Translation Club</Company>
     <Owners>haroohie-club</Owners>
     <Description>A utility for packing and unpacking Nintendo DS ROMs. Additionally can patch ARM9 and overlays.</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/haroohie-club/NitroPacker</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/haroohie-club/NitroPacker</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
     <PackageId>HaroohieClub.NitroPacker</PackageId>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageTags>nds nintendo ds arm9 overlay asm patching romhacking hacking nitrofs nitro unpack pack extract</PackageTags>
+    <PackageIcon>nitropacker_red.png</PackageIcon>
   </PropertyGroup>
+  
+  <ItemGroup>
+    <None Include="..\.branding\logo\png\nitropacker_red.png" Pack="true" PackagePath="\" />
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="9.0.2" />
+    <PackageReference Include="System.Text.Json" Version="9.0.2" />
+  </ItemGroup>
 
 </Project>

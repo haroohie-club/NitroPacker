@@ -39,7 +39,8 @@ public class EndianBinaryWriter : IDisposable
     /// <exception cref="ArgumentException">Thrown if the stream cannot be written too</exception>
     public EndianBinaryWriter(Stream baseStream, Endianness endianness = Endianness.LittleEndian)
     {
-        ArgumentNullException.ThrowIfNull(baseStream);
+        if (baseStream is null)
+            throw new ArgumentNullException(nameof(baseStream));
         if (!baseStream.CanWrite)
             throw new ArgumentException(nameof(baseStream));
 
@@ -156,7 +157,7 @@ public class EndianBinaryWriter : IDisposable
     {
         int size = sizeof(T);
         CreateBuffer(size);
-        MemoryMarshal.Write(_buffer, in value);
+        MemoryMarshal.Write(_buffer, ref value);
         WriteBuffer(size, size);
     }
 

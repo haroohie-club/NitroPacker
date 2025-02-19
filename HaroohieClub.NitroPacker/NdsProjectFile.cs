@@ -195,10 +195,10 @@ public class NdsProjectFile
             projectFile.RomInfo.NameEntryWithFatEntries =
             [
                 .. ndsFile.FileNameTable.NameTable.SelectMany((t, i) => t.Where(e => e.Type == NameTableEntryType.File).Select(e => (i, e)))
-                    .Zip(ndsFile.Fat.Skip(ndsFile.Arm9OverlayTable.Length + ndsFile.Arm7OverlayTable.Length)).Select(n => new NameEntryWithFatEntry
+                    .Zip(ndsFile.Fat.Skip(ndsFile.Arm9OverlayTable.Length + ndsFile.Arm7OverlayTable.Length), (tuple, entry) => (Tuple: tuple, Entry: entry)).Select(n => new NameEntryWithFatEntry
                     {
-                        Path = NitroFsArchive.JoinPath(NitroFsArchive.GetPathFromDir(n.First.i, "/", ndsFile.FileNameTable), n.First.e.Name),
-                        FatOffset = n.Second.FileTop,
+                        Path = NitroFsArchive.JoinPath(NitroFsArchive.GetPathFromDir(n.Tuple.i, "/", ndsFile.FileNameTable), n.Tuple.e.Name),
+                        FatOffset = n.Entry.FileTop,
                     }),
             ];
         }
