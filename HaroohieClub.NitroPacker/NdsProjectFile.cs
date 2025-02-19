@@ -85,7 +85,7 @@ public class NdsProjectFile
     }
 
     /// <summary>
-    /// Deserializes an NDS project file
+    /// Deserializes an NDS project file (including the external banner data)
     /// </summary>
     /// <param name="projectJsonPath">The path to the NDS project file</param>
     /// <returns></returns>
@@ -99,6 +99,21 @@ public class NdsProjectFile
             project.RomInfo.Banner = new(new(fs));
         }
         return project;
+    }
+
+    /// <summary>
+    /// Serializes an NDS project file (including the external banner data)
+    /// </summary>
+    /// <param name="projectJsonPath">The path to the NDS project file</param>
+    public void Serialize(string projectJsonPath)
+    {
+        File.WriteAllText(projectJsonPath, JsonSerializer.Serialize(this));
+        string bannerPath = Path.Combine(Path.GetDirectoryName(projectJsonPath)!, "banner.bin");
+        if (File.Exists(bannerPath))
+        {
+            using FileStream fs = File.OpenWrite(bannerPath);
+            RomInfo.Banner.Write(new(fs));
+        }
     }
 
     /// <summary>
