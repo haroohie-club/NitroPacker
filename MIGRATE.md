@@ -15,6 +15,7 @@ The `ProjectFile` class has been removed and is now simply the `NdsProjectFile` 
 
 | 2.x | 3.x |
 |-----|-----|
+| `FromByteArray` | Use `Deserialize` and pass the path of the project file rather than a byte array |
 | `RomHeader`, `NitroFooter`, `RomOVT`, `RomBanner`, `RomFNT` | These classes are no longer subclasses of `Rom` and now exist in the top-level namespace |
 | `RomOVT` | `RomOverlayTable` |
 | `RSASignature` | `RsaSignature` |

@@ -85,6 +85,23 @@ public class NdsProjectFile
     }
 
     /// <summary>
+    /// Deserializes an NDS project file
+    /// </summary>
+    /// <param name="projectJsonPath">The path to the NDS project file</param>
+    /// <returns></returns>
+    public static NdsProjectFile Deserialize(string projectJsonPath)
+    {
+        NdsProjectFile project = JsonSerializer.Deserialize<NdsProjectFile>(File.ReadAllText(projectJsonPath));
+        string bannerPath = Path.Combine(Path.GetDirectoryName(projectJsonPath)!, "banner.bin");
+        if (File.Exists(bannerPath))
+        {
+            using FileStream fs = File.OpenRead(bannerPath);
+            project.RomInfo.Banner = new(new(fs));
+        }
+        return project;
+    }
+
+    /// <summary>
     /// Packs an NDS ROM given a project file
     /// </summary>
     /// <param name="outputRomPath">The ROM to be output</param>
