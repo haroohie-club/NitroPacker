@@ -26,7 +26,7 @@
   
   <ItemGroup>
     <None Include="..\.branding\logo\png\nitropacker_red.png" Pack="true" PackagePath="\" />
-    <None Include="..\README.md" Pack="true" PackagePath="\" />
+    <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
   
   <ItemGroup>
