@@ -7,5 +7,3 @@ This README will be expanded in future versions to more comprehensively describe
 For now, all the methods and classes have XML/IntelliSense documentation for ease of use.
 
 Logo designed by [Judy Cheng](https://cjudy.com).
-
-![The NitroPacker logo, a red Nintendo DS Lite in a folder](https://raw.githubusercontent.com/haroohie-club/NitroPacker/refs/heads/main/.branding/logo/png/nitropacker_red.png)
