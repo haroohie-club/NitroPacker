@@ -66,7 +66,7 @@ public class RomHeader
         {
             if (value.Length == 9)
             {
-                _reservedA = value[0..6];
+                _reservedA = value[..7];
                 Flags = (DSiFlags)value[7];
                 RegionOrJump = (RegionOrPermitJump)value[8];
             }
