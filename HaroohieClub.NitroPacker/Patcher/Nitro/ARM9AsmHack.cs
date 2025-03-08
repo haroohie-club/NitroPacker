@@ -32,18 +32,27 @@ public class ARM9AsmHack
         string makePath = "make", string dockerPath = "docker", string devkitArmPath = "")
     {
         uint arenaLo = arm9.ReadU32LE(arenaLoOffset);
-        if (!Compile(makePath, dockerPath, path, arenaLo, outputDataReceived, errorDataReceived, dockerTag, devkitArmPath))
+        byte[] newCode;
+        if (Directory.GetFiles(Path.Combine(path, "source")).Length > 0)
         {
-            return false;
+            if (!Compile(makePath, dockerPath, path, arenaLo, outputDataReceived, errorDataReceived, dockerTag, devkitArmPath))
+            {
+                return false;
+            }
+            if (!File.Exists(Path.Combine(path, "newcode.bin")))
+            {
+                return false;
+            }
+            newCode = File.ReadAllBytes(Path.Combine(path, "newcode.bin"));
+            if (newCode.Length % 4 != 0)
+            {
+                newCode = [.. newCode, .. new byte[4 - newCode.Length % 4]];
+            }
         }
-        if (!File.Exists(Path.Combine(path, "newcode.bin")))
+        else
         {
-            return false;
-        }
-        byte[] newCode = File.ReadAllBytes(Path.Combine(path, "newcode.bin"));
-        if (newCode.Length % 4 != 0)
-        {
-            newCode = [.. newCode, .. new byte[4 - newCode.Length % 4]];
+            File.WriteAllText(Path.Combine(path, "newcode.sym"), string.Empty);
+            newCode = [];
         }
 
         StreamReader r = new(Path.Combine(path, "newcode.sym"));

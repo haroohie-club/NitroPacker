@@ -762,7 +762,7 @@ public class RomHeader
         /// </summary>
         RequireEulaAgreement = 1 << 1,
         /// <summary>
-        /// Custom Icon (Clear: No/Normal, Set: Use banner.sav
+        /// Custom Icon (Clear: No/Normal, Set: Use banner.sav)
         /// </summary>
         CustomIcon = 1 << 2,
         /// <summary>
