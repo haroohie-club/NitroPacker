@@ -184,7 +184,11 @@ public class ARM9AsmHack
             File.Delete(Path.Combine(path, $"{replFile}.elf"));
             File.Delete(Path.Combine(path, $"{replFile}.sym"));
         }
-        Directory.Delete(Path.Combine(path, "build"), true);
+
+        if (Directory.Exists(Path.Combine(path, "build")))
+        {
+            Directory.Delete(Path.Combine(path, "build"), true);
+        }
         return true;
     }
 
