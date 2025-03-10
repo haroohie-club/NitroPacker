@@ -60,7 +60,7 @@ public class ARM9AsmHack
         List<string> newSymbolsFile = new();
         foreach (string line in newSymLines)
         {
-            Match match = Regex.Match(line, @"(?<address>[\da-f]{8}) \w\s+.text\s+\d{8} (?<name>.+)");
+            Match match = Regex.Match(line, @"(?<address>[\da-f]{8}) \w[\w ]+ \.text\s+[\da-f]{8} (?<name>.+)");
             if (match.Success)
             {
                 newSymbolsFile.Add($"{match.Groups["name"].Value} = 0x{match.Groups["address"].Value.ToUpper()};");
