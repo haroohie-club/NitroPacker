@@ -113,7 +113,7 @@ public class EndianBinaryReaderEx : EndianBinaryReader
         PropertyType.Fx32 => ReadFx32(),
         PropertyType.Float => Read<float>(),
         PropertyType.Double => Read<double>(),
-        _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
     };
 
     private Array ReadFieldTypeArrayDirect(PropertyType type, int count) => type switch
@@ -130,7 +130,7 @@ public class EndianBinaryReaderEx : EndianBinaryReader
         PropertyType.Fx32 => ReadFx32s(count),
         PropertyType.Float => Read<float>(count),
         PropertyType.Double => Read<double>(count),
-        _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
     };
 
     private void AlignForProperty(PropertyInfo property, PropertyAlignment alignment, PropertyType type)

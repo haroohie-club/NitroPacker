@@ -54,7 +54,7 @@ public enum PropertyType
     /// <summary>
     /// Double
     /// </summary>
-    Double
+    Double,
 }
 
 /// <summary>

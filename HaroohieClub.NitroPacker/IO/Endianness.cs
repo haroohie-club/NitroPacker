@@ -12,5 +12,5 @@ public enum Endianness
     /// <summary>
     /// Little endian
     /// </summary>
-    LittleEndian
+    LittleEndian,
 }

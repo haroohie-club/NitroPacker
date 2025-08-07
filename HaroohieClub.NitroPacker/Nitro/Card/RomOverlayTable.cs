@@ -25,7 +25,7 @@ public class RomOverlayTable
         /// <summary>
         /// If set, 
         /// </summary>
-        AuthenticationCode = 2
+        AuthenticationCode = 2,
     }
 
     /// <summary>

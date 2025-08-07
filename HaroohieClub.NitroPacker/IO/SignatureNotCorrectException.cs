@@ -15,13 +15,13 @@ internal class SignatureNotCorrectException : Exception
                 new byte[]
                 {
                     (byte) (signature & 0xFF), (byte) (signature >> 8 & 0xFF),
-                    (byte) (signature >> 16 & 0xFF), (byte) (signature >> 24 & 0xFF)
+                    (byte) (signature >> 16 & 0xFF), (byte) (signature >> 24 & 0xFF),
                 }),
             Encoding.ASCII.GetString(
                 new byte[]
                 {
                     (byte) (expected & 0xFF), (byte) (expected >> 8 & 0xFF),
-                    (byte) (expected >> 16 & 0xFF), (byte) (expected >> 24 & 0xFF)
+                    (byte) (expected >> 16 & 0xFF), (byte) (expected >> 24 & 0xFF),
                 }),
             offset
         )

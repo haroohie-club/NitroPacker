@@ -53,7 +53,7 @@ public enum ImageFormat : uint
     /// Direct, non-paletted image
     /// </summary>
     [Description("Direct")]
-    Direct = 7
+    Direct = 7,
 }
 
 /// <summary>
@@ -68,7 +68,7 @@ public enum CharFormat : uint
     /// <summary>
     /// Bmp
     /// </summary>
-    Bmp
+    Bmp,
 }
 
 /// <summary>
@@ -83,5 +83,5 @@ public enum MapFormat : uint
     /// <summary>
     /// Affine
     /// </summary>
-    Affine
+    Affine,
 }

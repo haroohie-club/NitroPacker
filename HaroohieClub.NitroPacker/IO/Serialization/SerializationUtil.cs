@@ -45,7 +45,7 @@ internal static class SerializationUtil
         PropertyType.Fx32 => typeof(double),
         PropertyType.Float => typeof(float),
         PropertyType.Double => typeof(double),
-        _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
     };
 
     public static int GetTypeSize(PropertyType type) => type switch
@@ -62,7 +62,7 @@ internal static class SerializationUtil
         PropertyType.Fx32 => 4,
         PropertyType.Float => 4,
         PropertyType.Double => 8,
-        _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
     };
 
     public static bool HasPrimitiveType(PropertyInfo property)

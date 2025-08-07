@@ -550,6 +550,6 @@ public struct SouthKoreaRegionRating
         /// <summary>
         /// 18 (restricted for ages 18 and older)
         /// </summary>
-        Eighteen = 18
+        Eighteen = 18,
     }
 }

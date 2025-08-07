@@ -83,7 +83,7 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
             HasSize = true,
             SizeOffset = sizeOffset,
             SizeType = sizeType,
-            SizeDelta = 0
+            SizeDelta = 0,
         });
     }
 
@@ -121,7 +121,7 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
     {
         Global,
         ChunkRelative,
-        FieldRelative
+        FieldRelative,
     }
 
     internal class ChunkPointer
@@ -550,7 +550,7 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
                     ReferenceType.Absolute => address,
                     ReferenceType.ChunkRelative => address - (pointer.chunk?.StartAddress ?? 0),
                     ReferenceType.PropertyRelative => address - pointer.address,
-                    _ => throw new ArgumentOutOfRangeException()
+                    _ => throw new ArgumentOutOfRangeException(),
                 };
 
                 Type fieldType = SerializationUtil.FieldTypeToType(pointer.refInfo.PointerPropertyType);

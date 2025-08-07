@@ -253,7 +253,7 @@ public class NdsProjectFile
         EndianBinaryReaderEx br = new(bannerStream);
         RomInfo.Banner = new()
         {
-            Header = br.ReadObject<Header>()
+            Header = br.ReadObject<Header>(),
         };
         RomInfo.Banner.Banner = RomInfo.Banner.Header.Version switch
         {
