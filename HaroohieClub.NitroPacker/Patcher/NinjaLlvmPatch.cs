@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using HaroohieClub.NitroPacker.Patcher.Nitro;
+using HaroohieClub.NitroPacker.Patcher.Overlay;
 
 namespace HaroohieClub.NitroPacker.Patcher;
 
@@ -29,13 +30,13 @@ public static class NinjaLlvmPatch
     /// <param name="symTableHelperPath">The path to the SymTableHelper executable (defaults to looking in the current directory)</param>
     /// <param name="outputDataReceived">A handler for standard output from ninja</param>
     /// <param name="errorDataReceived">A handler for standard error from ninja</param>
-    public static void Patch(string sourceDir, ARM9 arm9, string overlayDir, string ninjaPath, string llvmPath,
+    public static Overlay.Overlay[] PatchAndReturnOverlays(string sourceDir, ARM9 arm9, string overlayDir, string ninjaPath, string llvmPath,
         string romProjFile, uint arenaLoOffset, string symTableHelperPath = "", DataReceivedEventHandler outputDataReceived = null,
         DataReceivedEventHandler errorDataReceived = null)
     {
         uint arenaLo = arm9.ReadU32LE(arenaLoOffset);
-        GenerateNinjaBuildFile(sourceDir, overlayDir, llvmPath, symTableHelperPath, romProjFile, arenaLo);
-        RunNinja(ninjaPath, sourceDir, outputDataReceived, errorDataReceived);
+        // GenerateNinjaBuildFile(sourceDir, overlayDir, llvmPath, symTableHelperPath, romProjFile, arenaLo);
+        // RunNinja(ninjaPath, sourceDir, outputDataReceived, errorDataReceived);
 
         byte[] newArm9Code = File.ReadAllBytes(Path.Combine(sourceDir, "build", "newcode.bin"));
         ARM9AsmHack.PatchArm9(Path.Combine(sourceDir, "build"), arm9, arenaLoOffset, arenaLo, newArm9Code);
@@ -50,6 +51,32 @@ public static class NinjaLlvmPatch
                 arm9.WriteBytes(replaceAddress, replCode);
             }
         }
+
+        List<Overlay.Overlay> overlays = [];
+        string overlayPatchDir = Path.Combine(sourceDir, "overlays");
+        foreach (Overlay.Overlay overlay in Directory.GetFiles(overlayDir)
+                     .Select(o => new Overlay.Overlay(o, romProjFile))
+                     .Where(o => Directory.GetDirectories(overlayPatchDir).Contains(Path.Combine(overlayPatchDir, o.Name))))
+        {
+            byte[] newOverlayCode = File.ReadAllBytes(Path.Combine(sourceDir, "build", overlay.Name, "newcode.bin"));
+            string[] newSym = File.ReadAllLines(Path.Combine(sourceDir, "build", overlay.Name, "newcode.sym"));
+            OverlayAsmHack.Patch(Path.Combine(sourceDir, "build", overlay.Name), overlay, newSym, newOverlayCode, romProjFile);
+            overlays.Add(overlay);
+            
+            // Perform the replacements for each of the replacement hacks we assembled
+            if (Directory.Exists(Path.Combine(sourceDir, "build", overlay.Name, "repl")))
+            {
+                foreach (string replFile in Directory.GetFiles(Path.Combine(sourceDir, "build", overlay.Name, "repl"),
+                             "*.bin"))
+                {
+                    byte[] replCode = File.ReadAllBytes(Path.Combine(sourceDir, "build", overlay.Name, "repl", $"{replFile}.bin"));
+                    uint replaceAddress = uint.Parse(Path.GetFileNameWithoutExtension(replFile), NumberStyles.HexNumber);
+                    overlay.Patch(replaceAddress, replCode);
+                }
+            }
+        }
+
+        return [.. overlays];
     }
 
     private static bool RunNinja(string ninjaPath, string sourceDir, DataReceivedEventHandler outputDataReceived, DataReceivedEventHandler errorDataReceived)

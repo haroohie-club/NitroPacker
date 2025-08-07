@@ -71,9 +71,37 @@ public static class OverlayAsmHack
                 return false;
             }
         }
+        
         // We'll start by adding in the hook and append codes
         byte[] newCode = File.ReadAllBytes(Path.Combine(path, overlay.Name, "newcode.bin"));
+        Patch(path, overlay, newSym, newCode, romInfoPath);
 
+        // Perform the replacements for each of the replacement hacks we assembled
+        foreach (string replFile in replFiles)
+        {
+            byte[] replCode = File.ReadAllBytes(Path.Combine(path, overlay.Name, $"{replFile}.bin"));
+            uint replaceAddress = uint.Parse(replFile.Split('_')[1], NumberStyles.HexNumber);
+            overlay.Patch(replaceAddress, replCode);
+        }
+            
+        // Clean up after ourselves
+        File.Delete(Path.Combine(path, overlay.Name, "newcode.bin"));
+        File.Delete(Path.Combine(path, overlay.Name, "newcode.elf"));
+        File.Delete(Path.Combine(path, overlay.Name, "newcode.sym"));
+        File.Delete(Path.Combine(path, overlay.Name, "newcode.x"));
+        File.Delete(Path.Combine(path, overlay.Name, "arm9_newcode.x"));
+        foreach (string replFile in replFiles)
+        {
+            File.Delete(Path.Combine(path, overlay.Name, $"{replFile}.bin"));
+            File.Delete(Path.Combine(path, overlay.Name, $"{replFile}.elf"));
+            File.Delete(Path.Combine(path, overlay.Name, $"{replFile}.sym"));
+        }
+        Directory.Delete(Path.Combine(path, "build"), true);
+        return true;
+    }
+
+    internal static void Patch(string path, Overlay overlay, string[] newSym, byte[] newCode, string romInfoPath)
+    {
         foreach (string line in newSym)
         {
             Match match = Regex.Match(line, @"(?<address>[\da-f]{8}) \w\s+.text\s+\d{8} (?<name>.+)");
@@ -94,31 +122,8 @@ public static class OverlayAsmHack
                 }
             }
         }
-
-        // Perform the replacements for each of the replacement hacks we assembled
-        foreach (string replFile in replFiles)
-        {
-            byte[] replCode = File.ReadAllBytes(Path.Combine(path, overlay.Name, $"{replFile}.bin"));
-            uint replaceAddress = uint.Parse(replFile.Split('_')[1], NumberStyles.HexNumber);
-            overlay.Patch(replaceAddress, replCode);
-        }
-
+        
         overlay.Append(newCode, romInfoPath);
-            
-        // Clean up after ourselves
-        File.Delete(Path.Combine(path, overlay.Name, "newcode.bin"));
-        File.Delete(Path.Combine(path, overlay.Name, "newcode.elf"));
-        File.Delete(Path.Combine(path, overlay.Name, "newcode.sym"));
-        File.Delete(Path.Combine(path, overlay.Name, "newcode.x"));
-        File.Delete(Path.Combine(path, overlay.Name, "arm9_newcode.x"));
-        foreach (string replFile in replFiles)
-        {
-            File.Delete(Path.Combine(path, overlay.Name, $"{replFile}.bin"));
-            File.Delete(Path.Combine(path, overlay.Name, $"{replFile}.elf"));
-            File.Delete(Path.Combine(path, overlay.Name, $"{replFile}.sym"));
-        }
-        Directory.Delete(Path.Combine(path, "build"), true);
-        return true;
     }
 
     private static bool Compile(string makePath, string dockerPath, string path, Overlay overlay, DataReceivedEventHandler outputDataReceived, DataReceivedEventHandler errorDataReceived, string dockerTag, string devkitArmPath)

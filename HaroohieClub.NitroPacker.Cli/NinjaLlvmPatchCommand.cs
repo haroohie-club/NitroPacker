@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using HaroohieClub.NitroPacker.Patcher;
 using HaroohieClub.NitroPacker.Patcher.Nitro;
+using HaroohieClub.NitroPacker.Patcher.Overlay;
 using Mono.Options;
 
 namespace HaroohieClub.NitroPacker.Cli;
@@ -119,11 +120,18 @@ public class NinjaLlvmPatchCommand : Command
 
         NdsProjectFile project = NdsProjectFile.Deserialize(_projectFilePath);
         ARM9 arm9 = new(File.ReadAllBytes(Path.Combine(_inputDir, "arm9.bin")), project.RomInfo.Header.Arm9RamAddress);
-        NinjaLlvmPatch.Patch(_inputDir, arm9, _inputOverlaysDirectory, _ninja, _llvm,
+        Overlay[] overlays = NinjaLlvmPatch.PatchAndReturnOverlays(_inputDir, arm9, _inputOverlaysDirectory, _ninja, _llvm,
             _projectFilePath, _arenaLoOffset, _symTableHelper,
             (_, e) => Console.WriteLine(e.Data),
             (_, e) => Console.Error.WriteLine(e.Data));
+        
+        CommandSet.Out.WriteLine("Saving ARM9...");
         File.WriteAllBytes(Path.Combine(_outputDir, "arm9.bin"), arm9.GetBytes());
+        foreach (Overlay overlay in overlays)
+        {
+            CommandSet.Out.WriteLine($"Saving overlay {overlay.Name}");
+            overlay.Save(Path.Combine(_outputOverlaysDirectory, $"{overlay.Name}.bin"));
+        }
 
         Utilities.RevertOverrideFiles(renames);
 
