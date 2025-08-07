@@ -72,7 +72,8 @@ stages:
         Move-Item -Path ./publish-symtable/NitroPacker.SymTableHelper -Destination ./publish/NitroPacker.SymTableHelper
         Push-Location publish
         chmod +x ./NitroPacker
-        tar -czvf $(artifactPath) ./NitroPacker
+        chmod +x ./NitroPacker.SymTableHelper
+        tar -czvf $(artifactPath) ./
         Pop-Location
       condition: ne(variables['imageName'], 'windows-latest')
       displayName: Create tar
@@ -82,7 +83,7 @@ stages:
         Expand-Archive -Path $(Build.SourcesDirectory)/HaroohieClub.NitroPacker.Cli/bin/Release/net8.0/$(rid)/publish.zip .\publish
         Move-Item -Path ./publish-symtable/NitroPacker.SymTableHelper.exe -Destination ./publish/NitroPacker.SymTableHelper.exe
         Push-Location publish
-        Compress-Archive -Path .\NitroPacker.exe -DestinationPath $(artifactPath)
+        Compress-Archive -Path .\ -DestinationPath $(artifactPath)
         Pop-Location
       condition: eq(variables['imageName'], 'windows-latest')
       displayName: Create zip
