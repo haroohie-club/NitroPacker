@@ -131,10 +131,12 @@ This directory structure should be copied from the `asm_ninja_llvm` directory in
 #### Assembling Hacks
 To assemble hacks using Ninja & LLVM, run the following command:
 ```
-NitroPacker patch-arm9 -i PATH/TO/SRC/DIRECTORY -o PATH/TO/OUTPUT/DIRECTORY --input-overlays PATH/TO/ORIGINAL/OVERLAY/DIRECTORY --output-overlays PATH/TO/PATCHED/OVERLAY/DIRECTORY -n PATH/TO/NINJA -l PATH/TO/LLVM/DIRECTORY [-s PATH/TO/SYMTABLEHELPER] -p PROJECT_FILE -a ARENA_LO_OFFSET
+NitroPacker patch-arm9 -i PATH/TO/SRC/DIRECTORY -o PATH/TO/OUTPUT/DIRECTORY --input-overlays PATH/TO/ORIGINAL/OVERLAY/DIRECTORY --output-overlays PATH/TO/PATCHED/OVERLAY/DIRECTORY -n PATH/TO/NINJA -l PATH/TO/LLVM/DIRECTORY [-s PATH/TO/SYMTABLEHELPER] -p PROJECT_FILE -a ARENA_LO_OFFSET [-f "LINKER_FLAGS"]
 ```
 
 The LLVM directory is the root installation (on Windows, usually `C:\Program Files\LLVM`; on Linux, often `/usr/lib/llvm`). The SYMTABLEHELPER path can usually be omitted as it is an executable that is bundled with NitroPacker; you only need to specify it if you have placed this executable somewhere other than next to NitroPacker.
+
+If you are using libraries, you should pass the directories, library, and include flags to the linker directly with `-f` or `--linker-flags`.
 
 ### Using Make & devkitARM or Docker
 The legacy path for compiling assembly hacks is to use a combination of Make & devkitARM or Docker. This path is a bit more cumbersome to execute,
