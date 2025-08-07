@@ -10,7 +10,7 @@ namespace HaroohieClub.NitroPacker.Patcher.Overlay;
 /// <summary>
 /// Static class for handling overlay ASM hack patching
 /// </summary>
-public class OverlayAsmHack
+public static class OverlayAsmHack
 {
     /// <summary>
     /// Compiles a directory containing ASM hacks and inserts them into an overlay binary

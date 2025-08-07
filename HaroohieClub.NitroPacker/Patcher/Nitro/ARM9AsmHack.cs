@@ -12,7 +12,7 @@ namespace HaroohieClub.NitroPacker.Patcher.Nitro;
 /// <summary>
 /// Static class for handling ARM9 ASM hack patching
 /// </summary>
-public class ARM9AsmHack
+public static class ARM9AsmHack
 {
     /// <summary>
     /// Compiles a directory containing ASM hacks and inserts them into the ARM9 binary

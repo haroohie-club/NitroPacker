@@ -78,8 +78,8 @@ public class PatchOverlaysCommand : Command
             if (Directory.GetDirectories(_overlaySourceDir).Contains(Path.Combine(_overlaySourceDir, overlay.Name)))
             {
                 OverlayAsmHack.Insert(_overlaySourceDir, overlay, _romInfoPath, _dockerTag,
-                    (object sender, DataReceivedEventArgs e) => Console.WriteLine(e.Data),
-                    (object sender, DataReceivedEventArgs e) => Console.Error.WriteLine(e.Data),
+                    (_, e) => Console.WriteLine(e.Data),
+                    (_, e) => Console.Error.WriteLine(e.Data),
                     devkitArmPath: _devkitArm);
             }
         }

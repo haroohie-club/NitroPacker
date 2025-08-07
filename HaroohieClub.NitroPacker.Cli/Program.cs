@@ -10,6 +10,7 @@ public class Program
         {
             new UnpackCommand(),
             new PackCommand(),
+            new NinjaLlvmPatchCommand(),
             new PatchArm9Command(),
             new PatchOverlaysCommand(),
             new MigrateProjectCommand(),

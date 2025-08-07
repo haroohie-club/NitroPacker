@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HaroohieClub.NitroPacker.Cl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HaroohieClub.NitroPacker", "HaroohieClub.NitroPacker\HaroohieClub.NitroPacker.csproj", "{2B57DC29-801A-49D0-99E2-662CA96C2C3A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HaroohieClub.NitroPacker.SymTableHelper", "HaroohieClub.NitroPacker.SymTableHelper\HaroohieClub.NitroPacker.SymTableHelper.csproj", "{42E95BCC-1700-400B-BCEF-654EBCAA3C61}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{2B57DC29-801A-49D0-99E2-662CA96C2C3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2B57DC29-801A-49D0-99E2-662CA96C2C3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2B57DC29-801A-49D0-99E2-662CA96C2C3A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{42E95BCC-1700-400B-BCEF-654EBCAA3C61}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42E95BCC-1700-400B-BCEF-654EBCAA3C61}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42E95BCC-1700-400B-BCEF-654EBCAA3C61}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42E95BCC-1700-400B-BCEF-654EBCAA3C61}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
