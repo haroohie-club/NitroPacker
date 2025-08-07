@@ -100,7 +100,7 @@ LLVM distributes binaries on all operating systems. We recommend using LLVM-19 o
 of LLVM 19 can be found [here](https://github.com/llvm/llvm-project/releases/tag/llvmorg-19.1.6). For Windows, you will want `LLVM-19.1.6-win64.exe` or
 `LLVM-19.1.6-woa64.exe` depending on whether you are running an x64 or ARM64 machine. Again, however, if you are on Linux, you can install the specific
 components you need from your package manager with a command similar to `sudo apt install clang-19 lld-19`. (Note that you only need to install clang and lld
-for our purposes.) On macOS, LLVM can be installed with Homebrew via `brew install llvm` (or `brew install llvm@19` for llvm-19 specifically).
+for our purposes.) On macOS, LLVM can be installed with Homebrew via `brew install llvm lld` (or `brew install llvm@19 lld@19` for llvm-19 specifically).
 
 #### Directory Structure
 You will need to move the unpacked `arm9.bin` to a different directory with a specific structure:
