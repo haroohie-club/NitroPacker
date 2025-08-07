@@ -16,8 +16,8 @@ public class RomFileNameTable
     /// </summary>
     public RomFileNameTable()
     {
-        DirectoryTable = new[] { new DirectoryTableEntry { ParentId = 1 } };
-        NameTable = new[] { new[] { NameTableEntry.EndOfDirectory() } };
+        DirectoryTable = [new DirectoryTableEntry { ParentId = 1 }];
+        NameTable = [[NameTableEntry.EndOfDirectory()]];
     }
 
     /// <summary>

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using HaroohieClub.NitroPacker.Patcher;
@@ -11,7 +10,7 @@ namespace HaroohieClub.NitroPacker.Cli;
 
 public class PatchOverlaysCommand : Command
 {
-    private string _inputOverlaysDirectory, _outputOverlaysDirectory, _overlaySourceDir, _romInfoPath, _dockerTag = "latest", _devkitArm, _overrideSuffix;
+    private string _inputOverlaysDirectory, _outputOverlaysDirectory, _overlaySourceDir, _romInfoPath, _buildSystemPath, _dockerTag = "latest", _devkitArm, _overrideSuffix;
     private BuildType _buildType = BuildType.Ninja;
 
     public PatchOverlaysCommand() : base("patch-overlays", "Patches the game's overlays")
@@ -32,6 +31,7 @@ public class PatchOverlaysCommand : Command
                 "ninja" => BuildType.Ninja,
                 _ => BuildType.NotSpecified,
             }},
+            { "build-system-path=", "The path to the build system executable; defaults to just using an executable on the path", b => _buildSystemPath = b },
             { "d|docker-tag=", "(Optional) Indicates a docker tag of the devkitpro/devkitarm image to use (defaults to 'latest')", d => _dockerTag = d },
             { "devkitarm=", "(Optional) Location of the devkitARM installation; defaults to the DEVKITARM environment variable", dev => _devkitArm = dev },
             { "override-suffix=", "(Optional) A file extension suffix to indicate that a general file should be overridden, good for using with e.g. locales", o => _overrideSuffix = o },
@@ -80,10 +80,7 @@ public class PatchOverlaysCommand : Command
         }
 
         List<Overlay> overlays = [];
-        foreach (string file in Directory.GetFiles(_inputOverlaysDirectory))
-        {
-            overlays.Add(new(file, _romInfoPath));
-        }
+        overlays.AddRange(Directory.GetFiles(_inputOverlaysDirectory).Select(file => new Overlay(file, _romInfoPath)));
 
         List<(string, string)> renames = Utilities.RenameOverrideFiles(_overlaySourceDir, _overrideSuffix, CommandSet.Out);
 
@@ -91,9 +88,10 @@ public class PatchOverlaysCommand : Command
         {
             if (Directory.GetDirectories(_overlaySourceDir).Contains(Path.Combine(_overlaySourceDir, overlay.Name)))
             {
-                OverlayAsmHack.Insert(_overlaySourceDir, overlay, _romInfoPath, (object sender, DataReceivedEventArgs e) => Console.WriteLine(e.Data),
-                    (object sender, DataReceivedEventArgs e) => Console.Error.WriteLine(e.Data),
-                    devkitArmPath: _devkitArm);
+                OverlayAsmHack.Insert(_overlaySourceDir, overlay, _romInfoPath, _buildType, 
+                    (_, e) => Console.WriteLine(e.Data),
+                    (_, e) => Console.Error.WriteLine(e.Data),
+                    _buildSystemPath, _dockerTag, _devkitArm);
             }
         }
 

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Text.Json;
+using HaroohieClub.NitroPacker.Patcher;
 using HaroohieClub.NitroPacker.Patcher.Nitro;
 using Mono.Options;
 
@@ -11,8 +12,9 @@ namespace HaroohieClub.NitroPacker.Cli;
 
 public class PatchArm9Command : Command
 {
-    private string _inputDir, _outputDir, _projectFilePath, _dockerTag, _devkitArm, _overrideSuffix;
+    private string _inputDir, _outputDir, _projectFilePath, _buildSystemPath, _dockerTag = "latest", _devkitArm, _overrideSuffix;
     private uint _arenaLoOffset = 0, _ramAddress = 0;
+    private BuildType _buildType = BuildType.Ninja;
 
     public PatchArm9Command() : base("patch-arm9", "Patches the game's arm9.bin")
     {
@@ -23,7 +25,15 @@ public class PatchArm9Command : Command
             { "a|arena-lo-offset=", "ArenaLoOffset provided as a hex number", a => _arenaLoOffset = uint.Parse(a.StartsWith("0x", StringComparison.OrdinalIgnoreCase) ? a[2..] : a, NumberStyles.HexNumber) },
             { "p|project-file=", "An NDS project file from extracting with NitroPacker (can be provided instead of a RAM address)", p => _projectFilePath = p },
             { "r|ram-address=", "The address at which the ROM is loaded into NDS RAM", r => _ramAddress = uint.Parse(r.StartsWith("0x", StringComparison.OrdinalIgnoreCase) ? r[2..] : r, NumberStyles.HexNumber) },
-            { "d|docker-tag=", "(Optional) Indicates Docker should be used and provides a docker tag of the devkitpro/devkitarm image to use", d => _dockerTag = d },
+            { "b|build-type=", "The build system to use; specify one of 'make', 'docker', or 'ninja'", b => _buildType = b.ToLower() switch
+            {
+                "make" => BuildType.Make,
+                "docker" => BuildType.Docker,
+                "ninja" => BuildType.Ninja,
+                _ => BuildType.NotSpecified,
+            }},
+            { "build-system-path=", "The path to the build system executable; defaults to just using an executable on the path", b => _buildSystemPath = b },
+            { "d|docker-tag=", "(Optional) Indicates a docker tag of the devkitpro/devkitarm image to use (defaults to 'latest')", d => _dockerTag = d },
             { "devkitarm=", "(Optional) Location of the devkitARM installation; defaults to the DEVKITARM environment variable", dev => _devkitArm = dev },
             { "override-suffix=", "(Optional) A file extension suffix to indicate that a general file should be overridden, good for using with e.g. locales", o => _overrideSuffix = o },
         };
@@ -72,10 +82,10 @@ public class PatchArm9Command : Command
         List<(string, string)> renames = Utilities.RenameOverrideFiles(_inputDir, _overrideSuffix, CommandSet.Out);
 
         ARM9 arm9 = new(File.ReadAllBytes(Path.Combine(_inputDir, "arm9.bin")), _ramAddress);
-        if (!ARM9AsmHack.Insert(_inputDir, arm9, _arenaLoOffset, _dockerTag,
-                (object sender, DataReceivedEventArgs e) => Console.WriteLine(e.Data),
-                (object sender, DataReceivedEventArgs e) => Console.Error.WriteLine(e.Data),
-                devkitArmPath: _devkitArm))
+        if (!ARM9AsmHack.Insert(_inputDir, arm9, _arenaLoOffset, _buildType,
+                (_, e) => Console.WriteLine(e.Data),
+                (_, e) => Console.Error.WriteLine(e.Data),
+                _buildSystemPath, _dockerTag, _devkitArm))
         {
             Console.WriteLine("ERROR: ASM hack insertion failed!");
             Utilities.RevertOverrideFiles(renames);

@@ -13,8 +13,8 @@ public class ARM9
 {
     private readonly uint _ramAddress;
     private readonly List<byte> _staticData;
-    private readonly uint _start_ModuleParamsOffset;
-    private readonly CRT0.ModuleParams _start_ModuleParams;
+    private readonly uint _startModuleParamsOffset;
+    private readonly CRT0.ModuleParams _startModuleParams;
 
     private readonly List<CRT0.AutoLoadEntry> _autoLoadList;
 
@@ -42,21 +42,21 @@ public class ARM9
         }
 
         _ramAddress = ramAddress;
-        _start_ModuleParamsOffset = moduleParamsOffset;
-        _start_ModuleParams = new(data, moduleParamsOffset);
-        if (_start_ModuleParams.CompressedStaticEnd != 0)
+        _startModuleParamsOffset = moduleParamsOffset;
+        _startModuleParams = new(data, moduleParamsOffset);
+        if (_startModuleParams.CompressedStaticEnd != 0)
         {
-            _start_ModuleParams = new(data, moduleParamsOffset);
+            _startModuleParams = new(data, moduleParamsOffset);
         }
 
-        _staticData = data.Take((int)(_start_ModuleParams.AutoLoadStart - ramAddress)).ToList();
+        _staticData = data.Take((int)(_startModuleParams.AutoLoadStart - ramAddress)).ToList();
 
-        _autoLoadList = new();
-        uint nr = (_start_ModuleParams.AutoLoadListEnd - _start_ModuleParams.AutoLoadListOffset) / 0xC;
-        uint offset = _start_ModuleParams.AutoLoadStart - ramAddress;
+        _autoLoadList = [];
+        uint nr = (_startModuleParams.AutoLoadListEnd - _startModuleParams.AutoLoadListOffset) / 0xC;
+        uint offset = _startModuleParams.AutoLoadStart - ramAddress;
         for (int i = 0; i < nr; i++)
         {
-            var entry = new CRT0.AutoLoadEntry(data, _start_ModuleParams.AutoLoadListOffset - ramAddress + (uint)i * 0xC);
+            var entry = new CRT0.AutoLoadEntry(data, _startModuleParams.AutoLoadListOffset - ramAddress + (uint)i * 0xC);
             entry.Data = data.Skip((int)offset).Take((int)entry.Size).ToList();
             _autoLoadList.Add(entry);
             offset += entry.Size;
@@ -69,22 +69,22 @@ public class ARM9
     /// <returns>A byte array of the ARM9 binary data</returns>
     public byte[] GetBytes()
     {
-        List<byte> bytes = new();
+        List<byte> bytes = [];
         bytes.AddRange(_staticData);
-        _start_ModuleParams.AutoLoadStart = (uint)bytes.Count + _ramAddress;
+        _startModuleParams.AutoLoadStart = (uint)bytes.Count + _ramAddress;
         foreach (CRT0.AutoLoadEntry autoLoad in _autoLoadList)
         {
             bytes.AddRange(autoLoad.Data);
         }
-        _start_ModuleParams.AutoLoadListOffset = (uint)bytes.Count + _ramAddress;
+        _startModuleParams.AutoLoadListOffset = (uint)bytes.Count + _ramAddress;
         foreach (CRT0.AutoLoadEntry autoLoad in _autoLoadList)
         {
             bytes.AddRange(autoLoad.GetEntryBytes());
         }
-        _start_ModuleParams.AutoLoadListEnd = (uint)bytes.Count + _ramAddress;
-        List<byte> moduleParamsBytes = _start_ModuleParams.GetBytes();
-        bytes.RemoveRange((int)_start_ModuleParamsOffset, moduleParamsBytes.Count);
-        bytes.InsertRange((int)_start_ModuleParamsOffset, moduleParamsBytes);
+        _startModuleParams.AutoLoadListEnd = (uint)bytes.Count + _ramAddress;
+        List<byte> moduleParamsBytes = _startModuleParams.GetBytes();
+        bytes.RemoveRange((int)_startModuleParamsOffset, moduleParamsBytes.Count);
+        bytes.InsertRange((int)_startModuleParamsOffset, moduleParamsBytes);
         return bytes.ToArray();
     }
 
@@ -101,7 +101,7 @@ public class ARM9
 
     internal bool WriteU16LE(uint address, ushort value)
     {
-        if (address > _ramAddress && address < _start_ModuleParams.AutoLoadStart)
+        if (address > _ramAddress && address < _startModuleParams.AutoLoadStart)
         {
             _staticData.RemoveRange((int)(address - _ramAddress), 2);
             _staticData.InsertRange((int)(address - _ramAddress), BitConverter.GetBytes(value));
@@ -121,7 +121,7 @@ public class ARM9
 
     internal uint ReadU32LE(uint address)
     {
-        if (address > _ramAddress && address < _start_ModuleParams.AutoLoadStart)
+        if (address > _ramAddress && address < _startModuleParams.AutoLoadStart)
         {
             return BitConverter.ToUInt32(_staticData.ToArray(), (int)(address - _ramAddress));
         }
@@ -137,7 +137,7 @@ public class ARM9
 
     internal bool WriteU32LE(uint address, uint value)
     {
-        if (address > _ramAddress && address < _start_ModuleParams.AutoLoadStart)
+        if (address > _ramAddress && address < _startModuleParams.AutoLoadStart)
         {
             _staticData.RemoveRange((int)(address - _ramAddress), 4);
             _staticData.InsertRange((int)(address - _ramAddress), BitConverter.GetBytes(value));

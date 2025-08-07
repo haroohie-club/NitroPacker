@@ -6,7 +6,7 @@ namespace HaroohieClub.NitroPacker.Nitro.Gx;
 
 internal static class GxUtil
 {
-    private static readonly int[] DataSize = { 0, 8, 2, 4, 8, 2, 8, 16 };
+    private static readonly int[] DataSize = [0, 8, 2, 4, 8, 2, 8, 16];
 
     public static Rgba8Bitmap DecodeChar(ReadOnlySpan<byte> data, ReadOnlySpan<byte> palette,
         ReadOnlySpan<byte> map, ImageFormat imageFormat, MapFormat mapFormat, int width, int height,

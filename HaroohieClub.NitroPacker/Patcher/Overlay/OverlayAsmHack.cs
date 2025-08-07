@@ -10,7 +10,7 @@ namespace HaroohieClub.NitroPacker.Patcher.Overlay;
 /// <summary>
 /// Static class for handling overlay ASM hack patching
 /// </summary>
-public class OverlayAsmHack
+public static class OverlayAsmHack
 {
     /// <summary>
     /// Compiles a directory containing ASM hacks and inserts them into an overlay binary
@@ -26,8 +26,19 @@ public class OverlayAsmHack
     /// <param name="devkitArmPath">>The path to devkitARM (if not defined by the DEVKITARM environment variable)</param>
     /// <returns>True if patching succeeds, false if patching fails</returns>
     public static bool Insert(string path, Overlay overlay, string romInfoPath, BuildType buildType, DataReceivedEventHandler outputDataReceived = null, DataReceivedEventHandler errorDataReceived = null,
-        string buildSystemPath = "ninja", string dockerTag = "", string devkitArmPath = "")
+        string buildSystemPath = "", string dockerTag = "latest", string devkitArmPath = "")
     {
+        if (string.IsNullOrEmpty(buildSystemPath))
+        {
+            buildSystemPath = buildType switch
+            {
+                BuildType.Make => "make",
+                BuildType.Docker => "docker",
+                BuildType.Ninja => "ninja",
+                _ => "echo Cannot find build system",
+            };
+        }
+        
         if (!Compile(buildSystemPath, buildType, path, overlay, outputDataReceived, errorDataReceived, dockerTag, devkitArmPath))
         {
             return false;
@@ -35,7 +46,7 @@ public class OverlayAsmHack
 
         // Add a new symbols file based on what we just compiled so the replacements can reference the old symbols
         string[] newSym = File.ReadAllLines(Path.Combine(path, overlay.Name, "newcode.sym"));
-        List<string> newSymbolsFile = new();
+        List<string> newSymbolsFile = [];
         foreach (string line in newSym)
         {
             Match match = Regex.Match(line, @"(?<address>[\da-f]{8}) \w[\w ]+ \.text\s+[\da-f]{8} (?<name>.+)");
@@ -48,7 +59,7 @@ public class OverlayAsmHack
 
         // Each repl should be compiled separately since they all have their own entry points
         // That's why each one lives in its own separate directory
-        List<string> replFiles = new();
+        List<string> replFiles = [];
         if (Directory.Exists(Path.Combine(path, overlay.Name, "replSource")))
         {
             foreach (string subdir in Directory.GetDirectories(Path.Combine(path, overlay.Name, "replSource")))
