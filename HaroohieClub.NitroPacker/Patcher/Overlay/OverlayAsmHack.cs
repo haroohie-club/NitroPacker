@@ -35,7 +35,7 @@ public static class OverlayAsmHack
 
         // Add a new symbols file based on what we just compiled so the replacements can reference the old symbols
         string[] newSym = File.ReadAllLines(Path.Combine(path, overlay.Name, "newcode.sym"));
-        List<string> newSymbolsFile = new();
+        List<string> newSymbolsFile = [];
         foreach (string line in newSym)
         {
             Match match = Regex.Match(line, @"(?<address>[\da-f]{8}) \w[\w ]+ \.text\s+[\da-f]{8} (?<name>.+)");
@@ -48,7 +48,7 @@ public static class OverlayAsmHack
 
         // Each repl should be compiled separately since they all have their own entry points
         // That's why each one lives in its own separate directory
-        List<string> replFiles = new();
+        List<string> replFiles = [];
         if (Directory.Exists(Path.Combine(path, overlay.Name, "replSource")))
         {
             foreach (string subdir in Directory.GetDirectories(Path.Combine(path, overlay.Name, "replSource")))

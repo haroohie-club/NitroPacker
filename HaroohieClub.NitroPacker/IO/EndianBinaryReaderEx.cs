@@ -218,14 +218,14 @@ public class EndianBinaryReaderEx : EndianBinaryReader
             throw new SerializationException();
         else
         {
-            ConstructorInfo readerConstructor = elementType.GetConstructor(new[] { typeof(EndianBinaryReader) });
+            ConstructorInfo readerConstructor = elementType.GetConstructor([typeof(EndianBinaryReader)]);
             if (readerConstructor == null)
-                readerConstructor = elementType.GetConstructor(new[] { typeof(EndianBinaryReaderEx) });
+                readerConstructor = elementType.GetConstructor([typeof(EndianBinaryReaderEx)]);
             if (readerConstructor != null)
             {
                 value = Array.CreateInstance(elementType, size);
                 for (int i = 0; i < size; i++)
-                    value.SetValue(readerConstructor.Invoke(new object[] { this }), i);
+                    value.SetValue(readerConstructor.Invoke([this]), i);
             }
             else
                 throw new SerializationException();
@@ -343,12 +343,12 @@ public class EndianBinaryReaderEx : EndianBinaryReader
             else
             {
                 AlignForProperty(property, alignment, PropertyType.U8);
-                ConstructorInfo readerConstructor = property.PropertyType.GetConstructor(new[] { typeof(EndianBinaryReader) });
+                ConstructorInfo readerConstructor = property.PropertyType.GetConstructor([typeof(EndianBinaryReader)]);
                 if (readerConstructor == null)
-                    readerConstructor = property.PropertyType.GetConstructor(new[] { typeof(EndianBinaryReaderEx) });
+                    readerConstructor = property.PropertyType.GetConstructor([typeof(EndianBinaryReaderEx)]);
                 if (readerConstructor != null)
                 {
-                    object obj = readerConstructor.Invoke(new object[] { this });
+                    object obj = readerConstructor.Invoke([this]);
                     property.SetValue(target, obj);
                 }
                 else

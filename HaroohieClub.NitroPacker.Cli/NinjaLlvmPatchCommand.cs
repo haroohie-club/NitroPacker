@@ -123,6 +123,7 @@ public class NinjaLlvmPatchCommand : Command
             _projectFilePath, _arenaLoOffset, _symTableHelper,
             (_, e) => Console.WriteLine(e.Data),
             (_, e) => Console.Error.WriteLine(e.Data));
+        File.WriteAllBytes(Path.Combine(_outputDir, "arm9.bin"), arm9.GetBytes());
 
         Utilities.RevertOverrideFiles(renames);
 

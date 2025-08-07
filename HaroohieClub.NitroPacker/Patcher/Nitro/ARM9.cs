@@ -51,7 +51,7 @@ public class ARM9
 
         _staticData = data.Take((int)(_start_ModuleParams.AutoLoadStart - ramAddress)).ToList();
 
-        _autoLoadList = new();
+        _autoLoadList = [];
         uint nr = (_start_ModuleParams.AutoLoadListEnd - _start_ModuleParams.AutoLoadListOffset) / 0xC;
         uint offset = _start_ModuleParams.AutoLoadStart - ramAddress;
         for (int i = 0; i < nr; i++)
@@ -69,7 +69,7 @@ public class ARM9
     /// <returns>A byte array of the ARM9 binary data</returns>
     public byte[] GetBytes()
     {
-        List<byte> bytes = new();
+        List<byte> bytes = [];
         bytes.AddRange(_staticData);
         _start_ModuleParams.AutoLoadStart = (uint)bytes.Count + _ramAddress;
         foreach (CRT0.AutoLoadEntry autoLoad in _autoLoadList)

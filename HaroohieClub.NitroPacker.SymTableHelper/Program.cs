@@ -10,7 +10,7 @@ partial class Program
     {
         string file = args[0];
         string[] newSymLines = File.ReadAllLines(file);
-        List<string> newSymbolsFile = new();
+        List<string> newSymbolsFile = [];
         foreach (string line in newSymLines)
         {
             Match match = SymTableRegex().Match(line);
@@ -22,6 +22,6 @@ partial class Program
         File.WriteAllLines(args[1], newSymbolsFile);
     }
 
-    [GeneratedRegex(@"(?<address>[\da-f]{8}) \w[\w ]+ \.text\s+[\da-f]{8} (?<name>.+)")]
+    [GeneratedRegex(@"(?<address>[\da-f]{8}) \w[\w ]+ \.text\s+[\da-f]{8} (?<name>[^\$]+)")]
     private static partial Regex SymTableRegex();
 }

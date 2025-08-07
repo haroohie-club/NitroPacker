@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -32,10 +33,54 @@ public static class NinjaLlvmPatch
         string romProjFile, uint arenaLoOffset, string symTableHelperPath = "", DataReceivedEventHandler outputDataReceived = null,
         DataReceivedEventHandler errorDataReceived = null)
     {
-        GenerateNinjaBuildFile(sourceDir, llvmPath, symTableHelperPath, romProjFile, arenaLoOffset);
+        uint arenaLo = arm9.ReadU32LE(arenaLoOffset);
+        GenerateNinjaBuildFile(sourceDir, overlayDir, llvmPath, symTableHelperPath, romProjFile, arenaLo);
+        RunNinja(ninjaPath, sourceDir, outputDataReceived, errorDataReceived);
+
+        byte[] newArm9Code = File.ReadAllBytes(Path.Combine(sourceDir, "build", "newcode.bin"));
+        ARM9AsmHack.PatchArm9(Path.Combine(sourceDir, "build"), arm9, arenaLoOffset, arenaLo, newArm9Code);
+        
+        // Perform the replacements for each of the replacement hacks we assembled
+        if (Directory.Exists(Path.Combine(sourceDir, "build", "repl")))
+        {
+            foreach (string replFile in Directory.GetFiles(Path.Combine(sourceDir, "build", "repl"), "*.bin"))
+            {
+                byte[] replCode = File.ReadAllBytes(replFile);
+                uint replaceAddress = uint.Parse(Path.GetFileNameWithoutExtension(replFile), NumberStyles.HexNumber);
+                arm9.WriteBytes(replaceAddress, replCode);
+            }
+        }
+    }
+
+    private static bool RunNinja(string ninjaPath, string sourceDir, DataReceivedEventHandler outputDataReceived, DataReceivedEventHandler errorDataReceived)
+    {
+        Process ninjaProc = new()
+        {
+            StartInfo = new()
+            {
+                FileName = ninjaPath,
+                WorkingDirectory = sourceDir,
+                CreateNoWindow = true,
+                UseShellExecute = false,
+                RedirectStandardError = true,
+                RedirectStandardOutput = true,
+            },
+        };
+        ninjaProc.OutputDataReceived += outputDataReceived ?? ConsoleLogger;
+        ninjaProc.ErrorDataReceived += errorDataReceived ?? ConsoleLogger;
+        ninjaProc.Start();
+        ninjaProc.BeginOutputReadLine();
+        ninjaProc.BeginErrorReadLine();
+        ninjaProc.WaitForExit();
+        return ninjaProc.ExitCode == 0;
+
+        static void ConsoleLogger(object sender, DataReceivedEventArgs e)
+        {
+            Console.WriteLine(e.Data);
+        }
     }
     
-    private static void GenerateNinjaBuildFile(string sourceDir, string llvmPath, string symTableHelperPath, string romProjFile, uint arenaLoOffset)
+    private static void GenerateNinjaBuildFile(string sourceDir, string overlayDir, string llvmPath, string symTableHelperPath, string romProjFile, uint arenaLo)
     {
         string exeExt = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : string.Empty;
         StringBuilder sb = new();
@@ -61,7 +106,7 @@ public static class NinjaLlvmPatch
         sb.AppendLine();
 
         sb.AppendLine("rule ld");
-        sb.AppendLine("  command = ${LLD} -T ./linker.x -T ./symbols.x -Ttext ${codeaddr} ${ldflags} -g -o $out $in");
+        sb.AppendLine("  command = ${LLD} -T ./linker.x -T ./symbols.x -Ttext=0x${codeaddr} ${ldflags} -g -o $out $in");
         sb.AppendLine();
 
         sb.AppendLine("rule objcopy");
@@ -79,15 +124,15 @@ public static class NinjaLlvmPatch
         sb.AppendLine("build build: makedir");
         sb.AppendLine();
 
-        bool wroteMain = AppendNinjaBuildCommands(sb, sourceDir, sourceDir, arenaLoOffset);
+        bool wroteMain = AppendNinjaBuildCommands(sb, sourceDir, sourceDir, arenaLo);
         
         NdsProjectFile proj = NdsProjectFile.Deserialize(romProjFile);
-        foreach (string overlayDir in Directory.GetDirectories(Path.Combine(sourceDir, "overlays")))
+        foreach (string overlaySrcDir in Directory.GetDirectories(Path.Combine(sourceDir, "overlays")))
         {
-            string overlayName = Path.GetFileNameWithoutExtension(overlayDir);
-            AppendNinjaBuildCommands(sb, sourceDir, overlayDir,
-                proj.RomInfo.ARM9Ovt.First(o => o.Id == uint.Parse(overlayName[^4..])).RamAddress, $"{overlayName}/",
-                wroteMain ? " build/newcode.x" : "");
+            Overlay.Overlay overlay = new(Path.Combine(overlayDir, $"{Path.GetFileName(overlaySrcDir)}.bin"), romProjFile);
+            AppendNinjaBuildCommands(sb, sourceDir, overlaySrcDir,
+                proj.RomInfo.ARM9Ovt.First(o => o.Id == uint.Parse(overlay.Name[^4..])).RamAddress + (uint)overlay.Length,
+                $"{overlay.Name}/", wroteMain ? " build/newcode.x" : "");
         }
         
         File.WriteAllText(Path.Combine(sourceDir, "build.ninja"), sb.ToString());
@@ -138,15 +183,15 @@ public static class NinjaLlvmPatch
                          Path.GetExtension(f).Equals(".c", StringComparison.OrdinalIgnoreCase) ||
                          Path.GetExtension(f).Equals(".s", StringComparison.OrdinalIgnoreCase)))
             {
-                sb.AppendLine($"build build/{overlay}{Path.GetFileName(file)}.o: cc {replSource.Replace(sourceRoot, "").Replace('\\', '/')}/{Path.GetFileName(file)} || build{dependency}");
+                sb.AppendLine($"build build/{overlay}repl/{Path.GetFileName(file)}.o: cc {replSource.Replace(sourceRoot, "").Replace('\\', '/')}/{Path.GetFileName(file)} || build{dependency}");
                 sb.AppendLine();
 
-                sb.AppendLine($"build build/{overlay}{Path.GetFileNameWithoutExtension(file)}.elf: ld build/{overlay}{Path.GetFileName(file)}.o || build{dependency}");
+                sb.AppendLine($"build build/{overlay}repl/{Path.GetFileNameWithoutExtension(file)}.elf: ld build/{overlay}repl/{Path.GetFileName(file)}.o || build{dependency}");
                 sb.AppendLine($"  codeaddr = {Path.GetFileNameWithoutExtension(file)}");
                 sb.AppendLine($"  ldflags = {(string.IsNullOrEmpty(overlay) ? "" : "-Map build/newcode.x ")}-Map build/{overlay}newcode.x");
                 sb.AppendLine();
             
-                sb.AppendLine($"build build/{overlay}{Path.GetFileNameWithoutExtension(file)}.bin: objcopy build/{overlay}{Path.GetFileNameWithoutExtension(file)}.elf || build{dependency}");
+                sb.AppendLine($"build build/{overlay}repl/{Path.GetFileNameWithoutExtension(file)}.bin: objcopy build/{overlay}repl/{Path.GetFileNameWithoutExtension(file)}.elf || build{dependency}");
                 sb.AppendLine();
             }
         }
