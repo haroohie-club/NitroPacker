@@ -35,8 +35,8 @@ public static class NinjaLlvmPatch
         DataReceivedEventHandler errorDataReceived = null)
     {
         uint arenaLo = arm9.ReadU32LE(arenaLoOffset);
-        // GenerateNinjaBuildFile(sourceDir, overlayDir, llvmPath, symTableHelperPath, romProjFile, arenaLo);
-        // RunNinja(ninjaPath, sourceDir, outputDataReceived, errorDataReceived);
+        GenerateNinjaBuildFile(sourceDir, overlayDir, llvmPath, symTableHelperPath, romProjFile, arenaLo);
+        RunNinja(ninjaPath, sourceDir, outputDataReceived, errorDataReceived);
 
         byte[] newArm9Code = File.ReadAllBytes(Path.Combine(sourceDir, "build", "newcode.bin"));
         ARM9AsmHack.PatchArm9(Path.Combine(sourceDir, "build"), arm9, arenaLoOffset, arenaLo, newArm9Code);
