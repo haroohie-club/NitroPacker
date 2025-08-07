@@ -73,8 +73,8 @@ public class PatchArm9Command : Command
 
         ARM9 arm9 = new(File.ReadAllBytes(Path.Combine(_inputDir, "arm9.bin")), _ramAddress);
         if (!ARM9AsmHack.Insert(_inputDir, arm9, _arenaLoOffset, _dockerTag,
-                (object sender, DataReceivedEventArgs e) => Console.WriteLine(e.Data),
-                (object sender, DataReceivedEventArgs e) => Console.Error.WriteLine(e.Data),
+                (_, e) => Console.WriteLine(e.Data),
+                (_, e) => Console.Error.WriteLine(e.Data),
                 devkitArmPath: _devkitArm))
         {
             Console.WriteLine("ERROR: ASM hack insertion failed!");

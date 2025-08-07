@@ -12,7 +12,7 @@ namespace HaroohieClub.NitroPacker.Patcher.Nitro;
 /// <summary>
 /// Static class for handling ARM9 ASM hack patching
 /// </summary>
-public class ARM9AsmHack
+public static class ARM9AsmHack
 {
     /// <summary>
     /// Compiles a directory containing ASM hacks and inserts them into the ARM9 binary
@@ -54,10 +54,9 @@ public class ARM9AsmHack
             File.WriteAllText(Path.Combine(path, "newcode.sym"), string.Empty);
             newCode = [];
         }
-
-        StreamReader r = new(Path.Combine(path, "newcode.sym"));
+        
         string[] newSymLines = File.ReadAllLines(Path.Combine(path, "newcode.sym"));
-        List<string> newSymbolsFile = new();
+        List<string> newSymbolsFile = [];
         foreach (string line in newSymLines)
         {
             Match match = Regex.Match(line, @"(?<address>[\da-f]{8}) \w[\w ]+ \.text\s+[\da-f]{8} (?<name>.+)");
@@ -91,8 +90,42 @@ public class ARM9AsmHack
             }
         }
 
-        string currentLine;
-        while ((currentLine = r.ReadLine()) != null)
+        PatchArm9(path, arm9, arenaLoOffset, arenaLo, newCode);
+        
+        // Perform the replacements for each of the replacement hacks we assembled
+        foreach (string replFile in replFiles)
+        {
+            byte[] replCode = File.ReadAllBytes(Path.Combine(path, $"{replFile}.bin"));
+            uint replaceAddress = uint.Parse(replFile.Split('_')[1], NumberStyles.HexNumber);
+            arm9.WriteBytes(replaceAddress, replCode);
+        }
+
+        File.Delete(Path.Combine(path, "newcode.bin"));
+        File.Delete(Path.Combine(path, "newcode.elf"));
+        File.Delete(Path.Combine(path, "newcode.sym"));
+        foreach (string overlayDirectory in Directory.GetDirectories(Path.Combine(path, "overlays")))
+        {
+            File.Copy(Path.Combine(path, "newcode.x"), Path.Combine(overlayDirectory, "arm9_newcode.x"), overwrite: true);
+        }
+        File.Delete(Path.Combine(path, "newcode.x"));
+        foreach (string replFile in replFiles)
+        {
+            File.Delete(Path.Combine(path, $"{replFile}.bin"));
+            File.Delete(Path.Combine(path, $"{replFile}.elf"));
+            File.Delete(Path.Combine(path, $"{replFile}.sym"));
+        }
+
+        if (Directory.Exists(Path.Combine(path, "build")))
+        {
+            Directory.Delete(Path.Combine(path, "build"), true);
+        }
+        return true;
+    }
+
+    internal static void PatchArm9(string path, ARM9 arm9, uint arenaLoOffset, uint arenaLo, byte[] newCode)
+    {
+        StreamReader r = new(Path.Combine(path, "newcode.sym"));
+        while (r.ReadLine() is { } currentLine)
         {
             string[] lines = currentLine.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             if (lines.Length == 4)
@@ -152,7 +185,8 @@ public class ARM9AsmHack
                                 $"The offset of function {lines[3]} is invalid. Maybe your code is inside an overlay or you wrote the wrong offset.\r\nIf your code is inside an overlay, this is an action replay code to let your asm hack still work:\r\n1 {replaceOffset:X7} 0000{replace1:X4}\r\n1{replaceOffset + 2:X7} 0000{replace2:X4})"
                             );
                         }
-                        else arm9.WriteU16LE(replaceOffset + 2, replace2);
+
+                        arm9.WriteU16LE(replaceOffset + 2, replace2);
                         break;
                     }
                 }
@@ -161,35 +195,6 @@ public class ARM9AsmHack
         r.Close();
         arm9.WriteU32LE(arenaLoOffset, arenaLo + (uint)newCode.Length);
         arm9.AddAutoLoadEntry(arenaLo, newCode);
-
-        // Perform the replacements for each of the replacement hacks we assembled
-        foreach (string replFile in replFiles)
-        {
-            byte[] replCode = File.ReadAllBytes(Path.Combine(path, $"{replFile}.bin"));
-            uint replaceAddress = uint.Parse(replFile.Split('_')[1], NumberStyles.HexNumber);
-            arm9.WriteBytes(replaceAddress, replCode);
-        }
-
-        File.Delete(Path.Combine(path, "newcode.bin"));
-        File.Delete(Path.Combine(path, "newcode.elf"));
-        File.Delete(Path.Combine(path, "newcode.sym"));
-        foreach (string overlayDirectory in Directory.GetDirectories(Path.Combine(path, "overlays")))
-        {
-            File.Copy(Path.Combine(path, "newcode.x"), Path.Combine(overlayDirectory, "arm9_newcode.x"), overwrite: true);
-        }
-        File.Delete(Path.Combine(path, "newcode.x"));
-        foreach (string replFile in replFiles)
-        {
-            File.Delete(Path.Combine(path, $"{replFile}.bin"));
-            File.Delete(Path.Combine(path, $"{replFile}.elf"));
-            File.Delete(Path.Combine(path, $"{replFile}.sym"));
-        }
-
-        if (Directory.Exists(Path.Combine(path, "build")))
-        {
-            Directory.Delete(Path.Combine(path, "build"), true);
-        }
-        return true;
     }
 
     private static bool Compile(string makePath, string dockerPath, string path, uint arenaLo, DataReceivedEventHandler outputDataReceived, DataReceivedEventHandler errorDataReceived, string dockerTag, string devkitArmPath)

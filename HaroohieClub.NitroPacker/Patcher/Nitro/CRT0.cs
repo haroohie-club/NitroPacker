@@ -34,7 +34,7 @@ internal class CRT0
 		}
 		public List<byte> GetBytes()
 		{
-			List<byte> bytes = new();
+			List<byte> bytes = [];
 			bytes.AddRange(BitConverter.GetBytes(AutoLoadListOffset));
 			bytes.AddRange(BitConverter.GetBytes(AutoLoadListEnd));
 			bytes.AddRange(BitConverter.GetBytes(AutoLoadStart));
@@ -71,7 +71,7 @@ internal class CRT0
 		}
 		public List<byte> GetEntryBytes()
 		{
-			List<byte> bytes = new();
+			List<byte> bytes = [];
 			bytes.AddRange(BitConverter.GetBytes(Address));
 			bytes.AddRange(BitConverter.GetBytes(Size));
 			bytes.AddRange(BitConverter.GetBytes(BssSize));

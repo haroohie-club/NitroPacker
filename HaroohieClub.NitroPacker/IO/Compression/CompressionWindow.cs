@@ -21,7 +21,7 @@ internal class CompressionWindow
         MaxRun = maxRun;
         WindowSize = windowSize;
         for (int i = 0; i < 256; i++)
-            _windowDict[i] = new();
+            _windowDict[i] = [];
     }
 
     public unsafe (uint pos, int len) FindRun()

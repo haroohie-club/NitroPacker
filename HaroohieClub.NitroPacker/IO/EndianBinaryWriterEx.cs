@@ -401,13 +401,13 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
         else
         {
             AlignForProperty(property, alignment, PropertyType.U8);
-            MethodInfo writeMethod = elementType.GetMethod("Write", new[] { typeof(EndianBinaryWriter) });
+            MethodInfo writeMethod = elementType.GetMethod("Write", [typeof(EndianBinaryWriter)]);
             if (writeMethod == null)
-                writeMethod = elementType.GetMethod("Write", new[] { typeof(EndianBinaryWriterEx) });
+                writeMethod = elementType.GetMethod("Write", [typeof(EndianBinaryWriterEx)]);
             if (writeMethod != null)
             {
                 for (int i = 0; i < size; i++)
-                    writeMethod.Invoke(value.GetValue(i), new object[] { this });
+                    writeMethod.Invoke(value.GetValue(i), [this]);
             }
             else
                 throw new SerializationException();
@@ -478,7 +478,7 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
                 if (refValue != null)
                 {
                     if (!_references.ContainsKey(refValue))
-                        _references.Add(refValue, new List<(long, Chunk, ReferenceAttribute)>());
+                        _references.Add(refValue, []);
                     _references[refValue].Add((BaseStream.Position, _chunks.Count == 0 ? null : _chunks.Peek(),
                         refAttrib));
                 }
@@ -507,11 +507,11 @@ public class EndianBinaryWriterEx : EndianBinaryWriter
                 if (value == null)
                     throw new SerializationException("Field value is null");
 
-                MethodInfo writeMethod = field.PropertyType.GetMethod("Write", new[] { typeof(EndianBinaryWriter) });
+                MethodInfo writeMethod = field.PropertyType.GetMethod("Write", [typeof(EndianBinaryWriter)]);
                 if (writeMethod == null)
-                    writeMethod = field.PropertyType.GetMethod("Write", new[] { typeof(EndianBinaryWriterEx) });
+                    writeMethod = field.PropertyType.GetMethod("Write", [typeof(EndianBinaryWriterEx)]);
                 if (writeMethod != null)
-                    writeMethod.Invoke(value, new object[] { this });
+                    writeMethod.Invoke(value, [this]);
                 else
                 {
                     throw new SerializationException();
