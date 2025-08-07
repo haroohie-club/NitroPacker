@@ -121,11 +121,7 @@ public static class NinjaLlvmPatch
         sb.AppendLine($"OBJDUMP          = \"${{LLVM}}llvm-objdump{exeExt}\"");
         sb.AppendLine($"SYMTABLEHELPER   = \"{(string.IsNullOrEmpty(symTableHelperPath) ? 
             $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)?.Replace('\\', '/')}/NitroPacker.SymTableHelper{exeExt}" :
-            symTableHelperPath)}\"");
-        sb.AppendLine();
-        
-        sb.AppendLine("rule makedir");
-        sb.AppendLine("  command = mkdir $out");
+            symTableHelperPath.Replace('\\', '/'))}\"");
         sb.AppendLine();
         
         sb.AppendLine("rule cc");
@@ -141,14 +137,21 @@ public static class NinjaLlvmPatch
         sb.AppendLine();
 
         sb.AppendLine("rule objdump");
-        sb.AppendLine("  command = ${OBJDUMP} -t $in > $out");
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            sb.AppendLine("  command = cmd.exe /c \"\"${OBJDUMP}\"\" -t $in\" > $out");
+        }
+        else
+        {
+            sb.AppendLine("  command = ${OBJDUMP} -t $in > $out");
+        }
         sb.AppendLine();
 
         sb.AppendLine("rule symtablehelper");
         sb.AppendLine("  command = ${SYMTABLEHELPER} $in $out");
         sb.AppendLine();
 
-        sb.AppendLine("build build: makedir");
+        sb.AppendLine("build build: phony");
         sb.AppendLine();
 
         bool wroteMain = AppendNinjaBuildCommands(sb, sourceDir, sourceDir, arenaLo);
