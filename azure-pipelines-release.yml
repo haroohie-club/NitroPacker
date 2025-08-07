@@ -53,6 +53,18 @@ stages:
         arguments: '-c Release -f net8.0 -r $(rid) --self-contained /p:PublishSingleFile=true'
         publishWebProjects: false
       displayName: Build & Publish NitroPacker
+      
+    - task: DotNetCoreCLI@2
+      inputs:
+        command: 'publish'
+        projects: $(Build.SourcesDirectory)/HaroohieClub.NitroPacker.SymTableHelper/HaroohieClub.NitroPacker.SymTableHelper.csproj
+        arguments: '-c Release -f net8.0 -r $(rid) --self-contained /p:PublishSingleFile=true'
+        publishWebProjects: false
+      displayName: Build & Publish SymTableHelper
+      
+    - pwsh: |
+        Expand-Archive -Path $(Build.SourcesDirectory)/HaroohieClub.NitroPacker.SymTableHelper/bin/Release/net8.0/$(rid)/publish.zip -DestinationPath ./publish
+      displayName: Put SymTableHelper alongside NitroPacker
         
     - pwsh: |
         mkdir publish
