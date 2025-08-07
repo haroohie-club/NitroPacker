@@ -139,7 +139,7 @@ public static class NinjaLlvmPatch
         sb.AppendLine("rule objdump");
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            sb.AppendLine("  command = cmd.exe /c \"\"${OBJDUMP}\"\" -t $in\" > $out");
+            sb.AppendLine("  command = cmd.exe /c \"\"${OBJDUMP}\" -t $in\" > $out");
         }
         else
         {
