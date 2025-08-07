@@ -69,7 +69,7 @@ stages:
     - pwsh: |
         mkdir publish
         Expand-Archive -Path $(Build.SourcesDirectory)/HaroohieClub.NitroPacker.Cli/bin/Release/net8.0/$(rid)/publish.zip -DestinationPath ./publish
-        Move-Item -Path ./publish-symtable/NitroPacker.SymTableHelper -DestinationPath ./publish/NitroPacker.SymTableHelper
+        Move-Item -Path ./publish-symtable/NitroPacker.SymTableHelper -Destination ./publish/NitroPacker.SymTableHelper
         Push-Location publish
         chmod +x ./NitroPacker
         tar -czvf $(artifactPath) ./NitroPacker
@@ -80,7 +80,7 @@ stages:
     - pwsh: |
         mkdir publish
         Expand-Archive -Path $(Build.SourcesDirectory)/HaroohieClub.NitroPacker.Cli/bin/Release/net8.0/$(rid)/publish.zip .\publish
-        Move-Item -Path ./publish-symtable/NitroPacker.SymTableHelper.exe -DestinationPath ./publish/NitroPacker.SymTableHelper.exe
+        Move-Item -Path ./publish-symtable/NitroPacker.SymTableHelper.exe -Destination ./publish/NitroPacker.SymTableHelper.exe
         Push-Location publish
         Compress-Archive -Path .\NitroPacker.exe -DestinationPath $(artifactPath)
         Pop-Location
