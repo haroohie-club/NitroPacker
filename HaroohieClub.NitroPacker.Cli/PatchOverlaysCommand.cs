@@ -10,8 +10,9 @@ namespace HaroohieClub.NitroPacker.Cli;
 
 public class PatchOverlaysCommand : Command
 {
-    private string _inputOverlaysDirectory, _outputOverlaysDirectory, _overlaySourceDir, _romInfoPath, _buildSystemPath, _dockerTag = "latest", _devkitArm, _overrideSuffix;
-    private BuildType _buildType = BuildType.Ninja;
+    private string _inputOverlaysDirectory, _outputOverlaysDirectory, _overlaySourceDir, _romInfoPath, _dockerTag = "latest", _devkitArm, _overrideSuffix;
+    private string[] _buildSystemPaths;
+    private BuildType _buildType = BuildType.NinjaClang;
 
     public PatchOverlaysCommand() : base("patch-overlays", "Patches the game's overlays")
     {
@@ -24,14 +25,14 @@ public class PatchOverlaysCommand : Command
             { "o|output-overlays=", "Directory where patched overlays will be written", o => _outputOverlaysDirectory = o },
             { "s|source-dir=", "Directory where overlay source code lives", s => _overlaySourceDir = s },
             { "r|project=", "Project JSON file containing the overlay table", r => _romInfoPath = r },
-            { "b|build-type=", "The build system to use; specify one of 'make', 'docker', or 'ninja'", b => _buildType = b.ToLower() switch
+            { "b|build-type=", "The build system to use; specify one of 'make', 'docker', or 'ninja-clang'", b => _buildType = b.ToLower() switch
             {
                 "make" => BuildType.Make,
                 "docker" => BuildType.Docker,
-                "ninja" => BuildType.Ninja,
+                "ninja-clang" => BuildType.NinjaClang,
                 _ => BuildType.NotSpecified,
             }},
-            { "build-system-path=", "The path to the build system executable; defaults to just using an executable on the path", b => _buildSystemPath = b },
+            { "build-system-paths=", "A semicolon-delimited list of build system executables; defaults to just using an executables on the path (for Ninja/Clang, specify ninja and then clang)", b => _buildSystemPaths = b.Split(";") },
             { "d|docker-tag=", "(Optional) Indicates a docker tag of the devkitpro/devkitarm image to use (defaults to 'latest')", d => _dockerTag = d },
             { "devkitarm=", "(Optional) Location of the devkitARM installation; defaults to the DEVKITARM environment variable", dev => _devkitArm = dev },
             { "override-suffix=", "(Optional) A file extension suffix to indicate that a general file should be overridden, good for using with e.g. locales", o => _overrideSuffix = o },
@@ -91,7 +92,7 @@ public class PatchOverlaysCommand : Command
                 OverlayAsmHack.Insert(_overlaySourceDir, overlay, _romInfoPath, _buildType, 
                     (_, e) => Console.WriteLine(e.Data),
                     (_, e) => Console.Error.WriteLine(e.Data),
-                    _buildSystemPath, _dockerTag, _devkitArm);
+                    _buildSystemPaths, _dockerTag, _devkitArm);
             }
         }
 

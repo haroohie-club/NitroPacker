@@ -23,30 +23,35 @@ public static class ARM9AsmHack
     /// <param name="buildType">The build system type to use; specify one of Make, Docker, or Ninja</param>
     /// <param name="outputDataReceived">A handler for standard output from make/Docker</param>
     /// <param name="errorDataReceived">A handler for standard error from make/Docker</param>
-    /// <param name="buildSystemPath">The path to the build system executable (make, docker, or ninja) (only necessary to specify if not on path)</param>
+    /// <param name="buildSystemPaths">The path to the build system executable (make, docker, or ninja/clang) (only necessary to specify if not on path)</param>
     /// <param name="dockerTag">If using Docker to compile the hacks, the tag of the devkitpro/devkitarm to use (e.g. "latest"); leave empty or null if not using Docker</param>
     /// <param name="devkitArmPath">The path to devkitARM (if not defined by the DEVKITARM environment variable)</param>
     /// <returns>True if patching succeeds, false if patching fails</returns>
     /// <exception cref="Exception"></exception>
     public static bool Insert(string path, ARM9 arm9, uint arenaLoOffset, BuildType buildType, DataReceivedEventHandler outputDataReceived = null, DataReceivedEventHandler errorDataReceived = null,
-        string buildSystemPath = "", string dockerTag = "latest", string devkitArmPath = "")
+        string[] buildSystemPaths = null, string dockerTag = "latest", string devkitArmPath = "")
     {
-        if (string.IsNullOrEmpty(buildSystemPath))
+        if ((buildSystemPaths ?? []).Length == 0)
         {
-            buildSystemPath = buildType switch
+            buildSystemPaths = buildType switch
             {
-                BuildType.Make => "make",
-                BuildType.Docker => "docker",
-                BuildType.Ninja => "ninja",
-                _ => "echo Cannot find build system",
+                BuildType.Make => ["make"],
+                BuildType.Docker => ["docker"],
+                BuildType.NinjaClang => ["ninja", "/lib/llvm-19/"],
+                _ => ["echo Cannot find build system"],
             };
+        }
+
+        if (buildType == BuildType.NinjaClang && buildSystemPaths!.Length == 1)
+        {
+            buildSystemPaths = [buildSystemPaths[0], "/lib/llvm-19/"];
         }
 
         uint arenaLo = arm9.ReadU32LE(arenaLoOffset);
         byte[] newCode;
         if (Directory.GetFiles(Path.Combine(path, "source")).Length > 0)
         {
-            if (!Compile(buildSystemPath, buildType, path, arenaLo, outputDataReceived, errorDataReceived, dockerTag, devkitArmPath))
+            if (!Compile(buildSystemPaths, buildType, path, arenaLo, outputDataReceived, errorDataReceived, dockerTag, devkitArmPath))
             {
                 return false;
             }
@@ -87,7 +92,7 @@ public static class ARM9AsmHack
             foreach (string subdir in Directory.GetDirectories(Path.Combine(path, "replSource")))
             {
                 replFiles.Add($"repl_{Path.GetFileNameWithoutExtension(subdir)}");
-                if (!CompileReplace(buildSystemPath, buildType, Path.GetRelativePath(path, subdir), path, outputDataReceived, errorDataReceived, dockerTag, devkitArmPath))
+                if (!CompileReplace(buildSystemPaths, buildType, Path.GetRelativePath(path, subdir), path, outputDataReceived, errorDataReceived, dockerTag, devkitArmPath))
                 {
                     return false;
                 }
@@ -202,14 +207,14 @@ public static class ARM9AsmHack
         }
         return true;
     }
-
-    private static bool Compile(string buildSystemPath, BuildType buildType, string path, uint arenaLo, DataReceivedEventHandler outputDataReceived, DataReceivedEventHandler errorDataReceived, string dockerTag, string devkitArmPath)
+    
+    private static bool Compile(string[] buildSystemPaths, BuildType buildType, string path, uint arenaLo, DataReceivedEventHandler outputDataReceived, DataReceivedEventHandler errorDataReceived, string dockerTag, string devkitArmPath)
     {
         ProcessStartInfo psi = buildType switch
         {
             BuildType.Make => new()
             {
-                FileName = buildSystemPath,
+                FileName = buildSystemPaths[0],
                 Arguments = $"TARGET=newcode SOURCES=source BUILD=build CODEADDR=0x{arenaLo:X8}",
                 WorkingDirectory = path,
                 CreateNoWindow = true,
@@ -219,15 +224,15 @@ public static class ARM9AsmHack
             },
             BuildType.Docker => new()
             {
-                FileName = buildSystemPath,
+                FileName = buildSystemPaths[0],
                 Arguments = $"run --rm -v \"{Path.GetFullPath(path)}:/src\" -w /src devkitpro/devkitarm:{dockerTag} make TARGET=newcode SOURCES=source BUILD=build CODEADDR=0x{arenaLo:X8}",
                 UseShellExecute = false,
                 RedirectStandardError = true,
                 RedirectStandardOutput = true,
             },
-            BuildType.Ninja => new()
+            BuildType.NinjaClang => new()
             {
-                FileName = buildSystemPath,
+                FileName = buildSystemPaths[0],
                 Arguments = $"",
                 CreateNoWindow = true,
                 UseShellExecute = false,
@@ -274,14 +279,14 @@ public static class ARM9AsmHack
         }
     }
 
-    private static bool CompileReplace(string buildSystemPath, BuildType buildType, string subdir, string path, DataReceivedEventHandler outputDataReceived, DataReceivedEventHandler errorDataReceived, string dockerTag, string devkitArmPath)
+    private static bool CompileReplace(string[] buildSystemPaths, BuildType buildType, string subdir, string path, DataReceivedEventHandler outputDataReceived, DataReceivedEventHandler errorDataReceived, string dockerTag, string devkitArmPath)
     {
         uint address = uint.Parse(Path.GetFileNameWithoutExtension(subdir), NumberStyles.HexNumber);
         ProcessStartInfo psi = buildType switch
         {
             BuildType.Make => new()
             {
-                FileName = buildSystemPath,
+                FileName = buildSystemPaths[0],
                 Arguments =
                     $"TARGET=repl_{Path.GetFileNameWithoutExtension(subdir)} SOURCES={subdir} BUILD=build NEWSYM=newcode.x CODEADDR=0x{address:X7}",
                 WorkingDirectory = path,
@@ -291,16 +296,16 @@ public static class ARM9AsmHack
             },
             BuildType.Docker => new()
             {
-                FileName = buildSystemPath,
+                FileName = buildSystemPaths[0],
                 Arguments =
                     $"run --rm -v \"{Path.GetFullPath(path)}:/src\" -w /src devkitpro/devkitarm:{dockerTag} make TARGET=repl_{Path.GetFileNameWithoutExtension(subdir)} SOURCES={subdir} BUILD=build NEWSYM=newcode.x CODEADDR=0x{address:X7}",
                 UseShellExecute = false,
                 RedirectStandardError = true,
                 RedirectStandardOutput = true,
             },
-            BuildType.Ninja => new()
+            BuildType.NinjaClang => new()
             {
-                FileName = buildSystemPath,
+                FileName = buildSystemPaths[0],
                 Arguments = $"",
                 CreateNoWindow = true,
                 UseShellExecute = false,
