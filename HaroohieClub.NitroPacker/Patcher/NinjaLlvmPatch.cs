@@ -40,8 +40,12 @@ public static class NinjaLlvmPatch
         GenerateNinjaBuildFile(sourceDir, overlayDir, llvmPath, symTableHelperPath, romProjFile, arenaLo, linkerFlags);
         RunNinja(ninjaPath, sourceDir, outputDataReceived, errorDataReceived);
 
-        byte[] newArm9Code = File.ReadAllBytes(Path.Combine(sourceDir, "build", "newcode.bin"));
-        ARM9AsmHack.PatchArm9(Path.Combine(sourceDir, "build"), arm9, arenaLoOffset, arenaLo, newArm9Code);
+        string newArm9CodeFile = Path.Combine(sourceDir, "build", "newcode.bin");
+        if (File.Exists(newArm9CodeFile))
+        {
+            byte[] newArm9Code = File.ReadAllBytes(newArm9CodeFile);
+            ARM9AsmHack.PatchArm9(Path.Combine(sourceDir, "build"), arm9, arenaLoOffset, arenaLo, newArm9Code);
+        }
         
         // Perform the replacements for each of the replacement hacks we assembled
         if (Directory.Exists(Path.Combine(sourceDir, "build", "repl")))
@@ -60,10 +64,14 @@ public static class NinjaLlvmPatch
                      .Select(o => new Overlay.Overlay(o, romProjFile))
                      .Where(o => Directory.GetDirectories(overlayPatchDir).Contains(Path.Combine(overlayPatchDir, o.Name))))
         {
-            byte[] newOverlayCode = File.ReadAllBytes(Path.Combine(sourceDir, "build", overlay.Name, "newcode.bin"));
-            string[] newSym = File.ReadAllLines(Path.Combine(sourceDir, "build", overlay.Name, "newcode.sym"));
-            OverlayAsmHack.Patch(Path.Combine(sourceDir, "build", overlay.Name), overlay, newSym, newOverlayCode, newRomProjFile ?? romProjFile);
-            overlays.Add(overlay);
+            string newOverlayCodeFile = Path.Combine(sourceDir, "build", overlay.Name, "newcode.bin");
+            if (File.Exists(newOverlayCodeFile))
+            {
+                byte[] newOverlayCode = File.ReadAllBytes(newOverlayCodeFile);
+                string[] newSym = File.ReadAllLines(Path.Combine(sourceDir, "build", overlay.Name, "newcode.sym"));
+                OverlayAsmHack.Patch(Path.Combine(sourceDir, "build", overlay.Name), overlay, newSym, newOverlayCode, newRomProjFile ?? romProjFile);
+                overlays.Add(overlay);
+            }
             
             // Perform the replacements for each of the replacement hacks we assembled
             if (Directory.Exists(Path.Combine(sourceDir, "build", overlay.Name, "repl")))
@@ -74,6 +82,10 @@ public static class NinjaLlvmPatch
                     byte[] replCode = File.ReadAllBytes(Path.Combine(sourceDir, "build", overlay.Name, "repl", $"{replFile}.bin"));
                     uint replaceAddress = uint.Parse(Path.GetFileNameWithoutExtension(replFile), NumberStyles.HexNumber);
                     overlay.Patch(replaceAddress, replCode);
+                    if (!overlays.Contains(overlay))
+                    {
+                        overlays.Add(overlay);
+                    }
                 }
             }
         }
@@ -235,7 +247,7 @@ public static class NinjaLlvmPatch
 
                 sb.AppendLine($"build build/{overlay}repl/{Path.GetFileNameWithoutExtension(file)}.elf: ld build/{overlay}repl/{Path.GetFileName(file)}.o || build{dependency}");
                 sb.AppendLine($"  codeaddr = {Path.GetFileNameWithoutExtension(file)}");
-                sb.AppendLine($"  ldflags = {(string.IsNullOrEmpty(overlay) ? "" : "-Map build/newcode.x ")}-Map build/{overlay}newcode.x");
+                sb.AppendLine($"  ldflags = {(string.IsNullOrEmpty(overlay) ? "" : "-Map build/newcode.x ")}{(wroteMain ? $"-Map build/{overlay}newcode.x)" : string.Empty)}");
                 sb.AppendLine();
             
                 sb.AppendLine($"build build/{overlay}repl/{Path.GetFileNameWithoutExtension(file)}.bin: objcopy build/{overlay}repl/{Path.GetFileNameWithoutExtension(file)}.elf || build{dependency}");
