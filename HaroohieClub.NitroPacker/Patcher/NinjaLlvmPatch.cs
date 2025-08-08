@@ -89,8 +89,11 @@ public static class NinjaLlvmPatch
                 }
             }
         }
-        
-        Directory.Delete(Path.Combine(sourceDir, "build"), true);
+
+        if (Directory.Exists(Path.Combine(sourceDir, "build")))
+        {
+            Directory.Delete(Path.Combine(sourceDir, "build"), true);
+        }
         File.Delete(Path.Combine(sourceDir, "build.ninja"));
         File.Delete(Path.Combine(sourceDir, ".ninja_log"));
 
