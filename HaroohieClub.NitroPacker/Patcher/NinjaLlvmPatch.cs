@@ -200,24 +200,27 @@ public static class NinjaLlvmPatch
                 sb.AppendLine();
             }
 
-            sb.Append($"build build/{overlay}newcode.elf: ld ");
-            sb.AppendJoin(' ', objFiles);
-            sb.AppendLine($" || build{dependency}");
-            sb.AppendLine($"  codeaddr = {codeAddress:X8}");
-            sb.AppendLine($"  ldflags = {(string.IsNullOrEmpty(overlay) ? "" : "-Map build/newcode.x")}");
-            sb.AppendLine();
+            if (objFiles.Count > 0)
+            {
+                sb.Append($"build build/{overlay}newcode.elf: ld ");
+                sb.AppendJoin(' ', objFiles);
+                sb.AppendLine($" || build{dependency}");
+                sb.AppendLine($"  codeaddr = {codeAddress:X8}");
+                sb.AppendLine($"  ldflags = {(string.IsNullOrEmpty(overlay) ? "" : "-Map build/newcode.x")}");
+                sb.AppendLine();
         
-            sb.AppendLine($"build build/{overlay}newcode.bin: objcopy build/{overlay}newcode.elf || build{dependency}");
-            sb.AppendLine();
+                sb.AppendLine($"build build/{overlay}newcode.bin: objcopy build/{overlay}newcode.elf || build{dependency}");
+                sb.AppendLine();
         
-            sb.AppendLine($"build build/{overlay}newcode.sym: objdump build/{overlay}newcode.elf || build{dependency}");
-            sb.AppendLine();
+                sb.AppendLine($"build build/{overlay}newcode.sym: objdump build/{overlay}newcode.elf || build{dependency}");
+                sb.AppendLine();
 
-            sb.AppendLine($"build build/{overlay}newcode.x: symtablehelper build/{overlay}newcode.sym || build{dependency}");
-            sb.AppendLine();
+                sb.AppendLine($"build build/{overlay}newcode.x: symtablehelper build/{overlay}newcode.sym || build{dependency}");
+                sb.AppendLine();
 
-            wroteMain = true;
-            dependency += $" build/{overlay}newcode.x";
+                wroteMain = true;
+                dependency += $" build/{overlay}newcode.x";
+            }
         }
 
         string replSource = Path.Combine(sourceDir, "replSource");
