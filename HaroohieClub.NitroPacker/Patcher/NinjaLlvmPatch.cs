@@ -31,9 +31,10 @@ public static class NinjaLlvmPatch
     /// <param name="linkerFlags">Flags to pass directly to the linker (used for linking your own libraries)</param>
     /// <param name="outputDataReceived">A handler for standard output from ninja</param>
     /// <param name="errorDataReceived">A handler for standard error from ninja</param>
+    /// <param name="newRomProjFile">(Optional) An output ROM project file (so the original is not overwritten)</param>
     public static Overlay.Overlay[] PatchAndReturnOverlays(string sourceDir, ARM9 arm9, string overlayDir, string ninjaPath, string llvmPath,
         string romProjFile, uint arenaLoOffset, string symTableHelperPath = "", string linkerFlags = "", DataReceivedEventHandler outputDataReceived = null,
-        DataReceivedEventHandler errorDataReceived = null)
+        DataReceivedEventHandler errorDataReceived = null, string newRomProjFile = null)
     {
         uint arenaLo = arm9.ReadU32LE(arenaLoOffset);
         GenerateNinjaBuildFile(sourceDir, overlayDir, llvmPath, symTableHelperPath, romProjFile, arenaLo, linkerFlags);
@@ -61,7 +62,7 @@ public static class NinjaLlvmPatch
         {
             byte[] newOverlayCode = File.ReadAllBytes(Path.Combine(sourceDir, "build", overlay.Name, "newcode.bin"));
             string[] newSym = File.ReadAllLines(Path.Combine(sourceDir, "build", overlay.Name, "newcode.sym"));
-            OverlayAsmHack.Patch(Path.Combine(sourceDir, "build", overlay.Name), overlay, newSym, newOverlayCode, romProjFile);
+            OverlayAsmHack.Patch(Path.Combine(sourceDir, "build", overlay.Name), overlay, newSym, newOverlayCode, newRomProjFile ?? romProjFile);
             overlays.Add(overlay);
             
             // Perform the replacements for each of the replacement hacks we assembled

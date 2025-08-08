@@ -19,6 +19,7 @@ public class NinjaLlvmPatchCommand : Command
         _llvm,
         _symTableHelper,
         _projectFilePath,
+        _newProjectFilePath,
         _linkerFlags,
         _overrideSuffix;
 
@@ -38,6 +39,7 @@ public class NinjaLlvmPatchCommand : Command
             { "s|sym-table-helper=", "Path to NitroPacker.SymTableHelper executable", s => _symTableHelper = s },
             { "a|arena-lo-offset=", "ArenaLoOffset provided as a hex number", a => _arenaLoOffset = uint.Parse(a.StartsWith("0x", StringComparison.OrdinalIgnoreCase) ? a[2..] : a, NumberStyles.HexNumber) },
             { "p|project-file=", "An NDS project file from extracting with NitroPacker (can be provided instead of a RAM address)", p => _projectFilePath = p },
+            { "new-project-file=", "A second NDS project file that will be written to (the first one will be left untouched", n => _newProjectFilePath = n },
             { "f|linker-flags=", "A string of flags to pass directly to the linker (used for linking your own libraries)", f => _linkerFlags = f },
             { "override-suffix=", "(Optional) A file extension suffix to indicate that a general file should be overridden, good for using with e.g. locales", o => _overrideSuffix = o },
         };
@@ -125,7 +127,7 @@ public class NinjaLlvmPatchCommand : Command
         Overlay[] overlays = NinjaLlvmPatch.PatchAndReturnOverlays(_inputDir, arm9, _inputOverlaysDirectory, _ninja, _llvm,
             _projectFilePath, _arenaLoOffset, _symTableHelper, _linkerFlags,
             (_, e) => Console.WriteLine(e.Data),
-            (_, e) => Console.Error.WriteLine(e.Data));
+            (_, e) => Console.Error.WriteLine(e.Data), _newProjectFilePath);
         
         CommandSet.Out.WriteLine("Saving ARM9...");
         File.WriteAllBytes(Path.Combine(_outputDir, "arm9.bin"), arm9.GetBytes());
