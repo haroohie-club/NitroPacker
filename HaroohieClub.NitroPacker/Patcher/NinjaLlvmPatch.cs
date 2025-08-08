@@ -250,7 +250,7 @@ public static class NinjaLlvmPatch
 
                 sb.AppendLine($"build build/{overlay}repl/{Path.GetFileNameWithoutExtension(file)}.elf: ld build/{overlay}repl/{Path.GetFileName(file)}.o || build{dependency}");
                 sb.AppendLine($"  codeaddr = {Path.GetFileNameWithoutExtension(file)}");
-                sb.AppendLine($"  ldflags = {(string.IsNullOrEmpty(overlay) ? "" : "-Map build/newcode.x ")}{(wroteMain ? $"-Map build/{overlay}newcode.x)" : string.Empty)}");
+                sb.AppendLine($"  ldflags = {(string.IsNullOrEmpty(overlay) ? "" : "-Map build/newcode.x ")}{(wroteMain ? $"-Map build/{overlay}newcode.x" : string.Empty)}");
                 sb.AppendLine();
             
                 sb.AppendLine($"build build/{overlay}repl/{Path.GetFileNameWithoutExtension(file)}.bin: objcopy build/{overlay}repl/{Path.GetFileNameWithoutExtension(file)}.elf || build{dependency}");
