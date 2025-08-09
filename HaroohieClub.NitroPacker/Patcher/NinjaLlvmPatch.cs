@@ -149,7 +149,7 @@ public static class NinjaLlvmPatch
         sb.AppendLine($"OBJCOPY          = ${{LLVM}}llvm-objcopy{exeExt}");
         sb.AppendLine($"OBJDUMP          = ${{LLVM}}llvm-objdump{exeExt}");
         sb.AppendLine($"SYMTABLEHELPER   = {(string.IsNullOrEmpty(symTableHelperPath) ? 
-            Utility.PathCombineAgnostic(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), $"NitroPacker.SymTableHelper{exeExt}") :
+            Utility.PathCombineAgnostic(AppContext.BaseDirectory, $"NitroPacker.SymTableHelper{exeExt}") :
             symTableHelperPath.Replace('\\', '/'))}");
         sb.AppendLine();
         

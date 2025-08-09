@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFrameworks>netstandard2.1;net8.0</TargetFrameworks>
     <LangVersion>12.0</LangVersion>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
@@ -19,9 +19,12 @@
     <RepositoryUrl>https://github.com/haroohie-club/NitroPacker</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageId>HaroohieClub.NitroPacker</PackageId>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageTags>nds nintendo ds arm9 overlay asm patching romhacking hacking nitrofs nitro unpack pack extract</PackageTags>
     <PackageIcon>nitropacker_red.png</PackageIcon>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(TargetFramework)' != 'net8.0'">
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
   
   <ItemGroup>

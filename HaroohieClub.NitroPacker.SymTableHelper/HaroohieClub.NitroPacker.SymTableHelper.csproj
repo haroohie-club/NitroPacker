@@ -7,6 +7,10 @@
         <Nullable>enable</Nullable>
         <Version>$(NPVersion)</Version>
         <AssemblyName>NitroPacker.SymTableHelper</AssemblyName>
+        <DebugType>None</DebugType>
+        <DebugSymbols>false</DebugSymbols>
+        <PublishSingleFile>true</PublishSingleFile>
+        <PublishTrimmed>true</PublishTrimmed>
     </PropertyGroup>
 
 </Project>

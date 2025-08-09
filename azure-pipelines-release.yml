@@ -50,28 +50,13 @@ stages:
       inputs:
         command: 'publish'
         projects: $(Build.SourcesDirectory)/HaroohieClub.NitroPacker.Cli/HaroohieClub.NitroPacker.Cli.csproj
-        arguments: '-c Release -f net8.0 -r $(rid) --self-contained /p:PublishSingleFile=true'
+        arguments: '-c Release -f net8.0 -r $(rid) --self-contained'
         publishWebProjects: false
       displayName: Build & Publish NitroPacker
-      
-    - task: DotNetCoreCLI@2
-      inputs:
-        command: 'publish'
-        projects: $(Build.SourcesDirectory)/HaroohieClub.NitroPacker.SymTableHelper/HaroohieClub.NitroPacker.SymTableHelper.csproj
-        arguments: '-c Release -f net8.0 -r $(rid) --self-contained /p:PublishSingleFile=true'
-        publishWebProjects: false
-      displayName: Build & Publish SymTableHelper
-      
-    - pwsh: |
-        Expand-Archive -Path $(Build.SourcesDirectory)/HaroohieClub.NitroPacker.SymTableHelper/bin/Release/net8.0/$(rid)/publish.zip -DestinationPath ./publish-symtable
-      displayName: Put SymTableHelper alongside NitroPacker
         
     - pwsh: |
         mkdir publish
-        mkdir publish-np
-        Expand-Archive -Path $(Build.SourcesDirectory)/HaroohieClub.NitroPacker.Cli/bin/Release/net8.0/$(rid)/publish.zip -DestinationPath ./publish-np
-        Move-Item -Path ./publish-symtable/NitroPacker.SymTableHelper -Destination ./publish/NitroPacker.SymTableHelper
-        Move-Item -Path ./publish-np/NitroPacker -Destination ./publish/NitroPacker
+        Expand-Archive -Path $(Build.SourcesDirectory)/HaroohieClub.NitroPacker.Cli/bin/Release/net8.0/$(rid)/publish.zip -DestinationPath ./publish
         Push-Location publish
         chmod +x ./NitroPacker
         chmod +x ./NitroPacker.SymTableHelper
@@ -82,10 +67,7 @@ stages:
 
     - pwsh: |
         mkdir publish
-        mkdir publish-np
-        Expand-Archive -Path $(Build.SourcesDirectory)/HaroohieClub.NitroPacker.Cli/bin/Release/net8.0/$(rid)/publish.zip .\publish-np
-        Move-Item -Path ./publish-symtable/NitroPacker.SymTableHelper.exe -Destination ./publish/NitroPacker.SymTableHelper.exe
-        Move-Item -Path ./publish-np/NitroPacker.exe -Destination ./publish/NitroPacker.exe
+        Expand-Archive -Path $(Build.SourcesDirectory)/HaroohieClub.NitroPacker.Cli/bin/Release/net8.0/$(rid)/publish.zip .\publish
         Push-Location publish
         Compress-Archive -Path .\ -DestinationPath $(artifactPath)
         Pop-Location

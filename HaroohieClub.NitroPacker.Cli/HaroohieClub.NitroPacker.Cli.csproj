@@ -8,6 +8,7 @@
     <AssemblyName>NitroPacker</AssemblyName>
     <Version>$(NPVersion)</Version>
     <ApplicationIcon>..\.branding\logo\ico\nitropacker_red.ico</ApplicationIcon>
+    <PublishSingleFile>true</PublishSingleFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,7 +16,22 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Condition="'$(RuntimeIdentifier)' == ''" Include="..\HaroohieClub.NitroPacker.SymTableHelper\HaroohieClub.NitroPacker.SymTableHelper.csproj" />
     <ProjectReference Include="..\HaroohieClub.NitroPacker\HaroohieClub.NitroPacker.csproj" />
+  </ItemGroup>
+  
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent" Condition="'$(RuntimeIdentifier)' != ''">
+    <Exec Command="dotnet publish HaroohieClub.NitroPacker.SymTableHelper/HaroohieClub.NitroPacker.SymTableHelper.csproj -c Release -f net8.0 -r $(RuntimeIdentifier) --self-contained" WorkingDirectory=".."/>
+  </Target>
+  <ItemGroup>
+    <None Condition="'$(RuntimeIdentifier)' != '' And $([System.OperatingSystem]::IsWindows())" Include="..\HaroohieClub.NitroPacker.SymTableHelper\bin\Release\net8.0\$(RuntimeIdentifier)\publish\NitroPacker.SymTableHelper.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </None>
+    <None Condition="'$(RuntimeIdentifier)' != '' And !$([System.OperatingSystem]::IsWindows())" Include="..\HaroohieClub.NitroPacker.SymTableHelper\bin\Release\net8.0\$(RuntimeIdentifier)\publish\NitroPacker.SymTableHelper">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
