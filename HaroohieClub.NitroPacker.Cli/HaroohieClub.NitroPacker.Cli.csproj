@@ -7,7 +7,7 @@
     <Nullable>disable</Nullable>
     <AssemblyName>NitroPacker</AssemblyName>
     <Version>$(NPVersion)</Version>
-    <ApplicationIcon>..\.branding\logo\ico\nitropacker_red.ico</ApplicationIcon>
+    <ApplicationIcon>..\.branding\logo\ico\nitropacker_lightblue.ico</ApplicationIcon>
     <PublishSingleFile>true</PublishSingleFile>
   </PropertyGroup>
 
