@@ -155,7 +155,7 @@ public class ARM9
         return false;
     }
 
-    private static uint FindModuleParams(byte[] data)
+    internal static uint FindModuleParams(byte[] data)
     {
         return (uint)(data.IndexOfSequence(new byte[] { 0x21, 0x06, 0xC0, 0xDE, 0xDE, 0xC0, 0x06, 0x21 }) - 0x1C);
     }

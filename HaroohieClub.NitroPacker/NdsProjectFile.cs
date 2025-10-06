@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -10,6 +11,7 @@ using HaroohieClub.NitroPacker.Nitro.Card;
 using HaroohieClub.NitroPacker.Nitro.Card.Banners;
 using HaroohieClub.NitroPacker.Nitro.Card.Headers;
 using HaroohieClub.NitroPacker.Nitro.Fs;
+using HaroohieClub.NitroPacker.Patcher.Nitro;
 
 namespace HaroohieClub.NitroPacker;
 
@@ -314,6 +316,16 @@ public class NdsProjectFile
         {
             Blz blz = new();
             n.Arm9Binary = blz.BLZ_Encode(n.Arm9Binary, true);
+            uint moduleParamsOffset = ARM9.FindModuleParams(n.Arm9Binary);
+            CRT0.ModuleParams moduleParams = new(n.Arm9Binary, moduleParamsOffset)
+            {
+                CompressedStaticEnd = n.Header.Arm9RamAddress + (uint)n.Arm9Binary.Length,
+            };
+            List<byte> data = moduleParams.GetBytes();
+            for (int i = 0; i < data.Count; i++)
+            {
+                n.Arm9Binary[moduleParamsOffset + i] = data[i];
+            }
         }
         n.Arm7Binary = File.ReadAllBytes(Path.Combine(projectDir, "arm7.bin"));
         n.FromArchive(fsRoot, RomInfo.NameEntryWithFatEntries);
