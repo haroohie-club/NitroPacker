@@ -23,7 +23,7 @@ public class NinjaLlvmPatchCommand : Command
         _linkerFlags,
         _overrideSuffix;
 
-    private uint _arenaLoOffset = 0;
+    private uint _arenaLoOffset;
 
     public NinjaLlvmPatchCommand() : base("ninja-llvm-patch",
         "Patches the game's arm9.bin and overlays using ninja & LLVM")

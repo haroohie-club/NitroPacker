@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using HaroohieClub.NitroPacker.Patcher.Nitro;
@@ -100,7 +99,8 @@ public static class NinjaLlvmPatch
         return [.. overlays];
     }
 
-    private static bool RunNinja(string ninjaPath, string sourceDir, DataReceivedEventHandler outputDataReceived, DataReceivedEventHandler errorDataReceived)
+    private static void RunNinja(string ninjaPath, string sourceDir, DataReceivedEventHandler outputDataReceived,
+        DataReceivedEventHandler errorDataReceived)
     {
         Process ninjaProc = new()
         {
@@ -120,7 +120,7 @@ public static class NinjaLlvmPatch
         ninjaProc.BeginOutputReadLine();
         ninjaProc.BeginErrorReadLine();
         ninjaProc.WaitForExit();
-        return ninjaProc.ExitCode == 0;
+        return;
 
         static void ConsoleLogger(object sender, DataReceivedEventArgs e)
         {
@@ -166,14 +166,9 @@ public static class NinjaLlvmPatch
         sb.AppendLine();
 
         sb.AppendLine("rule objdump");
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            sb.AppendLine("  command = cmd.exe /c \"\"${OBJDUMP}\" -t $in\" > $out");
-        }
-        else
-        {
-            sb.AppendLine("  command = ${OBJDUMP} -t $in > $out");
-        }
+        sb.AppendLine(RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            ? "  command = cmd.exe /c \"\"${OBJDUMP}\" -t $in\" > $out"
+            : "  command = ${OBJDUMP} -t $in > $out");
         sb.AppendLine();
 
         sb.AppendLine("rule symtablehelper");

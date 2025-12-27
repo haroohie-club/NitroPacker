@@ -6,14 +6,14 @@ namespace HaroohieClub.NitroPacker.Cli;
 public class PackCommand : Command
 {
     private string _projectJson, _outputRom;
-    private bool _compressArm9 = false;
+    private bool _compressArm9;
     public PackCommand() : base("pack", "Packs a ROM given a project JSON file")
     {
         Options = new()
         {
             { "p|i|project|input=", "Input project JSON file", p => _projectJson = p },
             { "r|o|rom|output=", "Output ROM path", o => _outputRom = o },
-            { "c|compress-arm9", "Indicates ARM9 should be compressed", c => _compressArm9 = true },
+            { "c|compress-arm9", "Indicates ARM9 should be compressed", _ => _compressArm9 = true },
         };
     }
 
