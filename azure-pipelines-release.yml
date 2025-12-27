@@ -49,6 +49,12 @@ stages:
       
     - task: DotNetCoreCLI@2
       inputs:
+        command: 'restore'
+        projects: $(Build.SourcesDirectory)/HaroohieClub.NitroPacker.Cli/HaroohieClub.NitroPacker.Cli.csproj
+      displayName: Build & Publish NitroPacker
+
+    - task: DotNetCoreCLI@2
+      inputs:
         command: 'publish'
         projects: $(Build.SourcesDirectory)/HaroohieClub.NitroPacker.Cli/HaroohieClub.NitroPacker.Cli.csproj
         arguments: '-c Release -f net10.0 -r $(rid) --self-contained /p:DebugType=None /p:DebugSymbols=false'  
