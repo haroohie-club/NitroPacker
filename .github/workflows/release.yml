@@ -103,7 +103,7 @@ jobs:
           dotnet-version: '10.0.x'
       - run: |
           dotnet pack HaroohieClub.NitroPacker/HaroohieClub.NitroPacker.csproj
-          dotnet nuget push -k ${{ secrets.API_NUGET_KEY }} HaroohieClub.NitroPacker/bin/Release/NitroPacker.${{ inputs.version }}.nupkg
+          dotnet nuget push -s nuget.org -k ${{ secrets.API_NUGET_KEY }} HaroohieClub.NitroPacker/bin/Release/NitroPacker.${{ inputs.version }}.nupkg
 
   release:
     runs-on: ubuntu-latest
