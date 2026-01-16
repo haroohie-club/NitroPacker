@@ -97,7 +97,7 @@ jobs:
         uses: tedd/publish-nuget-neo@main
         with:
           NUGET_KEY: ${{ secrets.API_NUGET_KEY }}
-          PROJECT_PATH: HaroohieClub.NitroPacker.Cli/HaroohieClub.NitroPacker.Cli.csproj
+          PROJECT_FILE_PATH: HaroohieClub.NitroPacker.Cli/HaroohieClub.NitroPacker.Cli.csproj
 
   release:
     runs-on: ubuntu-latest
