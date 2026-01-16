@@ -93,6 +93,10 @@ jobs:
     name: 'Publish NuGet Package'
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          submodules: true
       - name: Publish NuGet Package
         uses: tedd/publish-nuget-neo@main
         with:
