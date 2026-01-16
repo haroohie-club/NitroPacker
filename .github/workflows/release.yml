@@ -94,7 +94,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Publish NuGet Package
-        uses: tedd/publish-nuget-neo@v2
+        uses: tedd/publish-nuget-neo@main
         with:
           NUGET_KEY: ${{ secrets.API_NUGET_KEY }}
           PROJECT_PATH: HaroohieClub.NitroPacker.Cli/HaroohieClub.NitroPacker.Cli.csproj
