@@ -224,6 +224,8 @@ internal class Blz
         uint len_best = 0, pos_best = 0, len_next = 0, pos_next = 0, len_post = 0, pos_post = 0;
         uint pak_tmp, raw_tmp, raw_new;
         byte mask;
+        uint bytes_saved = 0, total_bytes_saved = 0, best_total_saved = 0;
+        uint best_pak_tmp = 0, best_raw_tmp = 0, best_flg = 0;
 
         pak_tmp = 0;
         raw_tmp = raw_len;
@@ -258,9 +260,19 @@ internal class Blz
 
             if (mask == 0)
             {
+                total_bytes_saved += bytes_saved;
+                total_bytes_saved = total_bytes_saved > 0 ? total_bytes_saved - 1 : 0;
+                if (total_bytes_saved > best_total_saved)
+                {
+                    best_total_saved = total_bytes_saved;
+                    best_pak_tmp = pak_tmp;
+                    best_raw_tmp = raw_tmp;
+                    best_flg = flg;
+                }
                 flg = pak++;
                 pak_buffer[flg] = 0;
                 mask = BLZ_MASK;
+                bytes_saved = 0;
             }
 
             SEARCH(ref len_best, ref pos_best, ref raw_buffer, ref raw, ref raw_end, ref max, ref pos, ref len);
@@ -296,6 +308,7 @@ internal class Blz
                 pak++;
                 pak_buffer[pak] = (byte)((pos_best - 3) & 0xFF);
                 pak++;
+                bytes_saved += len_best - 2;
             }
             else
             {
@@ -304,11 +317,20 @@ internal class Blz
                 raw++;
             }
 
-            if (pak + raw_len - raw < pak_tmp + raw_tmp)
+            if (pak + raw_len - raw <= pak_tmp + raw_tmp)
             {
                 pak_tmp = pak;
                 raw_tmp = raw_len - raw;
             }
+        }
+
+        total_bytes_saved += bytes_saved;
+        if (total_bytes_saved > best_total_saved)
+        {
+            best_total_saved = total_bytes_saved;
+            best_pak_tmp = pak_tmp;
+            best_raw_tmp = raw_tmp;
+            best_flg = flg;
         }
 
         while ((mask != 0) && (mask != 1))
@@ -317,6 +339,21 @@ internal class Blz
             pak_buffer[flg] <<= 1;
         }
 
+        bool has_raw_tmp = (arm9 && best_raw_tmp > 0x4000) || (!arm9 && best_raw_tmp > 0);
+
+        if (has_raw_tmp && pak_buffer[best_flg] > 0)
+        {
+            var flag_byte = pak_buffer[best_flg];
+            while ((flag_byte & 1) == 0) // treat trailing literals as uncompressed data
+            {
+                best_raw_tmp += 1;
+                best_pak_tmp -= 1;
+                flag_byte >>= 1;
+            }
+        }
+
+        raw_tmp = best_raw_tmp;
+        pak_tmp = best_pak_tmp;
         pak_len = pak;
 
         BLZ_Invert(raw_buffer, 0, raw_len);
