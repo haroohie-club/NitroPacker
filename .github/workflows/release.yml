@@ -67,7 +67,7 @@ jobs:
         Push-Location HaroohieClub.NitroPacker.Cli/bin/Release/net10.0/${{ matrix.platform.rid }}/publish
         chmod +x ./NitroPacker
         chmod +x ./NitroPacker.SymTableHelper
-        tar -czvf ${{ matrix.platform.artifact_name }}${{ matrix.platform.artifact_suffix }} ./
+        tar -czvf ../${{ matrix.platform.artifact_name }}${{ matrix.platform.artifact_suffix }} ./
         Pop-Location
     
     - name: Create zip
@@ -75,14 +75,14 @@ jobs:
       shell: pwsh
       run: |
         Push-Location -Path HaroohieClub.NitroPacker.Cli/bin/Release/net10.0/${{ matrix.platform.rid }}/publish.zip
-        Compress-Archive -Path .\ -DestinationPath ${{ matrix.platform.artifact_name }}${{ matrix.platform.artifact_suffix }}
+        Compress-Archive -Path .\ -DestinationPath ..\${{ matrix.platform.artifact_name }}${{ matrix.platform.artifact_suffix }}
         Pop-Location
     
     - name: 'Upload artifact'
       uses: actions/upload-artifact@v6
       with:
         name: ${{ matrix.platform.artifact_name }}
-        path: HaroohieClub.NitroPacker.Cli/bin/Release/net10.0/${{ matrix.platform.rid }}/publish/${{ matrix.platform.artifact_name }}${{ matrix.platform.artifact_suffix }}
+        path: HaroohieClub.NitroPacker.Cli/bin/Release/net10.0/${{ matrix.platform.rid }}/${{ matrix.platform.artifact_name }}${{ matrix.platform.artifact_suffix }}
         retention-days: 1
 
   publish-package:
