@@ -252,7 +252,10 @@ public class Rom
                 Header.Arm9OverlayTableSize = (uint)Arm9OverlayTable.Length * 0x20;
                 foreach (RomOverlayTable v in Arm9OverlayTable)
                 {
-                    v.Compressed = (uint)FileData[v.FileId].Data.Length;
+                    if (v.Flag.HasFlag(RomOverlayTable.OverlayTableFlag.Compressed))
+                    {
+                        v.Compressed = (uint)FileData[v.FileId].Data.Length;
+                    }
                     v.Write(ew);
                 }
                 foreach (RomOverlayTable v in Arm9OverlayTable)
@@ -347,7 +350,8 @@ public class Rom
             }
 
             ew.WritePadding(4);
-            
+            Header.RomSizeExcludingDSiArea = (uint)ew.BaseStream.Position;
+
             //RSA
             // if (RsaSignature != null)
             //     ew.Write(RsaSignature, 0, 0x88);
@@ -370,8 +374,6 @@ public class Rom
                 ew.Write(DigestBlockHashtableBinary, 0, DigestBlockHashtableBinary.Length);
                 ew.WritePadding(0x200, 0xFF);
             }
-            
-            Header.RomSizeExcludingDSiArea = (uint)ew.BaseStream.Position;
 
             //Fat
             ew.BaseStream.Position = Header.FatOffset;
