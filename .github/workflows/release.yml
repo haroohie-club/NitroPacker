@@ -79,7 +79,7 @@ jobs:
       if: ${{ matrix.platform.artifact_suffix == '.zip' }}
       shell: pwsh
       run: |
-        Push-Location -Path HaroohieClub.NitroPacker.Cli/bin/Release/net10.0/${{ matrix.platform.rid }}/publish.zip
+        Push-Location -Path HaroohieClub.NitroPacker.Cli/bin/Release/net10.0/${{ matrix.platform.rid }}/publish
         Compress-Archive -Path .\ -DestinationPath ..\${{ matrix.platform.artifact_name }}${{ matrix.platform.artifact_suffix }}
         Pop-Location
     
