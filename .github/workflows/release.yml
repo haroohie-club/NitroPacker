@@ -11,6 +11,11 @@ on:
         description: 'Release Notes'
         required: true
         type: 'string'
+      skip_nuget:
+        description: 'Skip NuGet Publish'
+        required: true
+        default: false
+        type: 'boolean'
 
 jobs:
   build-and-publish:
@@ -87,6 +92,7 @@ jobs:
 
   publish-package:
     name: 'Publish NuGet Package'
+    if: ${{ !inputs.skip_nuget }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
