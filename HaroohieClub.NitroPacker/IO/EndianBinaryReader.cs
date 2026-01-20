@@ -58,7 +58,7 @@ public class EndianBinaryReader : IDisposable
         if (_buffer == null || _buffer.Length < bytes)
             _buffer = new byte[bytes];
 
-        BaseStream.Read(_buffer, 0, bytes);
+        _ = BaseStream.Read(_buffer, 0, bytes);
 
         if (Reverse && stride > 1)
         {
@@ -168,7 +168,7 @@ public class EndianBinaryReader : IDisposable
         int size = sizeof(T);
         var result = new T[count];
         var byteResult = MemoryMarshal.Cast<T, byte>(result);
-        BaseStream.Read(byteResult);
+        _ = BaseStream.Read(byteResult);
 
         if (Reverse && size > 1)
         {
