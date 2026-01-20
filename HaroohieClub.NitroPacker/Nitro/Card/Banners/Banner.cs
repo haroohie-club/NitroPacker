@@ -41,7 +41,7 @@ public abstract class Banner
         ew.Write(Palette, 0, 16 * 2);
         foreach (string s in GameName)
         {
-            ew.Write(GameName[0].PadRight(128, '\0'), Encoding.Unicode, false);
+            ew.Write(s.PadRight(128, '\0'), Encoding.Unicode, false);
         }
     }
 
