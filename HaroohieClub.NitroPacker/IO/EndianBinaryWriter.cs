@@ -120,9 +120,9 @@ public class EndianBinaryWriter : IDisposable
         int size;
 
         size = GetEncodingSize(encoding);
-        CreateBuffer(size * count);
-        Array.Copy(encoding.GetBytes(value, offset, count), 0, _buffer, 0, count * size);
-        WriteBuffer(size * count, size);
+        CreateBuffer(count);
+        Array.Copy(encoding.GetBytes(value, offset, value.Length), 0, _buffer, 0, count);
+        WriteBuffer(count, size);
     }
 
     private static int GetEncodingSize(Encoding encoding)
@@ -143,7 +143,7 @@ public class EndianBinaryWriter : IDisposable
     /// <param name="nullTerminated">Whether to null-terminate the string or not</param>
     public void Write(string value, Encoding encoding, bool nullTerminated)
     {
-        Write(value.ToCharArray(), 0, value.Length, encoding);
+        Write(value.ToCharArray(), 0, encoding.GetByteCount(value), encoding);
         if (nullTerminated)
             Write('\0', encoding);
     }
