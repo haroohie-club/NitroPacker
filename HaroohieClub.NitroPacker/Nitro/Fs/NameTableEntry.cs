@@ -59,12 +59,14 @@ public class NameTableEntry
     /// <exception cref="ArgumentException">Thrown if the name is too long or if the directory ID is invalid</exception>
     private NameTableEntry(NameTableEntryType type, string name = null, ushort directoryId = 0)
     {
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
         Type = type;
         if (type != NameTableEntryType.EndOfDirectory)
         {
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
-            if (name.Length == 0 || name.Length > 0x7F)
+            if (Encoding.GetEncoding("Shift-JIS").GetByteCount(name) == 0 
+                || Encoding.GetEncoding("Shift-JIS").GetByteCount(name) > 0x7F)
                 throw new ArgumentException("Name length invalid", nameof(name));
             Name = name;
         }
@@ -109,22 +111,23 @@ public class NameTableEntry
     public void Write(EndianBinaryWriter er)
     {
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+        var ShiftJIS = Encoding.GetEncoding("Shift-JIS");
         switch (Type)
         {
             case NameTableEntryType.EndOfDirectory:
                 er.Write((byte)0);
                 break;
             case NameTableEntryType.File:
-                if (Name.Length > 0x7F)
+                if (ShiftJIS.GetByteCount(Name) > 0x7F)
                     throw new DataException($"File name '{Name}' too long");
-                er.Write((byte)Name.Length);
-                er.Write(Name, Encoding.GetEncoding("Shift-JIS"), false);
+                er.Write((byte)ShiftJIS.GetByteCount(Name));
+                er.Write(Name, ShiftJIS, false);
                 break;
             case NameTableEntryType.Directory:
-                if (Name.Length > 0x7F)
+                if (ShiftJIS.GetByteCount(Name) > 0x7F)
                     throw new DataException($"Directory name '{Name}' too long");
-                er.Write((byte)(Name.Length | 0x80));
-                er.Write(Name, Encoding.GetEncoding("Shift-JIS"), false);
+                er.Write((byte)(ShiftJIS.GetByteCount(Name) | 0x80));
+                er.Write(Name, ShiftJIS, false);
                 er.Write(DirectoryId);
                 break;
             default:
